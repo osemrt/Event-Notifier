@@ -8,4 +8,8 @@
     <string name="fri">Fri</string>
     <string name="sat">Sat</string>
     <string name="sun">Sun</string>
+    <string name="empty" />
+    <string name="upcoming_events">Upcoming Events</string>
+    <string name="user_settings">User Settings</string>
+    <string name="calendar">Calendar</string>
 </resources>
