@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">Calendar</string>
+    <string name="current_date">Current Date</string>
+    <string name="mon">Mon</string>
+    <string name="tue">Tue</string>
+    <string name="wed">Wed</string>
+    <string name="thu">Thu</string>
+    <string name="fri">Fri</string>
+    <string name="sat">Sat</string>
+    <string name="sun">Sun</string>
 </resources>
