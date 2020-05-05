@@ -20,8 +20,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:background="@color/Indigo"
-        app:itemIconTint="@color/white"
-        app:itemTextColor="@color/white"
+        app:itemIconTint="@drawable/selector"
+        app:itemTextColor="@drawable/selector"
         app:labelVisibilityMode="unlabeled"
         app:menu="@menu/bottom_navigation" />
 

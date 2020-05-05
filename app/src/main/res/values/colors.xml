@@ -18,5 +18,7 @@
     <color name="black">#000000</color>
     <color name="lime">#C6FF00</color>
     <color name="darkIndigo">#212E3A</color>
+    <color name="lightIndigo">#A0BDD8</color>
+
 
 </resources>
