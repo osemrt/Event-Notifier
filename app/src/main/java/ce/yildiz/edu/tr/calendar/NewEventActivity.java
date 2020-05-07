@@ -203,7 +203,7 @@ public class NewEventActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            Log.i("APP_TEST", "Event saved!");
+            setResult(RESULT_OK);
             finish();
         }
     }

@@ -3,6 +3,7 @@ package ce.yildiz.edu.tr.calendar;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -15,6 +16,7 @@ import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -33,6 +35,7 @@ public class CalendarFragment extends Fragment implements View.OnClickListener, 
 
     private final String TAG = this.getClass().getSimpleName();
 
+    private static final int ADD_NEW_EVENT_ACTIVITY_REQUEST_CODE = 0;
     private static final int MAX_CALENDAR_DAYS = 42;
 
     private Calendar calendar = Calendar.getInstance(Locale.ENGLISH);
@@ -49,6 +52,11 @@ public class CalendarFragment extends Fragment implements View.OnClickListener, 
     private ImageButton prevButton, nextButton;
     private TextView currentDate;
     private GridView gridView;
+
+    // AlertDialog components
+    private RecyclerView recyclerView;
+    private Button newEvent;
+    private TextView noEvent;
 
     private DBOpenHelper dbOpenHelper;
 
@@ -122,12 +130,21 @@ public class CalendarFragment extends Fragment implements View.OnClickListener, 
     public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
         final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setCancelable(true);
-
         View dialogView = LayoutInflater.from(getActivity().getApplicationContext()).inflate(R.layout.layout_alert_dialog, parent, false);
+        builder.setView(dialogView);
+        final AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+        alertDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                setUpCalendar();
 
-        RecyclerView recyclerView = (RecyclerView) dialogView.findViewById(R.id.AlertDialog_RecyclerView_ListEvents);
-        Button newEvent = (Button) dialogView.findViewById(R.id.AlertDialog_Button_AddEvent);
-        TextView noEvent = (TextView) dialogView.findViewById(R.id.AlertDialog_TextView_NoEvent);
+            }
+        });
+
+        recyclerView = (RecyclerView) dialogView.findViewById(R.id.AlertDialog_RecyclerView_ListEvents);
+        newEvent = (Button) dialogView.findViewById(R.id.AlertDialog_Button_AddEvent);
+        noEvent = (TextView) dialogView.findViewById(R.id.AlertDialog_TextView_NoEvent);
 
 
         final String date = eventDateFormat.format(dates.get(position));
@@ -144,7 +161,7 @@ public class CalendarFragment extends Fragment implements View.OnClickListener, 
             recyclerView.setHasFixedSize(true);
             RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(view.getContext());
             recyclerView.setLayoutManager(layoutManager);
-            EventAdapter eventAdapter = new EventAdapter(getActivity(), eventsByDate);
+            EventAdapter eventAdapter = new EventAdapter(getActivity(), eventsByDate, alertDialog);
             recyclerView.setAdapter(eventAdapter);
             eventAdapter.notifyDataSetChanged();
             newEvent.setText("ADD EVENT");
@@ -156,12 +173,11 @@ public class CalendarFragment extends Fragment implements View.OnClickListener, 
             public void onClick(View v) {
                 Intent intent = new Intent(getActivity(), NewEventActivity.class);
                 intent.putExtra("date", date);
-                startActivity(intent);
+                startActivityForResult(intent, ADD_NEW_EVENT_ACTIVITY_REQUEST_CODE);
+                alertDialog.dismiss();
             }
         });
 
-        builder.setView(dialogView);
-        builder.create().show();
 
     }
 
@@ -203,5 +219,16 @@ public class CalendarFragment extends Fragment implements View.OnClickListener, 
         sqLiteDatabase.close();
 
         return events;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == ADD_NEW_EVENT_ACTIVITY_REQUEST_CODE) {
+            if (resultCode == getActivity().RESULT_OK) {
+                Toast.makeText(getActivity(), "Event created!", Toast.LENGTH_SHORT).show();
+                setUpCalendar();
+            }
+        }
     }
 }

@@ -1,5 +1,6 @@
 package ce.yildiz.edu.tr.calendar;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.view.LayoutInflater;
@@ -22,10 +23,13 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
 
     private Context context;
     private List<Event> eventList;
+    private AlertDialog alertDialog;
+    private DBOpenHelper dbOpenHelper;
 
-    public EventAdapter(Context context, List<Event> eventList) {
+    public EventAdapter(Context context, List<Event> eventList, AlertDialog alertDialog) {
         this.context = context;
         this.eventList = eventList;
+        this.alertDialog = alertDialog;
     }
 
     @NonNull
@@ -85,21 +89,27 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
 
     private class MyMenuItemClickListener implements PopupMenu.OnMenuItemClickListener {
         private int position;
+        private Event mEvent;
 
         public MyMenuItemClickListener(int position) {
             this.position = position;
+            this.mEvent = eventList.get(position);
         }
 
         @Override
         public boolean onMenuItemClick(MenuItem menuItem) {
             switch (menuItem.getItemId()) {
-
                 case R.id.Popup_Item_Delete:
+                    deleteCalendarEvent(mEvent.getEVENT(), mEvent.getDATE(), mEvent.getTIME());
                     eventList.remove(position);
                     notifyItemRemoved(position);
                     notifyItemRangeChanged(position, eventList.size());
-                    // TODO: Delete from the db
-                    Toast.makeText(context, "Event removed", Toast.LENGTH_SHORT).show();
+                    notifyDataSetChanged();
+                    Toast.makeText(context, "Event removed!", Toast.LENGTH_SHORT).show();
+                    if (eventList.isEmpty()) {
+                        alertDialog.dismiss();
+                    }
+
                     return true;
                 case R.id.Popup_Item_Edit:
                     Toast.makeText(context, "Edit is clicked!", Toast.LENGTH_SHORT).show();
@@ -109,5 +119,10 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
         }
     }
 
-
+    private void deleteCalendarEvent(String eventTitle, String date, String time) {
+        dbOpenHelper = new DBOpenHelper(context);
+        SQLiteDatabase sqLiteDatabase = dbOpenHelper.getWritableDatabase();
+        dbOpenHelper.deleteEvent(eventTitle, date, time, sqLiteDatabase);
+        dbOpenHelper.close();
+    }
 }
