@@ -64,7 +64,7 @@
 
             <TextView
                 android:id="@+id/CalenderFragment_TextView_Mon"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:background="@color/yellow"
@@ -75,7 +75,7 @@
 
             <TextView
                 android:id="@+id/CalenderFragment_TextView_Tue"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:background="@color/pink"
@@ -86,7 +86,7 @@
 
             <TextView
                 android:id="@+id/CalenderFragment_TextView_Wed"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:background="@color/cyan"
@@ -97,7 +97,7 @@
 
             <TextView
                 android:id="@+id/CalenderFragment_TextView_Thu"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:background="@color/deepPurple"
@@ -108,7 +108,7 @@
 
             <TextView
                 android:id="@+id/CalenderFragment_TextView_Fri"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:background="@color/green"
@@ -120,7 +120,7 @@
 
             <TextView
                 android:id="@+id/CalenderFragment_TextView_Sat"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:background="@color/brown"
@@ -131,7 +131,7 @@
 
             <TextView
                 android:id="@+id/CalenderFragment_TextView_Sun"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:background="@color/red"
