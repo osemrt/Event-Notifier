@@ -12,4 +12,18 @@
     <string name="upcoming_events">Upcoming Events</string>
     <string name="user_settings">User Settings</string>
     <string name="calendar">Calendar</string>
+    <string name="save_event">Save Event</string>
+    <string name="event">Event</string>
+    <string name="event_title">Event Title</string>
+    <string name="add_a_location">Add a location</string>
+    <string name="at_the_time_of_event">At the time of event</string>
+    <string name="add_people">Add People</string>
+    <string name="add">Add</string>
+    <string name="add_from_contacts">Add From Contacts</string>
+    <string name="add_your_notes">Add your notes</string>
+    <string name="date">Date</string>
+    <string name="_06_apr_2020">06-Apr-2020</string>
+    <string name="time">Time</string>
+    <string name="_12_00_am">12:00 AM</string>
+    <string name="duration_0_hours_0_minutes">DURATION: 0 HOURS 0 MINUTES</string>
 </resources>
