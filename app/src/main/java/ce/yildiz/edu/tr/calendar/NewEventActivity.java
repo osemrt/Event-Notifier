@@ -4,7 +4,9 @@ import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -103,6 +105,7 @@ public class NewEventActivity extends AppCompatActivity {
                     String month = monthFormat.format(aDate);
                     String year = yearFormat.format(aDate);
 
+                    new SaveEventAsyncTask().execute(eventName, (String) time.getText(), eventDate, month, year);
 
                 }
                 break;
@@ -183,5 +186,25 @@ public class NewEventActivity extends AppCompatActivity {
     }
 
 
+    private class SaveEventAsyncTask extends AsyncTask<String, Void, Void> {
 
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            progressBar.setVisibility(View.INVISIBLE);
+        }
+
+        @Override
+        protected Void doInBackground(String... strings) {
+            saveEvent(strings[0], strings[1], strings[2], strings[3], strings[4]);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            Log.i("APP_TEST", "Event saved!");
+            finish();
+        }
+    }
 }
