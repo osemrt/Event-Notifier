@@ -139,7 +139,15 @@ public class CalendarFragment extends Fragment implements View.OnClickListener, 
             noEvent.setVisibility(View.VISIBLE);
             newEvent.setText("CREATE EVENT");
         } else {
-            //TODO: Implement RecyclerView
+            recyclerView.setVisibility(View.VISIBLE);
+            noEvent.setVisibility(View.GONE);
+            recyclerView.setHasFixedSize(true);
+            RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(view.getContext());
+            recyclerView.setLayoutManager(layoutManager);
+            EventAdapter eventAdapter = new EventAdapter(getActivity(), eventsByDate);
+            recyclerView.setAdapter(eventAdapter);
+            eventAdapter.notifyDataSetChanged();
+            newEvent.setText("ADD EVENT");
         }
 
 

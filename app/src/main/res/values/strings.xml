@@ -26,4 +26,7 @@
     <string name="time">Time</string>
     <string name="_12_00_am">12:00 AM</string>
     <string name="duration_0_hours_0_minutes">DURATION: 0 HOURS 0 MINUTES</string>
+    <string name="events">Events</string>
+    <string name="add_event">Add Event</string>
+    <string name="no_event_to_display">No event to display!</string>
 </resources>
