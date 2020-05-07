@@ -72,11 +72,13 @@
 
             </LinearLayout>
 
-            <ImageView
-                android:id="@+id/LayoutCell_ImageView_Options"
+            <ImageButton
+                android:id="@+id/LayoutCell_ImageButton_Options"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="15dp"
+                android:layout_weight="0"
+                android:background="@color/white"
                 app:srcCompat="@drawable/ic_more" />
 
         </LinearLayout>

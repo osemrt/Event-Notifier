@@ -29,4 +29,6 @@
     <string name="events">Events</string>
     <string name="add_event">Add Event</string>
     <string name="no_event_to_display">No event to display!</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
 </resources>
