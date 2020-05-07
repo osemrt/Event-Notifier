@@ -1,7 +1,9 @@
 package ce.yildiz.edu.tr.calendar;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -9,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -16,6 +19,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -115,6 +120,40 @@ public class CalendarFragment extends Fragment implements View.OnClickListener, 
     @SuppressLint("SetTextI18n")
     @Override
     public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setCancelable(true);
+
+        View dialogView = LayoutInflater.from(getActivity().getApplicationContext()).inflate(R.layout.layout_alert_dialog, parent, false);
+
+        RecyclerView recyclerView = (RecyclerView) dialogView.findViewById(R.id.AlertDialog_RecyclerView_ListEvents);
+        Button newEvent = (Button) dialogView.findViewById(R.id.AlertDialog_Button_AddEvent);
+        TextView noEvent = (TextView) dialogView.findViewById(R.id.AlertDialog_TextView_NoEvent);
+
+
+        final String date = eventDateFormat.format(dates.get(position));
+
+        List<Event> eventsByDate = collectEventsByDate(date);
+
+        if (eventsByDate.isEmpty()) {
+            recyclerView.setVisibility(View.INVISIBLE);
+            noEvent.setVisibility(View.VISIBLE);
+            newEvent.setText("CREATE EVENT");
+        } else {
+            //TODO: Implement RecyclerView
+        }
+
+
+        newEvent.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), NewEventActivity.class);
+                intent.putExtra("date", date);
+                startActivity(intent);
+            }
+        });
+
+        builder.setView(dialogView);
+        builder.create().show();
 
     }
 
@@ -139,4 +178,22 @@ public class CalendarFragment extends Fragment implements View.OnClickListener, 
 
     }
 
+    private List<Event> collectEventsByDate(String Date) {
+        List<Event> events = new ArrayList<>();
+        dbOpenHelper = new DBOpenHelper(getActivity());
+        SQLiteDatabase sqLiteDatabase = dbOpenHelper.getReadableDatabase();
+        Cursor cursor = dbOpenHelper.readEvents(Date, sqLiteDatabase);
+        while (cursor.moveToNext()) {
+            String eventTitle = cursor.getString(cursor.getColumnIndex(DBStructure.EVENT));
+            String time = cursor.getString(cursor.getColumnIndex(DBStructure.TIME));
+            String date = cursor.getString(cursor.getColumnIndex(DBStructure.DATE));
+            String month = cursor.getString(cursor.getColumnIndex(DBStructure.MONTH));
+            String year = cursor.getString(cursor.getColumnIndex(DBStructure.YEAR));
+            events.add(new Event(eventTitle, time, date, month, year));
+        }
+        cursor.close();
+        sqLiteDatabase.close();
+
+        return events;
+    }
 }

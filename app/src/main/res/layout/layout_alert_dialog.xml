@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:weightSum="1">
+
+    <TextView
+        android:id="@+id/AlertDialog_TextView_Events"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0"
+        android:background="@color/darkIndigo"
+        android:gravity="center"
+        android:padding="10dp"
+        android:text="@string/events"
+        android:textColor="@color/white"
+        android:textSize="24sp"
+        android:textStyle="bold" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/AlertDialog_TextView_NoEvent"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="50dp"
+                android:gravity="center"
+                android:text="@string/no_event_to_display"
+                android:textSize="16sp" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/AlertDialog_RecyclerView_ListEvents"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+    </ScrollView>
+
+
+    <Button
+        android:id="@+id/AlertDialog_Button_AddEvent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0"
+        android:background="@color/darkIndigo"
+        android:text="@string/add_event"
+        android:textColor="@color/white"
+        android:textSize="16sp" />
+</LinearLayout>
