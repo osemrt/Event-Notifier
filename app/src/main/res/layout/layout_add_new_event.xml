@@ -475,6 +475,49 @@
                         android:layout_height="1dp"
                         android:background="@color/Grey" />
 
+                    <LinearLayout
+                        android:id="@+id/AddNewEventActivity_LinearLayout_NoteColor"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_margin="20dp"
+                        android:gravity="center"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:id="@+id/AddNewEventActivity_ImageView_NoteColor"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginRight="10dp"
+                            app:srcCompat="@drawable/ic_palette" />
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="10dp">
+
+                            <TextView
+                                android:id="@+id/AddNewEventActivity_TextView_NoteColor"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/note_color"
+                                android:textColor="@color/black"
+                                android:textSize="20sp"
+                                android:textStyle="bold" />
+
+
+                            <TextView
+                                android:id="@+id/AddNewEventActivity_TextView_PickNoteColor"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentEnd="true"
+                                android:background="@drawable/circle"
+                                android:onClick="setNoteColor" />
+
+                        </RelativeLayout>
+
+
+                    </LinearLayout>
+
 
                 </LinearLayout>
             </ScrollView>

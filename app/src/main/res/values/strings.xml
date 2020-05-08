@@ -31,4 +31,5 @@
     <string name="no_event_to_display">No event to display!</string>
     <string name="edit">Edit</string>
     <string name="delete">Delete</string>
+    <string name="note_color">Note Color</string>
 </resources>

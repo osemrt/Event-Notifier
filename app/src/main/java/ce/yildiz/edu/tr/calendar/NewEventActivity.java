@@ -1,13 +1,16 @@
 package ce.yildiz.edu.tr.calendar;
 
+import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.app.DatePickerDialog;
 import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.drawable.GradientDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
@@ -18,6 +21,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
+import androidx.annotation.ColorRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -27,10 +31,13 @@ import com.google.android.material.textfield.TextInputLayout;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
+
+import petrov.kristiyan.colorpicker.ColorPicker;
 
 public class NewEventActivity extends AppCompatActivity {
 
@@ -48,8 +55,12 @@ public class NewEventActivity extends AppCompatActivity {
     private TextInputLayout addPeople;
     private TextInputLayout note;
     private ProgressBar progressBar;
+    //private ImageButton noteColorImageButton;
+    //private EditText pickNoteColorEditText;
+    private TextView pickNoteColorTextView;
 
     private int alarmYear, alarmMonth, alarmDay, alarmHour, alarmMinute;
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -73,6 +84,9 @@ public class NewEventActivity extends AppCompatActivity {
         addPeople = (TextInputLayout) findViewById(R.id.AddNewEventActivity_TextInputLayout_AddPeople);
         note = (TextInputLayout) findViewById(R.id.AddNewEventActivity_TextInputLayout_Note);
         progressBar = (ProgressBar) findViewById(R.id.AddNewEventActivity_ProgressBar);
+        //noteColorImageButton = (ImageButton) findViewById(R.id.AddNewEventActivity_ImageButton_NoteColor);
+        //pickNoteColorEditText = (EditText) findViewById(R.id.AddNewEventActivity_EditText_PickNoteColor);
+        pickNoteColorTextView = (TextView) findViewById(R.id.AddNewEventActivity_TextView_PickNoteColor);
     }
 
 
@@ -136,6 +150,52 @@ public class NewEventActivity extends AppCompatActivity {
         datePickerDialog.show();
     }
 
+    public void setNoteColor(View view) {
+        ColorPicker colorPicker = new ColorPicker(this);
+
+        final ArrayList<String> colors = getColors();
+        colorPicker
+                .setColors(colors)
+                .setColumns(5)
+                .setDefaultColorButton(R.color.blue)
+                .setOnChooseColorListener(new ColorPicker.OnChooseColorListener() {
+                    @Override
+                    public void onChooseColor(int position, int color) {
+                        GradientDrawable bgShape = (GradientDrawable) pickNoteColorTextView.getBackground();
+                        bgShape.setColor(color);
+                    }
+
+                    @Override
+                    public void onCancel() {
+
+                    }
+                }).show();
+
+
+    }
+
+    @SuppressLint("ResourceType")
+    private ArrayList<String> getColors() {
+        ArrayList<String> colors = new ArrayList<>();
+        colors.add(getResources().getString(R.color.darkIndigo));
+        colors.add(getResources().getString(R.color.yellow));
+        colors.add(getResources().getString(R.color.deepPurple));
+        colors.add(getResources().getString(R.color.pink));
+        colors.add(getResources().getString(R.color.Grey));
+        colors.add(getResources().getString(R.color.cyan));
+        colors.add(getResources().getString(R.color.green));
+        colors.add(getResources().getString(R.color.lime));
+        colors.add(getResources().getString(R.color.lightIndigo));
+        colors.add(getResources().getString(R.color.black));
+        colors.add(getResources().getString(R.color.white));
+        colors.add(getResources().getString(R.color.lite_blue));
+        colors.add(getResources().getString(R.color.red));
+        colors.add(getResources().getString(R.color.brown));
+        colors.add(getResources().getString(R.color.color11));
+        return colors;
+    }
+
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.toolbar, menu);
@@ -180,6 +240,10 @@ public class NewEventActivity extends AppCompatActivity {
         }
 
         return true;
+    }
+
+    private static String hexStringColor(Resources resources, @ColorRes int colorResId) {
+        return String.format("#%06X", (0xFFFFFF & resources.getColor(colorResId)));
     }
 
     private boolean confirmInputs() {
