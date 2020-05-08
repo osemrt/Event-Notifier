@@ -1,12 +1,15 @@
 package ce.yildiz.edu.tr.calendar;
 
+import android.app.AlarmManager;
 import android.app.DatePickerDialog;
+import android.app.PendingIntent;
 import android.app.TimePickerDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -46,6 +49,7 @@ public class NewEventActivity extends AppCompatActivity {
     private TextInputLayout note;
     private ProgressBar progressBar;
 
+    private int alarmYear, alarmMonth, alarmDay, alarmHour, alarmMinute;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -78,6 +82,60 @@ public class NewEventActivity extends AppCompatActivity {
         date.setText(dateString);
     }
 
+    public void setTime(View view) {
+        Calendar calendar = Calendar.getInstance();
+        int hour = calendar.get(Calendar.HOUR_OF_DAY);
+        int minute = calendar.get(Calendar.MINUTE);
+        TimePickerDialog timePickerDialog = new TimePickerDialog(this, new TimePickerDialog.OnTimeSetListener() {
+            @Override
+            public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                Calendar aCal = Calendar.getInstance();
+                aCal.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                aCal.set(Calendar.MINUTE, minute);
+                aCal.setTimeZone(TimeZone.getDefault());
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("K:mm a", Locale.ENGLISH);
+                String eventTime = simpleDateFormat.format(aCal.getTime());
+
+                alarmHour = hourOfDay;
+                alarmMinute = minute;
+
+                time.setText(eventTime);
+
+            }
+        }, hour, minute, false);
+
+        timePickerDialog.show();
+
+    }
+
+    public void setDate(View view) {
+        Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+
+        DatePickerDialog datePickerDialog = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                Calendar aCal = Calendar.getInstance();
+                aCal.set(Calendar.YEAR, year);
+                aCal.set(Calendar.MONTH, month);
+                aCal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                aCal.setTimeZone(TimeZone.getDefault());
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH);
+                String eventTime = simpleDateFormat.format(aCal.getTime());
+
+                alarmYear = year;
+                alarmMonth = month;
+                alarmDay = dayOfMonth;
+
+                date.setText(eventTime);
+            }
+        }, year, month, day);
+
+        datePickerDialog.show();
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.toolbar, menu);
@@ -105,7 +163,17 @@ public class NewEventActivity extends AppCompatActivity {
                     String month = monthFormat.format(aDate);
                     String year = yearFormat.format(aDate);
 
-                    new SaveEventAsyncTask().execute(eventName, (String) time.getText(), eventDate, month, year);
+                    // TODO: First check the notify switch
+                    if (true) {
+                        Calendar calendar = Calendar.getInstance();
+                        calendar.set(alarmYear, alarmMonth, alarmDay, alarmHour, alarmMinute, 0);
+                        int requestCode = getRequestCode(date.getText().toString(), eventName, time.getText().toString());
+                        setAlarm(calendar, eventName, time.getText().toString(), requestCode);
+                        new SaveEventAsyncTask().execute(eventName, (String) time.getText(), eventDate, month, year, "on");
+                    } else {
+                        new SaveEventAsyncTask().execute(eventName, (String) time.getText(), eventDate, month, year, "off");
+                    }
+
 
                 }
                 break;
@@ -134,55 +202,69 @@ public class NewEventActivity extends AppCompatActivity {
         }
     }
 
-    private void saveEvent(String eventTitle, String time, String date, String month, String year) {
+    private void saveEvent(String eventTitle, String time, String date, String month, String year, String notify) {
         SQLiteDatabase sqLiteDatabase = dbOpenHelper.getWritableDatabase();
-        dbOpenHelper.saveEvent(sqLiteDatabase, eventTitle, time, date, month, year);
+        dbOpenHelper.saveEvent(sqLiteDatabase, eventTitle, time, date, month, year, notify);
         dbOpenHelper.close();
     }
 
-    public void setTime(View view) {
-        Calendar calendar = Calendar.getInstance();
-        int hour = calendar.get(Calendar.HOUR_OF_DAY);
-        int minute = calendar.get(Calendar.MINUTE);
-        TimePickerDialog timePickerDialog = new TimePickerDialog(this, new TimePickerDialog.OnTimeSetListener() {
-            @Override
-            public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                Calendar aCal = Calendar.getInstance();
-                aCal.set(Calendar.HOUR_OF_DAY, hourOfDay);
-                aCal.set(Calendar.MINUTE, minute);
-                aCal.setTimeZone(TimeZone.getDefault());
-                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("K:mm a", Locale.ENGLISH);
-                String eventTime = simpleDateFormat.format(aCal.getTime());
-                time.setText(eventTime);
-
-            }
-        }, hour, minute, false);
-
-        timePickerDialog.show();
-
+    private int getRequestCode(String Date, String EventTitle, String Time) {
+        int code = 0;
+        dbOpenHelper = new DBOpenHelper(this);
+        SQLiteDatabase sqLiteDatabase = dbOpenHelper.getReadableDatabase();
+        Cursor cursor = dbOpenHelper.readIDEvents(EventTitle, Date, Time, sqLiteDatabase);
+        while (cursor.moveToNext()) {
+            code = cursor.getInt(cursor.getColumnIndex(DBStructure.ID));
+        }
+        cursor.close();
+        sqLiteDatabase.close();
+        return code;
     }
 
-    public void setDate(View view) {
-        Calendar calendar = Calendar.getInstance();
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH);
-        int day = calendar.get(Calendar.DAY_OF_MONTH);
+    private void updateEvent(String Date, String EventTitle, String Time, String notify) {
+        dbOpenHelper = new DBOpenHelper(this);
+        SQLiteDatabase sqLiteDatabase = dbOpenHelper.getWritableDatabase();
+        dbOpenHelper.updateEvent(EventTitle, Date, Time, notify, sqLiteDatabase);
+        dbOpenHelper.close();
+    }
 
-        DatePickerDialog datePickerDialog = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
-            @Override
-            public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-                Calendar aCal = Calendar.getInstance();
-                aCal.set(Calendar.YEAR, year);
-                aCal.set(Calendar.MONTH, month);
-                aCal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                aCal.setTimeZone(TimeZone.getDefault());
-                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH);
-                String eventTime = simpleDateFormat.format(aCal.getTime());
-                date.setText(eventTime);
-            }
-        }, year, month, day);
+    private void setAlarm(Calendar calendar, String eventTitle, String time, int requestCode) {
+        Intent intent = new Intent(this, AlarmReceiver.class);
+        intent.putExtra("eventTitle", eventTitle);
+        intent.putExtra("time", time);
+        intent.putExtra("notificationId", requestCode);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, requestCode, intent, PendingIntent.FLAG_ONE_SHOT);
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+    }
 
-        datePickerDialog.show();
+    private void cancelAlarm(int requestCode) {
+        Intent intent = new Intent(this, AlarmReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, requestCode, intent, PendingIntent.FLAG_ONE_SHOT);
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        alarmManager.cancel(pendingIntent);
+    }
+
+    private Date convertStringToDate(String date) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH);
+        Date aDate = null;
+        try {
+            aDate = simpleDateFormat.parse(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return aDate;
+    }
+
+    private Date convertStringToTime(String date) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("kk:mm", Locale.ENGLISH);
+        Date aDate = null;
+        try {
+            aDate = simpleDateFormat.parse(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return aDate;
     }
 
 
@@ -196,7 +278,7 @@ public class NewEventActivity extends AppCompatActivity {
 
         @Override
         protected Void doInBackground(String... strings) {
-            saveEvent(strings[0], strings[1], strings[2], strings[3], strings[4]);
+            saveEvent(strings[0], strings[1], strings[2], strings[3], strings[4], strings[5]);
             return null;
         }
 

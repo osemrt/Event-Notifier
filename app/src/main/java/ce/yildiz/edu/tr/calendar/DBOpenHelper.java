@@ -14,14 +14,16 @@ public class DBOpenHelper extends SQLiteOpenHelper {
             "CREATE TABLE " + DBStructure.EVENT_TABLE_NAME + " (ID INTEGER PRIMARY KEY AUTOINCREMENT, "
                     + DBStructure.EVENT + " TEXT, "
                     + DBStructure.TIME + " TIME, "
-                    + DBStructure.DATE + " TEXT, " + DBStructure.MONTH + " TEXT, " + DBStructure.YEAR + " TEXT)";
+                    + DBStructure.DATE + " TEXT, "
+                    + DBStructure.MONTH + " TEXT, "
+                    + DBStructure.YEAR + " TEXT,"
+                    + DBStructure.NOTIFY + " TEXT)";
 
     public static final String DROP_EVENT_TABLE =
             "DROP TABLE IF EXISTS " + DBStructure.EVENT_TABLE_NAME;
 
     public DBOpenHelper(@Nullable Context context) {
         super(context, DBStructure.DB_NAME, null, DBStructure.DB_VERSION);
-
     }
 
     @Override
@@ -36,13 +38,14 @@ public class DBOpenHelper extends SQLiteOpenHelper {
         onCreate(sqLiteDatabase);
     }
 
-    public void saveEvent(SQLiteDatabase sqLiteDatabase, String event, String time, String date, String month, String year) {
+    public void saveEvent(SQLiteDatabase sqLiteDatabase, String event, String time, String date, String month, String year, String notify) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(DBStructure.EVENT, event);
         contentValues.put(DBStructure.TIME, time);
         contentValues.put(DBStructure.DATE, date);
         contentValues.put(DBStructure.MONTH, month);
         contentValues.put(DBStructure.YEAR, year);
+        contentValues.put(DBStructure.NOTIFY, notify);
         sqLiteDatabase.insert(DBStructure.EVENT_TABLE_NAME, null, contentValues);
 
     }
@@ -55,6 +58,14 @@ public class DBOpenHelper extends SQLiteOpenHelper {
         return sqLiteDatabase.query(DBStructure.EVENT_TABLE_NAME, projection, where, whereArgs, null, null, null);
     }
 
+    public Cursor readIDEvents(String eventTitle, String date, String time, SQLiteDatabase sqLiteDatabase) {
+        String[] projection = {DBStructure.ID, DBStructure.NOTIFY};
+        String where = DBStructure.DATE + "=? and " + DBStructure.TIME + "=? and " + DBStructure.EVENT + "=?";
+        String[] whereArgs = {date, time, eventTitle};
+
+        return sqLiteDatabase.query(DBStructure.EVENT_TABLE_NAME, projection, where, whereArgs, null, null, null);
+    }
+
     public Cursor readEventsPerMonth(String month, String year, SQLiteDatabase sqLiteDatabase) {
         String[] projection = {DBStructure.EVENT, DBStructure.TIME, DBStructure.DATE, DBStructure.MONTH, DBStructure.YEAR};
         String where = DBStructure.MONTH + "=? and " + DBStructure.YEAR + "=?";
@@ -63,9 +74,17 @@ public class DBOpenHelper extends SQLiteOpenHelper {
     }
 
     public void deleteEvent(String eventTitle, String date, String time, SQLiteDatabase sqLiteDatabase) {
-        String selection = DBStructure.EVENT + "=? and " + DBStructure.DATE + "=? and " + DBStructure.TIME + "=?";
-        String[] selectionArgs = {eventTitle, date, time};
-        sqLiteDatabase.delete(DBStructure.EVENT_TABLE_NAME, selection, selectionArgs);
+        String where = DBStructure.EVENT + "=? and " + DBStructure.DATE + "=? and " + DBStructure.TIME + "=?";
+        String[] whereArgs = {eventTitle, date, time};
+        sqLiteDatabase.delete(DBStructure.EVENT_TABLE_NAME, where, whereArgs);
+    }
+
+    public void updateEvent(String eventTitle, String date, String time, String notify, SQLiteDatabase sqLiteDatabase) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DBStructure.NOTIFY, notify);
+        String where = DBStructure.DATE + "? and " + DBStructure.EVENT + "? and " + DBStructure.TIME + "=?";
+        String[] whereArgs = {date, eventTitle, time};
+        sqLiteDatabase.update(DBStructure.EVENT_TABLE_NAME, contentValues, where, whereArgs);
     }
 
 }

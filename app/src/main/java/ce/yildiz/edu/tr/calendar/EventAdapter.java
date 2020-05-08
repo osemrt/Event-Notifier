@@ -2,6 +2,7 @@ package ce.yildiz.edu.tr.calendar;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
@@ -50,6 +51,14 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
                 showPopupMenu(holder.options, position);
             }
         });
+
+        if (isAlarmed(event.getDATE(), event.getEVENT(), event.getTIME())) {
+            // TODO: Show the notification icon
+        } else {
+
+        }
+
+        //notifyDataSetChanged();
 
     }
 
@@ -124,5 +133,23 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
         SQLiteDatabase sqLiteDatabase = dbOpenHelper.getWritableDatabase();
         dbOpenHelper.deleteEvent(eventTitle, date, time, sqLiteDatabase);
         dbOpenHelper.close();
+    }
+
+    private boolean isAlarmed(String date, String eventTitle, String time) {
+        boolean alarmed = false;
+        dbOpenHelper = new DBOpenHelper(context);
+        SQLiteDatabase sqLiteDatabase = dbOpenHelper.getReadableDatabase();
+        Cursor cursor = dbOpenHelper.readIDEvents(eventTitle, date, time, sqLiteDatabase);
+        while (cursor.moveToNext()) {
+            String notify = cursor.getString(cursor.getColumnIndex(DBStructure.NOTIFY));
+            if (notify.equals("on")) {
+                alarmed = true;
+            } else {
+                alarmed = false;
+            }
+        }
+        cursor.close();
+        sqLiteDatabase.close();
+        return false;
     }
 }
