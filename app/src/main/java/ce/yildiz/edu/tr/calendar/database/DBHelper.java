@@ -113,6 +113,27 @@ public class DBHelper extends SQLiteOpenHelper {
         sqLiteDatabase.delete(DBTables.EVENT_TABLE_NAME, where, whereArgs);
     }
 
+    public Cursor readEvent(SQLiteDatabase sqLiteDatabase, String eventTitle, String date, String time) {
+        String[] projection = {
+                DBTables.EVENT_TITLE,
+                DBTables.EVENT_ALL_DAY,
+                DBTables.EVENT_DATE,
+                DBTables.EVENT_TIME,
+                DBTables.EVENT_MONTH,
+                DBTables.EVENT_YEAR,
+                DBTables.EVENT_NOTIFY,
+                DBTables.NOTIFICATION_ID,
+                DBTables.EVENT_NOTE,
+                DBTables.EVENT_COLOR,
+                DBTables.EVENT_LOCATION,
+                DBTables.EVENT_PHONE_NUMBER,
+                DBTables.EVENT_MAIL};
+        String where = DBTables.EVENT_TITLE + "=? and " + DBTables.EVENT_DATE + "=? and " + DBTables.EVENT_TIME + "=?";
+        String[] whereArgs = {eventTitle, date, time};
+
+        return sqLiteDatabase.query(DBTables.EVENT_TABLE_NAME, projection, where, whereArgs, null, null, null);
+    }
+
     public void updateEvent(SQLiteDatabase sqLiteDatabase, Event newEvent, String oldEventTitle, String oldEventDate, String oldEventTime) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(DBTables.EVENT_TITLE, newEvent.getTitle());
@@ -129,7 +150,7 @@ public class DBHelper extends SQLiteOpenHelper {
         contentValues.put(DBTables.EVENT_PHONE_NUMBER, newEvent.getPhoneNumber());
         contentValues.put(DBTables.EVENT_MAIL, newEvent.getEmail());
 
-        String where = DBTables.EVENT_TITLE + "? and " + DBTables.EVENT_DATE + "? and " + DBTables.EVENT_TITLE + "=?";
+        String where = DBTables.EVENT_TITLE + "=? and " + DBTables.EVENT_DATE + "=? and " + DBTables.EVENT_TIME + "=?";
         String[] whereArgs = {oldEventTitle, oldEventDate, oldEventTime};
         sqLiteDatabase.update(DBTables.EVENT_TABLE_NAME, contentValues, where, whereArgs);
     }
