@@ -114,6 +114,7 @@
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:layout_alignParentEnd="true"
+                                    android:checked="false"
                                     android:enabled="true"
                                     android:theme="@style/EditScreenTextInputLayoutStyleDark" />
 
@@ -290,7 +291,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_alignParentEnd="true"
-                                android:enabled="true"
+                                android:checked="true"
                                 android:theme="@style/EditScreenTextInputLayoutStyleDark" />
 
 
@@ -481,7 +482,7 @@
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:hint="Add phone number"
-                                    android:inputType="text"
+                                    android:inputType="phone"
                                     android:textSize="20sp"
                                     android:theme="@style/EditScreenTextInputLayoutStyleDark" />
 
@@ -545,6 +546,7 @@
                             app:errorEnabled="true">
 
                             <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/AddNewEventActivity_TextInputEditText_Mail"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
                                 android:layout_marginEnd="15dp"
@@ -560,7 +562,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_weight="0"
-                            android:enabled="true"
+                            android:checked="true"
                             android:theme="@style/EditScreenTextInputLayoutStyleDark" />
 
 

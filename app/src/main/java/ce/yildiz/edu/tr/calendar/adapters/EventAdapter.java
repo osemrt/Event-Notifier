@@ -2,6 +2,7 @@ package ce.yildiz.edu.tr.calendar.adapters;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
@@ -29,8 +30,11 @@ import ce.yildiz.edu.tr.calendar.database.DBStructure;
 import ce.yildiz.edu.tr.calendar.database.DBTables;
 import ce.yildiz.edu.tr.calendar.models.Event;
 import ce.yildiz.edu.tr.calendar.views.CalendarFragment;
+import ce.yildiz.edu.tr.calendar.views.EditEventActivity;
 
 public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> {
+
+    private static final int EDIT_EVENT_ACTIVITY_REQUEST_CODE = 1;
 
     private Context context;
     private List<Event> eventList;
@@ -139,7 +143,11 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
                     }
                     return true;
                 case R.id.Popup_Item_Edit:
-                    Toast.makeText(context, "Edit is clicked!", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(context, EditEventActivity.class);
+                    intent.putExtra("eventTitle", mEvent.getTitle());
+                    intent.putExtra("eventDate", mEvent.getDate());
+                    intent.putExtra("eventTime", mEvent.getTime());
+                    calendarFragment.startActivityForResult(intent, EDIT_EVENT_ACTIVITY_REQUEST_CODE);
                     return true;
             }
             return false;

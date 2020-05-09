@@ -7,7 +7,6 @@ import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.GradientDrawable;
@@ -24,14 +23,13 @@ import android.widget.ProgressBar;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.TimePicker;
-import android.widget.Toast;
 
-import androidx.annotation.ColorRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
 import java.text.ParseException;
@@ -45,7 +43,6 @@ import java.util.TimeZone;
 import ce.yildiz.edu.tr.calendar.R;
 import ce.yildiz.edu.tr.calendar.Utils;
 import ce.yildiz.edu.tr.calendar.database.DBHelper;
-import ce.yildiz.edu.tr.calendar.database.DBStructure;
 import ce.yildiz.edu.tr.calendar.database.DBTables;
 import ce.yildiz.edu.tr.calendar.models.Event;
 import ce.yildiz.edu.tr.calendar.other.AlarmReceiver;
@@ -71,6 +68,7 @@ public class NewEventActivity extends AppCompatActivity {
     private TextInputLayout eventLocationTextInputLayout;
     private TextInputLayout phoneNumberTextInputLayout;
     private TextInputLayout mailTextInputLayout;
+    private TextInputEditText mailTextInputEditText;
     private Switch mailSwitch;
 
     private DBHelper dbHelper;
@@ -107,6 +105,7 @@ public class NewEventActivity extends AppCompatActivity {
         eventLocationTextInputLayout = (TextInputLayout) findViewById(R.id.AddNewEventActivity_TextInputLayout_Location);
         phoneNumberTextInputLayout = (TextInputLayout) findViewById(R.id.AddNewEventActivity_TextInputLayout_PhoneNumber);
         mailTextInputLayout = (TextInputLayout) findViewById(R.id.AddNewEventActivity_TextInputLayout_Mail);
+        mailTextInputEditText = (TextInputEditText) findViewById(R.id.AddNewEventActivity_TextInputEditText_Mail);
         mailSwitch = (Switch) findViewById(R.id.AddNewEventActivity_Switch_Mail);
 
         progressBar = (ProgressBar) findViewById(R.id.AddNewEventActivity_ProgressBar);
@@ -184,9 +183,12 @@ public class NewEventActivity extends AppCompatActivity {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
                 if (isChecked) {
-                    mailTextInputLayout.setFocusable(true);
+                    mailTextInputEditText.setEnabled(true);
+                    mailTextInputLayout.setEnabled(true);
                 } else {
-                    mailTextInputLayout.setFocusable(true);
+                    mailTextInputEditText.setText("");
+                    mailTextInputEditText.setEnabled(false);
+                    mailTextInputLayout.setEnabled(false);
                 }
 
             }
@@ -391,6 +393,7 @@ public class NewEventActivity extends AppCompatActivity {
         protected Void doInBackground(Event... events) {
             SQLiteDatabase sqLiteDatabase = dbHelper.getWritableDatabase();
             dbHelper.saveEvent(sqLiteDatabase, events[0]);
+            sqLiteDatabase.close();
             return null;
         }
 

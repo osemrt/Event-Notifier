@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Locale;
 
 import ce.yildiz.edu.tr.calendar.R;
+import ce.yildiz.edu.tr.calendar.Utils;
 import ce.yildiz.edu.tr.calendar.models.Event;
 
 public class GridAdapter extends ArrayAdapter {
@@ -76,7 +77,7 @@ public class GridAdapter extends ArrayAdapter {
         ArrayList<String> strings = new ArrayList<>();
         Calendar aCalendar = Calendar.getInstance();
         for (int i = 0; i < events.size(); i++) {
-            aCalendar.setTime(convertStringToDate(events.get(i).getDate()));
+            aCalendar.setTime(Utils.convertStringToDate(events.get(i).getDate()));
             if (dayNo == aCalendar.get(Calendar.DAY_OF_MONTH) && displayMonth == aCalendar.get(Calendar.MONTH) && displayYear == aCalendar.get(Calendar.YEAR)) {
                 strings.add(events.get(i).getTitle());
             }
@@ -89,18 +90,6 @@ public class GridAdapter extends ArrayAdapter {
 
         return convertView;
     }
-
-    private Date convertStringToDate(String date) {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH);
-        Date aDate = null;
-        try {
-            aDate = simpleDateFormat.parse(date);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        return aDate;
-    }
-
 
     @Override
     public int getCount() {

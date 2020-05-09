@@ -43,6 +43,7 @@ public class CalendarFragment extends Fragment implements View.OnClickListener, 
     private final String TAG = this.getClass().getSimpleName();
 
     private static final int ADD_NEW_EVENT_ACTIVITY_REQUEST_CODE = 0;
+    private static final int EDIT_EVENT_ACTIVITY_REQUEST_CODE = 1;
 
     public static final Calendar calendar = Calendar.getInstance(Locale.ENGLISH);
 
@@ -58,6 +59,8 @@ public class CalendarFragment extends Fragment implements View.OnClickListener, 
     private RecyclerView savedEventsRecyclerView;
     private Button addNewEventButton;
     private TextView noEventTextView;
+
+    private AlertDialog alertDialog;
 
     private DBHelper dbHelper;
 
@@ -133,7 +136,7 @@ public class CalendarFragment extends Fragment implements View.OnClickListener, 
         builder.setCancelable(true);
         View dialogView = LayoutInflater.from(getActivity().getApplicationContext()).inflate(R.layout.layout_alert_dialog, parent, false);
         builder.setView(dialogView);
-        final AlertDialog alertDialog = builder.create();
+        alertDialog = builder.create();
         alertDialog.show();
         alertDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
             @Override
@@ -242,6 +245,12 @@ public class CalendarFragment extends Fragment implements View.OnClickListener, 
             if (resultCode == getActivity().RESULT_OK) {
                 Toast.makeText(getActivity(), "Event created!", Toast.LENGTH_SHORT).show();
                 setUpCalendar();
+            }
+        } else if (requestCode == EDIT_EVENT_ACTIVITY_REQUEST_CODE) {
+            if (resultCode == getActivity().RESULT_OK) {
+                Toast.makeText(getActivity(), "Event edited!", Toast.LENGTH_SHORT).show();
+                setUpCalendar();
+                alertDialog.dismiss();
             }
         }
     }
