@@ -76,12 +76,12 @@
                     android:orientation="vertical">
 
                     <LinearLayout
+                        android:id="@+id/AddNewEventActivity_LinearLayout_DateTime"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical">
 
                         <LinearLayout
-                            android:id="@+id/AddNewEventActivity_LinearLayout_DateTime"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:layout_margin="20dp"
@@ -240,63 +240,16 @@
 
                         </LinearLayout>
 
-                        <Button
-                            android:id="@+id/AddNewEventActivity_Button_Duration"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginLeft="20dp"
-                            android:layout_marginRight="20dp"
-                            android:layout_marginBottom="20dp"
-                            android:background="@color/darkIndigo"
-
-                            android:text="@string/duration_0_hours_0_minutes"
-                            android:textColor="@color/white" />
-
-                    </LinearLayout>
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="@color/Grey" />
-
-                    <LinearLayout
-                        android:id="@+id/AddNewEventActivity_LinearLayout_Location"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_margin="20dp"
-                        android:gravity="center"
-                        android:orientation="horizontal">
-
-                        <ImageView
-                            android:id="@+id/AddNewEventActivity_ImageView_Location"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginRight="10dp"
-                            app:srcCompat="@drawable/ic_location_white" />
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginRight="8dp">
-
-                            <com.google.android.material.textfield.TextInputLayout
-                                android:id="@+id/AddNewEventActivity_TextInputLayout_Location"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:theme="@style/EditScreenTextInputLayoutStyleDark"
-                                app:errorEnabled="true">
-
-                                <com.google.android.material.textfield.TextInputEditText
-                                    android:layout_width="match_parent"
-                                    android:layout_height="match_parent"
-                                    android:hint="@string/add_a_location"
-                                    android:inputType="text"
-                                    android:textSize="20sp"
-                                    android:theme="@style/EditScreenTextInputLayoutStyleDark" />
-                            </com.google.android.material.textfield.TextInputLayout>
-
-                        </LinearLayout>
-
+                        <!--                        <Button-->
+                        <!--                            android:id="@+id/AddNewEventActivity_Button_Duration"-->
+                        <!--                            android:layout_width="match_parent"-->
+                        <!--                            android:layout_height="wrap_content"-->
+                        <!--                            android:layout_marginLeft="20dp"-->
+                        <!--                            android:layout_marginRight="20dp"-->
+                        <!--                            android:layout_marginBottom="20dp"-->
+                        <!--                            android:background="@color/darkIndigo"-->
+                        <!--                            android:text="@string/duration_0_hours_0_minutes"-->
+                        <!--                            android:textColor="@color/white" />-->
 
                     </LinearLayout>
 
@@ -354,84 +307,10 @@
                         android:background="@color/Grey" />
 
                     <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <LinearLayout
-                            android:id="@+id/AddNewEventActivity_LinearLayout_AddPeople"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:layout_margin="20dp"
-                            android:gravity="center"
-                            android:orientation="horizontal">
-
-                            <ImageView
-                                android:id="@+id/AddNewEventActivity_ImageView_People"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginEnd="10dp"
-                                android:layout_weight="0.0"
-                                app:srcCompat="@drawable/ic_people_white" />
-
-
-                            <com.google.android.material.textfield.TextInputLayout
-
-                                android:id="@+id/AddNewEventActivity_TextInputLayout_AddPeople"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:layout_marginEnd="10dp"
-                                android:layout_weight="0.8"
-                                android:theme="@style/EditScreenTextInputLayoutStyleDark"
-                                app:errorEnabled="true">
-
-                                <com.google.android.material.textfield.TextInputEditText
-                                    android:layout_width="match_parent"
-                                    android:layout_height="match_parent"
-                                    android:hint="@string/add_people"
-                                    android:inputType="text"
-                                    android:textSize="20sp"
-                                    android:theme="@style/EditScreenTextInputLayoutStyleDark" />
-
-
-                            </com.google.android.material.textfield.TextInputLayout>
-
-
-                            <Button
-                                android:id="@+id/AddNewEventActivity_Button_Add"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="0.0"
-                                android:background="@color/darkIndigo"
-                                android:text="@string/add"
-                                android:textColor="@color/white" />
-
-
-                        </LinearLayout>
-
-                        <Button
-                            android:id="@+id/AddNewEventActivity_Button_AddFromContacts"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginLeft="20dp"
-                            android:layout_marginRight="20dp"
-                            android:layout_marginBottom="20dp"
-                            android:background="@color/darkIndigo"
-                            android:text="@string/add_from_contacts"
-                            android:textColor="@color/white" />
-
-                    </LinearLayout>
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="@color/Grey" />
-
-                    <LinearLayout
                         android:id="@+id/AddNewEventActivity_LinearLayout_Note"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_margin="10dp"
+                        android:layout_margin="20dp"
                         android:gravity="center"
                         android:orientation="horizontal">
 
@@ -517,6 +396,202 @@
 
 
                     </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/Grey" />
+
+                    <LinearLayout
+                        android:id="@+id/AddNewEventActivity_LinearLayout_Location"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_margin="20dp"
+                        android:gravity="center"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:id="@+id/AddNewEventActivity_ImageView_Location"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginRight="10dp"
+                            app:srcCompat="@drawable/ic_location_white" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginRight="8dp">
+
+                            <com.google.android.material.textfield.TextInputLayout
+                                android:id="@+id/AddNewEventActivity_TextInputLayout_Location"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:theme="@style/EditScreenTextInputLayoutStyleDark"
+                                app:errorEnabled="true">
+
+                                <com.google.android.material.textfield.TextInputEditText
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:hint="@string/add_a_location"
+                                    android:inputType="text"
+                                    android:textSize="20sp"
+                                    android:theme="@style/EditScreenTextInputLayoutStyleDark" />
+                            </com.google.android.material.textfield.TextInputLayout>
+
+                        </LinearLayout>
+
+
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/Grey" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:id="@+id/AddNewEventActivity_LinearLayout_AddPeople"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_margin="20dp"
+                            android:gravity="center"
+                            android:orientation="horizontal">
+
+                            <ImageView
+                                android:id="@+id/AddNewEventActivity_ImageView_People"
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                android:layout_marginEnd="10dp"
+                                android:layout_weight="0.0"
+                                app:srcCompat="@drawable/ic_people_white" />
+
+
+                            <com.google.android.material.textfield.TextInputLayout
+
+                                android:id="@+id/AddNewEventActivity_TextInputLayout_AddPeople"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_marginEnd="10dp"
+                                android:layout_weight="0.8"
+                                android:theme="@style/EditScreenTextInputLayoutStyleDark"
+                                app:errorEnabled="true">
+
+                                <com.google.android.material.textfield.TextInputEditText
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:hint="Add phone number"
+                                    android:inputType="text"
+                                    android:textSize="20sp"
+                                    android:theme="@style/EditScreenTextInputLayoutStyleDark" />
+
+
+                            </com.google.android.material.textfield.TextInputLayout>
+
+
+                            <!--                            <Button-->
+                            <!--                                android:id="@+id/AddNewEventActivity_Button_Add"-->
+                            <!--                                android:layout_width="wrap_content"-->
+                            <!--                                android:layout_height="wrap_content"-->
+                            <!--                                android:layout_weight="0.0"-->
+                            <!--                                android:background="@color/darkIndigo"-->
+                            <!--                                android:text="@string/add"-->
+                            <!--                                android:textColor="@color/white" />-->
+
+
+                        </LinearLayout>
+
+                        <!--                        <Button-->
+                        <!--                            android:id="@+id/AddNewEventActivity_Button_AddFromContacts"-->
+                        <!--                            android:layout_width="match_parent"-->
+                        <!--                            android:layout_height="wrap_content"-->
+                        <!--                            android:layout_marginLeft="20dp"-->
+                        <!--                            android:layout_marginRight="20dp"-->
+                        <!--                            android:layout_marginBottom="20dp"-->
+                        <!--                            android:background="@color/darkIndigo"-->
+                        <!--                            android:text="@string/add_from_contacts"-->
+                        <!--                            android:textColor="@color/white" />-->
+
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/Grey" />
+
+                    <LinearLayout
+                        android:id="@+id/AddNewEventActivity_LinearLayout_Email"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="20dp"
+                        android:gravity="center"
+                        android:orientation="horizontal"
+                        android:weightSum="1">
+
+                        <ImageView
+                            android:id="@+id/AddNewEventActivity_ImageView_Email"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="10dp"
+                            android:layout_weight="0"
+                            app:srcCompat="@drawable/ic_mail" />
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/AddNewEventActivity_TextInputLayout_EMail"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:theme="@style/EditScreenTextInputLayoutStyleDark"
+                            app:errorEnabled="true">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_marginEnd="15dp"
+                                android:layout_weight="0"
+                                android:hint="@string/send_mail"
+                                android:inputType="textEmailAddress"
+                                android:textSize="20sp"
+                                android:theme="@style/EditScreenTextInputLayoutStyleDark" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <Switch
+                            android:id="@+id/AddNewEventActivity_Switch_Email"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="0"
+                            android:enabled="true"
+                            android:theme="@style/EditScreenTextInputLayoutStyleDark" />
+
+
+                    </LinearLayout>
+
+                    <!--                    <LinearLayout-->
+                    <!--                        android:id="@+id/AddNewEventActivity_LinearLayout_Email"-->
+                    <!--                        android:layout_width="match_parent"-->
+                    <!--                        android:layout_height="match_parent"-->
+                    <!--                        android:layout_margin="20dp"-->
+                    <!--                        android:gravity="center"-->
+                    <!--                        android:orientation="horizontal">-->
+
+                    <!--                        <ImageView-->
+                    <!--                            android:id="@+id/AddNewEventActivity_ImageView_Email"-->
+                    <!--                            android:layout_width="wrap_content"-->
+                    <!--                            android:layout_height="wrap_content"-->
+                    <!--                            android:layout_marginEnd="10dp"-->
+                    <!--                            app:srcCompat="@drawable/ic_mail" />-->
+
+
+                    <!--                    </LinearLayout>-->
+
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/Grey" />
 
 
                 </LinearLayout>
