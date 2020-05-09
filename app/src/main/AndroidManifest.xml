@@ -15,6 +15,7 @@
             android:exported="true" />
 
         <activity android:name=".views.NewEventActivity" />
+        <activity android:name=".views.EditEventActivity" />
         <activity android:name=".views.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
