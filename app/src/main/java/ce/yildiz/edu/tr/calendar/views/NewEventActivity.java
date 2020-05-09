@@ -80,7 +80,7 @@ public class NewEventActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.layout_add_new_event);
+        setContentView(R.layout.activity_add_new_event);
 
         defineViews();
         initViews();
