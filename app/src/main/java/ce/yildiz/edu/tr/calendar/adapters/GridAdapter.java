@@ -26,8 +26,8 @@ public class GridAdapter extends ArrayAdapter {
     private Calendar currentDate;
     private List<Event> events;
     private LayoutInflater layoutInflater;
-    private TextView day;
-    private TextView eventCount;
+    private TextView dayTextView;
+    private TextView eventCountTextView;
 
     public GridAdapter(@NonNull Context context, List<Date> dates, Calendar currentDate, List<Event> events) {
         super(context, R.layout.layout_cell);
@@ -57,10 +57,10 @@ public class GridAdapter extends ArrayAdapter {
 
         if (convertView == null) {
             convertView = layoutInflater.inflate(R.layout.layout_cell, parent, false);
-            day = (TextView) convertView.findViewById(R.id.LayoutCell_TextView_Day);
-            eventCount = (TextView) convertView.findViewById(R.id.LayoutCell_TextView_EventCount);
+            dayTextView = (TextView) convertView.findViewById(R.id.LayoutCell_TextView_Day);
+            eventCountTextView = (TextView) convertView.findViewById(R.id.LayoutCell_TextView_EventCount);
 
-            day.setText(String.valueOf(dayNo));
+            dayTextView.setText(String.valueOf(dayNo));
         }
 
         TextView day = convertView.findViewById(R.id.LayoutCell_TextView_Day);
@@ -70,22 +70,22 @@ public class GridAdapter extends ArrayAdapter {
             convertView.setBackgroundColor(getContext().getResources().getColor(R.color.lightIndigo));
             day.setTextColor(getContext().getResources().getColor(R.color.black));
         } else {
-            //convertView.setBackgroundColor(getContext().getResources().getColor(R.color.darkIndigo2));
             day.setTextColor(getContext().getResources().getColor(R.color.lightGrey));
         }
 
         ArrayList<String> strings = new ArrayList<>();
         Calendar aCalendar = Calendar.getInstance();
         for (int i = 0; i < events.size(); i++) {
-            aCalendar.setTime(convertStringToDate(events.get(i).getDATE()));
+            aCalendar.setTime(convertStringToDate(events.get(i).getDate()));
             if (dayNo == aCalendar.get(Calendar.DAY_OF_MONTH) && displayMonth == aCalendar.get(Calendar.MONTH) && displayYear == aCalendar.get(Calendar.YEAR)) {
-                strings.add(events.get(i).getEVENT());
+                strings.add(events.get(i).getTitle());
             }
-
-
         }
 
-        eventCount.setText(Integer.toString(strings.size()));
+        if (strings.size() > 0) {
+            eventCount.setText(Integer.toString(strings.size()));
+        }
+
 
         return convertView;
     }

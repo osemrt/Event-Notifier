@@ -91,8 +91,16 @@ public class DBHelper extends SQLiteOpenHelper {
         return sqLiteDatabase.query(DBTables.EVENT_TABLE_NAME, projection, where, whereArgs, null, null, null);
     }
 
-    public Cursor readNotificationID(SQLiteDatabase sqLiteDatabase, String eventTitle, String date, String time) {
-        String[] projection = {DBTables.NOTIFICATION_ID};
+    public Cursor readNotification(SQLiteDatabase sqLiteDatabase, String eventTitle, String date, String time) {
+        String[] projection = {DBTables.NOTIFICATION_ID, DBTables.EVENT_NOTIFY};
+        String where = DBTables.EVENT_TITLE + "=? and " + DBTables.EVENT_DATE + "=? and " + DBTables.EVENT_TIME + "=?";
+        String[] whereArgs = {eventTitle, date, time};
+
+        return sqLiteDatabase.query(DBTables.EVENT_TABLE_NAME, projection, where, whereArgs, null, null, null);
+    }
+
+    public Cursor readIsAllDay(SQLiteDatabase sqLiteDatabase, String eventTitle, String date, String time) {
+        String[] projection = {DBTables.EVENT_ALL_DAY};
         String where = DBTables.EVENT_TITLE + "=? and " + DBTables.EVENT_DATE + "=? and " + DBTables.EVENT_TIME + "=?";
         String[] whereArgs = {eventTitle, date, time};
 

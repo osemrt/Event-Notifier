@@ -35,7 +35,6 @@ import ce.yildiz.edu.tr.calendar.Utils;
 import ce.yildiz.edu.tr.calendar.adapters.EventAdapter;
 import ce.yildiz.edu.tr.calendar.adapters.GridAdapter;
 import ce.yildiz.edu.tr.calendar.database.DBHelper;
-import ce.yildiz.edu.tr.calendar.database.DBStructure;
 import ce.yildiz.edu.tr.calendar.database.DBTables;
 import ce.yildiz.edu.tr.calendar.models.Event;
 
@@ -66,9 +65,11 @@ public class CalendarFragment extends Fragment implements View.OnClickListener, 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_calendar, container, false);
+        dbHelper = new DBHelper(getActivity());
+
         defineViews(view);
         setUpCalendar();
-        dbHelper = new DBHelper(getActivity());
+
         return view;
     }
 
@@ -161,7 +162,7 @@ public class CalendarFragment extends Fragment implements View.OnClickListener, 
             savedEventsRecyclerView.setHasFixedSize(true);
             RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(view.getContext());
             savedEventsRecyclerView.setLayoutManager(layoutManager);
-            EventAdapter eventAdapter = new EventAdapter(getActivity(), eventsByDate, alertDialog);
+            EventAdapter eventAdapter = new EventAdapter(getActivity(), eventsByDate, alertDialog, this, alertDialog);
             savedEventsRecyclerView.setAdapter(eventAdapter);
             eventAdapter.notifyDataSetChanged();
             addNewEventButton.setText("ADD EVENT");

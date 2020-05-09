@@ -43,6 +43,7 @@
                     android:textStyle="bold" />
 
                 <LinearLayout
+                    android:id="@+id/LayoutCell_LinearLayout_EventTime"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="center"
@@ -72,14 +73,33 @@
 
             </LinearLayout>
 
-            <ImageButton
-                android:id="@+id/LayoutCell_ImageButton_Options"
+            <RelativeLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="15dp"
                 android:layout_weight="0"
-                android:background="@color/white"
-                app:srcCompat="@drawable/ic_more" />
+                android:gravity="center">
+
+
+                <ImageButton
+                    android:id="@+id/LayoutCell_ImageButton_Options"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:background="@color/white"
+                    app:srcCompat="@drawable/ic_more" />
+
+                <ImageButton
+                    android:id="@+id/LayoutCell_ImageButton_Notification"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_alignParentBottom="true"
+                    android:background="@color/white"
+                    app:srcCompat="@drawable/ic_small_notification" />
+
+            </RelativeLayout>
+
 
         </LinearLayout>
 

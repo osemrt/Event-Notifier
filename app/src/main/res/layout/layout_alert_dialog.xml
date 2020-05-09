@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:weightSum="1">
 
@@ -37,10 +38,13 @@
                 android:text="@string/no_event_to_display"
                 android:textSize="16sp" />
 
+
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/AlertDialog_RecyclerView_ListEvents"
                 android:layout_width="match_parent"
+                app:layout_constraintHeight_max="280dp"
                 android:layout_height="wrap_content" />
+
         </LinearLayout>
     </ScrollView>
 

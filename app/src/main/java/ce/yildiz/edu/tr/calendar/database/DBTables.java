@@ -13,7 +13,7 @@ public class DBTables {
     public static final String EVENT_MONTH = "month";
     public static final String EVENT_YEAR = "year";
     public static final String EVENT_NOTIFY = "notify";
-    public static final String NOTIFICATION_ID = "id";
+    public static final String NOTIFICATION_ID = "notification_id";
     public static final String EVENT_NOTE = "note";
     public static final String EVENT_COLOR = "color";
     public static final String EVENT_LOCATION = "location";

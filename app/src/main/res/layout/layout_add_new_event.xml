@@ -135,7 +135,6 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginEnd="30dp"
                                 android:gravity="center"
-                                android:onClick="setDate"
                                 android:orientation="vertical">
 
                                 <LinearLayout
@@ -170,7 +169,7 @@
 
 
                                     <TextView
-                                        android:id="@+id/AddNewEventActivity_TexView_Date"
+                                        android:id="@+id/AddNewEventActivity_TexView_SetDate"
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
                                         android:gravity="center"
@@ -189,7 +188,6 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:gravity="center"
-                                android:onClick="setTime"
                                 android:orientation="vertical">
 
                                 <LinearLayout
@@ -224,7 +222,7 @@
 
 
                                     <TextView
-                                        android:id="@+id/AddNewEventActivity_TexView_Time"
+                                        android:id="@+id/AddNewEventActivity_TexView_SetTime"
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
                                         android:gravity="center"
@@ -389,8 +387,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_alignParentEnd="true"
-                                android:background="@drawable/circle"
-                                android:onClick="setNoteColor" />
+                                android:background="@drawable/circle" />
 
                         </RelativeLayout>
 
@@ -472,7 +469,7 @@
 
                             <com.google.android.material.textfield.TextInputLayout
 
-                                android:id="@+id/AddNewEventActivity_TextInputLayout_AddPeople"
+                                android:id="@+id/AddNewEventActivity_TextInputLayout_PhoneNumber"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
                                 android:layout_marginEnd="10dp"
@@ -540,7 +537,7 @@
                             app:srcCompat="@drawable/ic_mail" />
 
                         <com.google.android.material.textfield.TextInputLayout
-                            android:id="@+id/AddNewEventActivity_TextInputLayout_EMail"
+                            android:id="@+id/AddNewEventActivity_TextInputLayout_Mail"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
@@ -559,7 +556,7 @@
                         </com.google.android.material.textfield.TextInputLayout>
 
                         <Switch
-                            android:id="@+id/AddNewEventActivity_Switch_Email"
+                            android:id="@+id/AddNewEventActivity_Switch_Mail"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_weight="0"

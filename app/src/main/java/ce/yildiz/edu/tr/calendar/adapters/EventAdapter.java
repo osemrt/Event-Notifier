@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -11,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -18,23 +20,28 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.Calendar;
 import java.util.List;
 
 import ce.yildiz.edu.tr.calendar.R;
 import ce.yildiz.edu.tr.calendar.database.DBHelper;
 import ce.yildiz.edu.tr.calendar.database.DBStructure;
+import ce.yildiz.edu.tr.calendar.database.DBTables;
 import ce.yildiz.edu.tr.calendar.models.Event;
+import ce.yildiz.edu.tr.calendar.views.CalendarFragment;
 
 public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> {
 
     private Context context;
     private List<Event> eventList;
-    private AlertDialog alertDialog;
     private DBHelper dbHelper;
+    private CalendarFragment calendarFragment;
+    private AlertDialog alertDialog;
 
-    public EventAdapter(Context context, List<Event> eventList, AlertDialog alertDialog) {
+    public EventAdapter(Context context, List<Event> eventList, AlertDialog alertDialog, CalendarFragment calendarFragment, AlertDialog dialog) {
         this.context = context;
         this.eventList = eventList;
+        this.calendarFragment = calendarFragment;
         this.alertDialog = alertDialog;
     }
 
@@ -48,22 +55,25 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
         Event event = eventList.get(position);
-        holder.eventTitle.setText(event.getEVENT());
 
-        holder.options.setOnClickListener(new View.OnClickListener() {
+        holder.eventColorImageView.setBackgroundColor(event.getColor());
+        holder.eventTitleTextView.setText(event.getTitle());
+        holder.eventTimeTextView.setText(event.getTime());
+        holder.eventNoteTextView.setText(event.getNote());
+
+        holder.optionsImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showPopupMenu(holder.options, position);
+                showPopupMenu(holder.optionsImageButton, position);
             }
         });
 
-        if (isAlarmed(event.getDATE(), event.getEVENT(), event.getTIME())) {
-            // TODO: Show the notification icon
-        } else {
-
+        if (!isAlarmed(event.getTitle(), event.getDate(), event.getTime())) {
+            holder.notificationImageButton.setVisibility(View.GONE);
         }
-
-        //notifyDataSetChanged();
+        if (isAllDay(event.getTitle(), event.getDate(), event.getTime())) {
+            holder.eventTimeLinearLayout.setVisibility(View.GONE);
+        }
 
     }
 
@@ -83,21 +93,24 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
-        public View mImageButton;
-        private ImageView eventColor;
-        private TextView eventTitle;
-        private TextView eventTime;
-        private TextView eventNote;
-        private ImageButton options;
+        private ImageView eventColorImageView;
+        private TextView eventTitleTextView;
+        private TextView eventTimeTextView;
+        private TextView eventNoteTextView;
+        private ImageButton optionsImageButton;
+        private ImageButton notificationImageButton;
+        private LinearLayout eventTimeLinearLayout;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
-            eventColor = (ImageView) itemView.findViewById(R.id.LayoutCell_ImageView_EventColor);
-            eventTitle = (TextView) itemView.findViewById(R.id.LayoutCell_TextView_EventTitle);
-            eventTime = (TextView) itemView.findViewById(R.id.LayoutCell_TextView_EventTime);
-            eventNote = (TextView) itemView.findViewById(R.id.LayoutCell_TextView_EventNote);
-            options = (ImageButton) itemView.findViewById(R.id.LayoutCell_ImageButton_Options);
+            eventColorImageView = (ImageView) itemView.findViewById(R.id.LayoutCell_ImageView_EventColor);
+            eventTitleTextView = (TextView) itemView.findViewById(R.id.LayoutCell_TextView_EventTitle);
+            eventTimeTextView = (TextView) itemView.findViewById(R.id.LayoutCell_TextView_EventTime);
+            eventNoteTextView = (TextView) itemView.findViewById(R.id.LayoutCell_TextView_EventNote);
+            optionsImageButton = (ImageButton) itemView.findViewById(R.id.LayoutCell_ImageButton_Options);
+            notificationImageButton = (ImageButton) itemView.findViewById(R.id.LayoutCell_ImageButton_Notification);
+            eventTimeLinearLayout = (LinearLayout) itemView.findViewById(R.id.LayoutCell_LinearLayout_EventTime);
         }
     }
 
@@ -114,16 +127,16 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
         public boolean onMenuItemClick(MenuItem menuItem) {
             switch (menuItem.getItemId()) {
                 case R.id.Popup_Item_Delete:
-                    deleteCalendarEvent(mEvent.getEVENT(), mEvent.getDATE(), mEvent.getTIME());
+                    deleteEvent(mEvent.getTitle(), mEvent.getDate(), mEvent.getTime());
                     eventList.remove(position);
                     notifyItemRemoved(position);
                     notifyItemRangeChanged(position, eventList.size());
                     notifyDataSetChanged();
+                    calendarFragment.setUpCalendar();
                     Toast.makeText(context, "Event removed!", Toast.LENGTH_SHORT).show();
                     if (eventList.isEmpty()) {
                         alertDialog.dismiss();
                     }
-
                     return true;
                 case R.id.Popup_Item_Edit:
                     Toast.makeText(context, "Edit is clicked!", Toast.LENGTH_SHORT).show();
@@ -133,21 +146,21 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
         }
     }
 
-    private void deleteCalendarEvent(String eventTitle, String date, String time) {
+    private void deleteEvent(String eventTitle, String date, String time) {
         dbHelper = new DBHelper(context);
         SQLiteDatabase sqLiteDatabase = dbHelper.getWritableDatabase();
-        dbHelper.deleteEvent(eventTitle, date, time, sqLiteDatabase);
+        dbHelper.deleteEvent(sqLiteDatabase, eventTitle, date, time);
         dbHelper.close();
     }
 
-    private boolean isAlarmed(String date, String eventTitle, String time) {
+    private boolean isAlarmed(String eventTitle, String date, String time) {
         boolean alarmed = false;
         dbHelper = new DBHelper(context);
         SQLiteDatabase sqLiteDatabase = dbHelper.getReadableDatabase();
-        Cursor cursor = dbHelper.readIDEvents(eventTitle, date, time, sqLiteDatabase);
+        Cursor cursor = dbHelper.readNotification(sqLiteDatabase, eventTitle, date, time);
         while (cursor.moveToNext()) {
-            String notify = cursor.getString(cursor.getColumnIndex(DBStructure.NOTIFY));
-            if (notify.equals("on")) {
+            String notify = cursor.getString(cursor.getColumnIndex(DBTables.EVENT_NOTIFY));
+            if (notify.equals("true")) {
                 alarmed = true;
             } else {
                 alarmed = false;
@@ -155,6 +168,24 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
         }
         cursor.close();
         sqLiteDatabase.close();
-        return false;
+        return alarmed;
+    }
+
+    private boolean isAllDay(String eventTitle, String date, String time) {
+        boolean isAllDay = false;
+        dbHelper = new DBHelper(context);
+        SQLiteDatabase sqLiteDatabase = dbHelper.getReadableDatabase();
+        Cursor cursor = dbHelper.readIsAllDay(sqLiteDatabase, eventTitle, date, time);
+        while (cursor.moveToNext()) {
+            String notify = cursor.getString(cursor.getColumnIndex(DBTables.EVENT_ALL_DAY));
+            if (notify.equals("true")) {
+                isAllDay = true;
+            } else {
+                isAllDay = false;
+            }
+        }
+        cursor.close();
+        sqLiteDatabase.close();
+        return isAllDay;
     }
 }
