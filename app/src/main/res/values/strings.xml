@@ -33,4 +33,7 @@
     <string name="delete">Delete</string>
     <string name="note_color">Note Color</string>
     <string name="send_mail">Send mail</string>
+    <string name="week">Week</string>
+    <string name="next_seven_days">Next 7 days</string>
+    <string name="period">Period</string>
 </resources>
