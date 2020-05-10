@@ -134,6 +134,24 @@ public class DBHelper extends SQLiteOpenHelper {
         return sqLiteDatabase.query(DBTables.EVENT_TABLE_NAME, projection, where, whereArgs, null, null, null);
     }
 
+    public Cursor readAllEvents(SQLiteDatabase sqLiteDatabase) {
+        String[] projection = {
+                DBTables.EVENT_TITLE,
+                DBTables.EVENT_ALL_DAY,
+                DBTables.EVENT_DATE,
+                DBTables.EVENT_TIME,
+                DBTables.EVENT_MONTH,
+                DBTables.EVENT_YEAR,
+                DBTables.EVENT_NOTIFY,
+                DBTables.NOTIFICATION_ID,
+                DBTables.EVENT_NOTE,
+                DBTables.EVENT_COLOR,
+                DBTables.EVENT_LOCATION,
+                DBTables.EVENT_PHONE_NUMBER,
+                DBTables.EVENT_MAIL};
+        return sqLiteDatabase.query(DBTables.EVENT_TABLE_NAME, projection, null, null, null, null, null);
+    }
+
     public void updateEvent(SQLiteDatabase sqLiteDatabase, Event newEvent, String oldEventTitle, String oldEventDate, String oldEventTime) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(DBTables.EVENT_TITLE, newEvent.getTitle());

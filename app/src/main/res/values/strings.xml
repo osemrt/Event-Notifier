@@ -36,4 +36,8 @@
     <string name="week">Week</string>
     <string name="next_seven_days">Next 7 days</string>
     <string name="period">Period</string>
+    <string name="today">Today</string>
+    <string name="next_7_days">Next 7 days</string>
+    <string name="next_30_days">Next 30 days</string>
+    <string name="all_events">All Events</string>
 </resources>

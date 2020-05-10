@@ -12,6 +12,13 @@ import java.util.Locale;
 
 public class Utils {
 
+    public static enum Period {
+        TODAY,
+        NEXT_7_DAYS,
+        NEXT_30_DAYS,
+        ALL_EVENTS
+    }
+
     public static final int MAX_CALENDAR_DAYS = 42;
 
     public static final SimpleDateFormat dateFormat = new SimpleDateFormat("MMMM yyyy", Locale.ENGLISH);
