@@ -1,0 +1,197 @@
+package ce.yildiz.edu.tr.calendar.adapters;
+
+import android.content.Context;
+import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.view.LayoutInflater;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.PopupMenu;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+
+import java.util.List;
+
+import ce.yildiz.edu.tr.calendar.R;
+import ce.yildiz.edu.tr.calendar.database.DBHelper;
+import ce.yildiz.edu.tr.calendar.database.DBTables;
+import ce.yildiz.edu.tr.calendar.models.Event;
+import ce.yildiz.edu.tr.calendar.views.EditEventActivity;
+import ce.yildiz.edu.tr.calendar.views.UpcomingEventsFragment;
+
+public class UpcomingEventAdapter extends RecyclerView.Adapter<UpcomingEventAdapter.ViewHolder> {
+
+    private final String TAG = this.getClass().getSimpleName();
+
+    private static final int EDIT_EVENT_ACTIVITY_REQUEST_CODE = 1;
+
+    private Context context;
+    private List<Event> events;
+    private DBHelper dbHelper;
+    private UpcomingEventsFragment upcomingEventsFragment;
+
+    public UpcomingEventAdapter(Context context, List<Event> events, UpcomingEventsFragment upcomingEventsFragment) {
+        this.context = context;
+        this.events = events;
+        this.upcomingEventsFragment = upcomingEventsFragment;
+
+        dbHelper = new DBHelper(context);
+    }
+
+    @NonNull
+    @Override
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(context).inflate(R.layout.layout_upcoming_events_list_row, parent, false);
+        return new ViewHolder(view);
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
+        Event event = events.get(position);
+
+        holder.eventColorImageView.setBackgroundColor(event.getColor());
+        holder.eventTitleTextView.setText(event.getTitle());
+        holder.eventDateTextView.setText(event.getDate());
+        holder.eventTimeTextView.setText(event.getTime());
+        holder.eventNoteTextView.setText(event.getNote());
+
+        holder.optionsImageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showPopupMenu(holder.optionsImageButton, position);
+            }
+        });
+
+        if (!isAlarmed(event.getTitle(), event.getDate(), event.getTime())) {
+            holder.notificationImageButton.setVisibility(View.GONE);
+        }
+        if (isAllDay(event.getTitle(), event.getDate(), event.getTime())) {
+            holder.eventTimeLinearLayout.setVisibility(View.GONE);
+        }
+
+    }
+
+    private void showPopupMenu(View view, int position) {
+        // inflate menu
+        PopupMenu popup = new PopupMenu(view.getContext(), view);
+        MenuInflater inflater = popup.getMenuInflater();
+        inflater.inflate(R.menu.popup, popup.getMenu());
+        popup.setOnMenuItemClickListener(new MyMenuItemClickListener(position));
+        popup.show();
+    }
+
+    @Override
+    public int getItemCount() {
+        return events.size();
+    }
+
+    public class ViewHolder extends RecyclerView.ViewHolder {
+
+        private ImageView eventColorImageView;
+        private TextView eventTitleTextView;
+        private TextView eventDateTextView;
+        private TextView eventTimeTextView;
+        private TextView eventNoteTextView;
+        private ImageButton optionsImageButton;
+        private ImageButton notificationImageButton;
+        private LinearLayout eventTimeLinearLayout;
+
+        public ViewHolder(@NonNull View itemView) {
+            super(itemView);
+
+            eventColorImageView = (ImageView) itemView.findViewById(R.id.UpcomingLayoutCell_ImageView_EventColor);
+            eventTitleTextView = (TextView) itemView.findViewById(R.id.UpcomingLayoutCell_TextView_EventTitle);
+            eventDateTextView = (TextView) itemView.findViewById(R.id.UpcomingLayoutCell_TextView_EventDate);
+            eventTimeTextView = (TextView) itemView.findViewById(R.id.UpcomingLayoutCell_TextView_EventTime);
+            eventNoteTextView = (TextView) itemView.findViewById(R.id.UpcomingLayoutCell_TextView_EventNote);
+            optionsImageButton = (ImageButton) itemView.findViewById(R.id.UpcomingLayoutCell_ImageButton_Options);
+            notificationImageButton = (ImageButton) itemView.findViewById(R.id.UpcomingLayoutCell_ImageButton_Notification);
+            eventTimeLinearLayout = (LinearLayout) itemView.findViewById(R.id.UpcomingLayoutCell_LinearLayout_Time);
+        }
+    }
+
+    private class MyMenuItemClickListener implements PopupMenu.OnMenuItemClickListener {
+        private int position;
+        private Event mEvent;
+
+        public MyMenuItemClickListener(int position) {
+            this.position = position;
+            this.mEvent = events.get(position);
+        }
+
+        @Override
+        public boolean onMenuItemClick(MenuItem menuItem) {
+            switch (menuItem.getItemId()) {
+                case R.id.Popup_Item_Delete:
+                    deleteEvent(mEvent.getTitle(), mEvent.getDate(), mEvent.getTime());
+                    events.remove(position);
+                    notifyItemRemoved(position);
+                    notifyItemRangeChanged(position, events.size());
+                    notifyDataSetChanged();
+                    Toast.makeText(context, "Event removed!", Toast.LENGTH_SHORT).show();
+                    return true;
+                case R.id.Popup_Item_Edit:
+                    Intent intent = new Intent(context, EditEventActivity.class);
+                    intent.putExtra("eventTitle", mEvent.getTitle());
+                    intent.putExtra("eventDate", mEvent.getDate());
+                    intent.putExtra("eventTime", mEvent.getTime());
+                    upcomingEventsFragment.startActivityForResult(intent, EDIT_EVENT_ACTIVITY_REQUEST_CODE);
+                    return true;
+            }
+            return false;
+        }
+    }
+
+    private void deleteEvent(String eventTitle, String date, String time) {
+        dbHelper = new DBHelper(context);
+        SQLiteDatabase sqLiteDatabase = dbHelper.getWritableDatabase();
+        dbHelper.deleteEvent(sqLiteDatabase, eventTitle, date, time);
+        dbHelper.close();
+    }
+
+    private boolean isAlarmed(String eventTitle, String date, String time) {
+        boolean alarmed = false;
+        dbHelper = new DBHelper(context);
+        SQLiteDatabase sqLiteDatabase = dbHelper.getReadableDatabase();
+        Cursor cursor = dbHelper.readNotification(sqLiteDatabase, eventTitle, date, time);
+        while (cursor.moveToNext()) {
+            String notify = cursor.getString(cursor.getColumnIndex(DBTables.EVENT_NOTIFY));
+            if (notify.equals("true")) {
+                alarmed = true;
+            } else {
+                alarmed = false;
+            }
+        }
+        cursor.close();
+        sqLiteDatabase.close();
+        return alarmed;
+    }
+
+    private boolean isAllDay(String eventTitle, String date, String time) {
+        boolean isAllDay = false;
+        dbHelper = new DBHelper(context);
+        SQLiteDatabase sqLiteDatabase = dbHelper.getReadableDatabase();
+        Cursor cursor = dbHelper.readIsAllDay(sqLiteDatabase, eventTitle, date, time);
+        while (cursor.moveToNext()) {
+            String notify = cursor.getString(cursor.getColumnIndex(DBTables.EVENT_ALL_DAY));
+            if (notify.equals("true")) {
+                isAllDay = true;
+            } else {
+                isAllDay = false;
+            }
+        }
+        cursor.close();
+        sqLiteDatabase.close();
+        return isAllDay;
+    }
+
+}

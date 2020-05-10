@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/PopupPeriod_Item_Today"
+        android:title="@string/today" />
+    <item
+        android:id="@+id/PopupPeriod_Item_Next7Days"
+        android:title="@string/next_7_days" />
+    <item
+        android:id="@+id/PopupPeriod_Item_Next30Days"
+        android:title="@string/next_30_days" />
+    <item
+        android:id="@+id/PopupPeriod_Item_AllEvents"
+        android:title="@string/all_events" />
+</menu>
