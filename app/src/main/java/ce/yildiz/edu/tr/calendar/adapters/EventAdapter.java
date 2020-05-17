@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -21,12 +20,10 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.Calendar;
 import java.util.List;
 
 import ce.yildiz.edu.tr.calendar.R;
 import ce.yildiz.edu.tr.calendar.database.DBHelper;
-import ce.yildiz.edu.tr.calendar.database.DBStructure;
 import ce.yildiz.edu.tr.calendar.database.DBTables;
 import ce.yildiz.edu.tr.calendar.models.Event;
 import ce.yildiz.edu.tr.calendar.views.CalendarFragment;
@@ -42,7 +39,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
     private CalendarFragment calendarFragment;
     private AlertDialog alertDialog;
 
-    public EventAdapter(Context context, List<Event> eventList, AlertDialog alertDialog, CalendarFragment calendarFragment, AlertDialog dialog) {
+    public EventAdapter(Context context, List<Event> eventList, AlertDialog alertDialog, CalendarFragment calendarFragment) {
         this.context = context;
         this.eventList = eventList;
         this.calendarFragment = calendarFragment;

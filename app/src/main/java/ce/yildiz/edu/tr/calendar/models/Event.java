@@ -10,6 +10,7 @@ public class Event {
     private String year;
     private boolean isNotify;
     private int notificationID;
+    private String notificationPreference;
     private String note;
     private int color;
     private String location;
@@ -78,6 +79,14 @@ public class Event {
 
     public void setNotificationID(int notificationID) {
         this.notificationID = notificationID;
+    }
+
+    public String getNotificationPreference() {
+        return notificationPreference;
+    }
+
+    public void setNotificationPreference(String notificationPreference) {
+        this.notificationPreference = notificationPreference;
     }
 
     public String getNote() {

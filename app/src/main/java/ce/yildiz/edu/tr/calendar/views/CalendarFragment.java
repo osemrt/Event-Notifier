@@ -165,7 +165,7 @@ public class CalendarFragment extends Fragment implements View.OnClickListener, 
             savedEventsRecyclerView.setHasFixedSize(true);
             RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(view.getContext());
             savedEventsRecyclerView.setLayoutManager(layoutManager);
-            EventAdapter eventAdapter = new EventAdapter(getActivity(), eventsByDate, alertDialog, this, alertDialog);
+            EventAdapter eventAdapter = new EventAdapter(getActivity(), eventsByDate, alertDialog, this);
             savedEventsRecyclerView.setAdapter(eventAdapter);
             eventAdapter.notifyDataSetChanged();
             addNewEventButton.setText("ADD EVENT");

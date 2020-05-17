@@ -12,11 +12,18 @@ import java.util.Locale;
 
 public class Utils {
 
-    public static enum Period {
+    public enum Period {
         TODAY,
         NEXT_7_DAYS,
         NEXT_30_DAYS,
         ALL_EVENTS
+    }
+
+    public enum NotificationPreference {
+        TEN_MINUTES_BEFORE,
+        ONE_HOUR_BEFORE,
+        ONE_DAY_BEFORE,
+        AT_THE_TIME_OF_EVENT
     }
 
     public static final int MAX_CALENDAR_DAYS = 42;
