@@ -59,4 +59,5 @@
     <string name="title_activity_maps">Map</string>
     <string name="default_info_title">Istanbul, Turkey</string>
     <string name="default_info_snippet">Current Location</string>
+    <string name="select_this_location">Select this location</string>
 </resources>

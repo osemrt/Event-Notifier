@@ -22,6 +22,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.DatePicker;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
@@ -37,6 +38,10 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
@@ -85,12 +90,18 @@ public class NewEventActivity extends AppCompatActivity {
     private TextInputLayout eventNoteTextInputLayout;
     private TextView pickNoteColorTextView;
     private TextInputLayout eventLocationTextInputLayout;
+    private ImageButton locationImageButton;
     private TextInputLayout phoneNumberTextInputLayout;
     private TextInputLayout mailTextInputLayout;
     private TextInputEditText mailTextInputEditText;
     private Switch mailSwitch;
 
+    private final int MAPS_ACTIVITY_REQUEST = 1;
+
     private DBHelper dbHelper;
+
+    private FusedLocationProviderClient fusedLocationClient;
+    private double wayLatitude = 0.0, wayLongitude = 0.0;
 
     private AlertDialog notificationAlertDialog;
     private AlertDialog repetitionAlertDialog;
@@ -108,6 +119,7 @@ public class NewEventActivity extends AppCompatActivity {
         setContentView(R.layout.activity_add_new_event);
 
         notifications = new ArrayList<>();
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
         defineViews();
         initViews();
@@ -131,6 +143,7 @@ public class NewEventActivity extends AppCompatActivity {
         eventNoteTextInputLayout = (TextInputLayout) findViewById(R.id.AddNewEventActivity_TextInputLayout_Note);
         pickNoteColorTextView = (TextView) findViewById(R.id.AddNewEventActivity_TextView_PickNoteColor);
         eventLocationTextInputLayout = (TextInputLayout) findViewById(R.id.AddNewEventActivity_TextInputLayout_Location);
+        locationImageButton = (ImageButton) findViewById(R.id.AddNewEventActivity_ImageButton_Location);
         phoneNumberTextInputLayout = (TextInputLayout) findViewById(R.id.AddNewEventActivity_TextInputLayout_PhoneNumber);
         mailTextInputLayout = (TextInputLayout) findViewById(R.id.AddNewEventActivity_TextInputLayout_Mail);
         mailTextInputEditText = (TextInputEditText) findViewById(R.id.AddNewEventActivity_TextInputEditText_Mail);
@@ -267,6 +280,13 @@ public class NewEventActivity extends AppCompatActivity {
             }
         });
 
+        locationImageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivityForResult(new Intent(getApplicationContext(), MapsActivity.class), MAPS_ACTIVITY_REQUEST);
+            }
+        });
+
         mailSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
@@ -281,6 +301,11 @@ public class NewEventActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+
+    public void getLocation(View view) {
+
     }
 
 
@@ -505,7 +530,6 @@ public class NewEventActivity extends AppCompatActivity {
         alarmManager.cancel(pendingIntent);
     }
 
-
     private class SaveEventAsyncTask extends AsyncTask<Event, Void, Void> {
 
         @Override
@@ -529,5 +553,18 @@ public class NewEventActivity extends AppCompatActivity {
             setResult(RESULT_OK);
             finish();
         }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (requestCode == MAPS_ACTIVITY_REQUEST) {
+            if (resultCode == RESULT_OK) {
+                eventLocationTextInputLayout.getEditText().setText(data.getStringExtra("address"));
+
+            } else {
+                super.onActivityResult(requestCode, resultCode, data);
+            }
+        }
+
     }
 }

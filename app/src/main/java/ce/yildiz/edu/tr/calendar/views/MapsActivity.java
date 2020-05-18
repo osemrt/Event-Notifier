@@ -1,12 +1,12 @@
 package ce.yildiz.edu.tr.calendar.views;
 
-import android.content.Context;
+import android.app.Activity;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -16,7 +16,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
-import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -30,10 +30,10 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
-import com.google.android.libraries.places.api.model.PlaceLikelihood;
-import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest;
-import com.google.android.libraries.places.api.net.FindCurrentPlaceResponse;
+import com.google.android.libraries.places.api.model.TypeFilter;
 import com.google.android.libraries.places.api.net.PlacesClient;
+import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
+import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -60,15 +60,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private boolean mLocationPermissionGranted;
 
-    private Button selectButton;
+    private Button selectLocationButton;
 
     private GoogleMap mMap;
     private Geocoder geocoder;
+    private Address address;
+    private AutocompleteSupportFragment autocompleteFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+
+        // Prompt the user for permission.
+        getLocationPermission();
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.MapsActivity_Fragment_Map);
@@ -79,6 +84,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Places.initialize(getApplicationContext(), apiKey);
         mPlacesClient = Places.createClient(this);
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+
+        // Initialize the AutocompleteSupportFragment.
+        autocompleteFragment = (AutocompleteSupportFragment) getSupportFragmentManager().findFragmentById(R.id.MapsActivity_Fragment_Autocomplete);
+
+        // Specify the types of place data to return.
+        autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME));
+
+        autocompleteFragment.setTypeFilter(TypeFilter.ADDRESS);
+        autocompleteFragment.setCountries("TR");
 
         geocoder = new Geocoder(this);
 
@@ -103,9 +117,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Enable the zoom controls for the map
         mMap.getUiSettings().setZoomControlsEnabled(true);
 
-        // Prompt the user for permission.
-        getLocationPermission();
-
         defineListeners();
 
         getDeviceLocation();
@@ -113,15 +124,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
     private void defineViews() {
-        selectButton = (Button) findViewById(R.id.MapsActivity_Button_Select);
+        selectLocationButton = (Button) findViewById(R.id.MapsActivity_Button_SelectLocation);
     }
 
     private void defineListeners() {
-        selectButton.setOnClickListener(new View.OnClickListener() {
+        selectLocationButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-
+                Intent returnIntent = new Intent();
+                returnIntent.putExtra("address", address.getAddressLine(0));
+                setResult(Activity.RESULT_OK, returnIntent);
+                finish();
 
             }
         });
@@ -130,12 +143,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onMapClick(LatLng latLng) {
                 Log.i(TAG, latLng.toString());
+                Log.i(TAG, "onMapClick: ");
                 mMap.addMarker(new MarkerOptions().position(latLng));
                 try {
                     mMap.clear();
                     List<Address> addresses = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
                     if (!addresses.isEmpty()) {
-                        Address address = addresses.get(0);
+                        address = addresses.get(0);
                         String streetAddress = address.getAddressLine(0);
                         Log.i(TAG, streetAddress);
 
@@ -168,7 +182,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 try {
                     List<Address> addresses = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
-                    if(!addresses.isEmpty()){
+                    if (!addresses.isEmpty()) {
                         Address address = addresses.get(0);
                         String addressString = address.getAddressLine(0);
                         marker.setTitle(addressString);
@@ -177,6 +191,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     e.printStackTrace();
                 }
 
+            }
+        });
+
+        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+            @Override
+            public void onPlaceSelected(Place place) {
+                // TODO: Get info about the selected place.
+                Log.i(TAG, "Place: " + place.getName() + ", " + place.getId());
+            }
+
+            @Override
+            public void onError(Status status) {
+                // TODO: Handle the error.
+                Log.i(TAG, "An error occurred: " + status);
             }
         });
     }
@@ -211,72 +239,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-//    private void getCurrentPlaceLikelihoods() {
-//        // Use fields to define the data types to return.
-//        List<Place.Field> placeFields = Arrays.asList(Place.Field.NAME, Place.Field.ADDRESS,
-//                Place.Field.LAT_LNG);
-//
-//        // Get the likely places - that is, the businesses and other points of interest that
-//        // are the best match for the device's current location.
-//        @SuppressWarnings("MissingPermission") final FindCurrentPlaceRequest request =
-//                FindCurrentPlaceRequest.builder(placeFields).build();
-//        Task<FindCurrentPlaceResponse> placeResponse = mPlacesClient.findCurrentPlace(request);
-//        placeResponse.addOnCompleteListener(this,
-//                new OnCompleteListener<FindCurrentPlaceResponse>() {
-//                    @Override
-//                    public void onComplete(@NonNull Task<FindCurrentPlaceResponse> task) {
-//                        if (task.isSuccessful()) {
-//                            FindCurrentPlaceResponse response = task.getResult();
-//                            // Set the count, handling cases where less than 5 entries are returned.
-//                            int count;
-//                            if (response.getPlaceLikelihoods().size() < M_MAX_ENTRIES) {
-//                                count = response.getPlaceLikelihoods().size();
-//                            } else {
-//                                count = M_MAX_ENTRIES;
-//                            }
-//
-//                            int i = 0;
-//                            mLikelyPlaceNames = new String[count];
-//                            mLikelyPlaceAddresses = new String[count];
-//                            mLikelyPlaceAttributions = new String[count];
-//                            mLikelyPlaceLatLngs = new LatLng[count];
-//
-//                            for (PlaceLikelihood placeLikelihood : response.getPlaceLikelihoods()) {
-//                                Place currPlace = placeLikelihood.getPlace();
-//                                mLikelyPlaceNames[i] = currPlace.getName();
-//                                mLikelyPlaceAddresses[i] = currPlace.getAddress();
-//                                mLikelyPlaceAttributions[i] = (currPlace.getAttributions() == null) ?
-//                                        null : TextUtils.join(" ", currPlace.getAttributions());
-//                                mLikelyPlaceLatLngs[i] = currPlace.getLatLng();
-//
-//                                String currLatLng = (mLikelyPlaceLatLngs[i] == null) ?
-//                                        "" : mLikelyPlaceLatLngs[i].toString();
-//
-//                                Log.i(TAG, String.format("Place " + currPlace.getName()
-//                                        + " has likelihood: " + placeLikelihood.getLikelihood()
-//                                        + " at " + currLatLng));
-//
-//                                i++;
-//                                if (i > (count - 1)) {
-//                                    break;
-//                                }
-//                            }
-//
-//
-//                            // COMMENTED OUT UNTIL WE DEFINE THE METHOD
-//                            // Populate the ListView
-//                            // fillPlacesList();
-//                        } else {
-//                            Exception exception = task.getException();
-//                            if (exception instanceof ApiException) {
-//                                ApiException apiException = (ApiException) exception;
-//                                Log.e(TAG, "Place not found: " + apiException.getStatusCode());
-//                            }
-//                        }
-//                    }
-//                });
-//    }
-
     private void getDeviceLocation() {
         /*
          * Get the best and most recent location of the device, which may be null in rare
@@ -291,9 +253,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         if (task.isSuccessful()) {
                             // Set the map's camera position to the current location of the device.
                             mLastKnownLocation = task.getResult();
-                            if(mLastKnownLocation==null){
+                            if (mLastKnownLocation == null) {
                                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mDefaultLocation, DEFAULT_ZOOM));
-                            }else{
+                            } else {
                                 Log.d(TAG, "Latitude: " + mLastKnownLocation.getLatitude());
                                 Log.d(TAG, "Longitude: " + mLastKnownLocation.getLongitude());
                                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude()), DEFAULT_ZOOM));

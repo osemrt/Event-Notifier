@@ -38,12 +38,7 @@
 
         <activity
             android:name=".views.MapsActivity"
-            android:label="@string/title_activity_maps">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:label="@string/title_activity_maps" />
 
         <receiver
             android:name=".other.AlarmReceiver"
@@ -52,7 +47,12 @@
 
         <activity android:name=".views.NewEventActivity" />
         <activity android:name=".views.EditEventActivity" />
-        <activity android:name=".views.MainActivity" />
+        <activity android:name=".views.MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>
