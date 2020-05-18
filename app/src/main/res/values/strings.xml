@@ -57,6 +57,6 @@
     <string name="yearly">Yearly</string>
     <string name="one_time">One-Time</string>
     <string name="title_activity_maps">Map</string>
-    <string name="default_info_title">Error</string>
-    <string name="default_info_snippet">An error has ocurred!</string>
+    <string name="default_info_title">Istanbul, Turkey</string>
+    <string name="default_info_snippet">Current Location</string>
 </resources>
