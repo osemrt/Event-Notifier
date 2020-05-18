@@ -60,4 +60,8 @@
     <string name="default_info_title">Istanbul, Turkey</string>
     <string name="default_info_snippet">Current Location</string>
     <string name="select_this_location">Select this location</string>
+    <string name="default_ringtone">Ringtone</string>
+    <string name="default_reminder_time">Reminder Time</string>
+    <string name="default_reminder_frequency">Reminder Frequency</string>
+    <string name="app_theme">App Theme</string>
 </resources>
