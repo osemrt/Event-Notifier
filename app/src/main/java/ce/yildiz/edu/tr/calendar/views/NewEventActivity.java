@@ -77,6 +77,7 @@ public class NewEventActivity extends AppCompatActivity {
     private TextView setDateTextView;
     private LinearLayout setTimeLinearLayout;
     private TextView setTimeTextView;
+    private Button setDurationButton;
     private RecyclerView notificationsRecyclerView;
     private TextView addNotificationTextView;
     private TextView repeatTextView;
@@ -137,6 +138,7 @@ public class NewEventActivity extends AppCompatActivity {
         setDateTextView = (TextView) findViewById(R.id.AddNewEventActivity_TexView_SetDate);
         setTimeLinearLayout = (LinearLayout) findViewById(R.id.AddNewEventActivity_LinearLayout_SetTime);
         setTimeTextView = (TextView) findViewById(R.id.AddNewEventActivity_TexView_SetTime);
+        setDurationButton = (Button) findViewById(R.id.AddNewEventActivity_Button_Duration);
         notificationsRecyclerView = (RecyclerView) findViewById(R.id.AddNewEventActivity_RecyclerView_Notifications);
         repeatTextView = (TextView) findViewById(R.id.AddNewEventActivity_TextView_Repeat);
         addNotificationTextView = (TextView) findViewById(R.id.AddNewEventActivity_TextView_Add_Notification);
@@ -204,6 +206,13 @@ public class NewEventActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 setTime(view);
+            }
+        });
+
+        setDurationButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                setDuration(view);
             }
         });
 
@@ -303,9 +312,17 @@ public class NewEventActivity extends AppCompatActivity {
         });
     }
 
+    private void setDuration(View view) {
+        Calendar calendar = Calendar.getInstance();
+        TimePickerDialog timePickerDialog = new TimePickerDialog(this, R.style.DurationPickerTheme, new TimePickerDialog.OnTimeSetListener() {
+            @Override
+            public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                setDurationButton.setText("DURATION: " + Integer.toString(hourOfDay) + " HOURS " + Integer.toString(minute) + " MINUTES");
+            }
+        }, 0, 0, true);
+        timePickerDialog.setTitle("Duration");
 
-    public void getLocation(View view) {
-
+        timePickerDialog.show();
     }
 
 
@@ -330,7 +347,6 @@ public class NewEventActivity extends AppCompatActivity {
 
             }
         }, hour, minute, false);
-
         timePickerDialog.show();
 
     }

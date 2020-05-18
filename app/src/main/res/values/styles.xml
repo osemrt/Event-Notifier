@@ -26,5 +26,12 @@
         <item name="android:textColorHint">@color/white</item>
         <item name="android:textColorPrimary">@color/white</item>
     </style>
+
+    <style name="DurationPickerTheme" parent="@android:style/Theme.Holo.Light.Dialog">
+        <item name="android:textColor">@color/darkIndigo</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:textColorPrimary">@color/darkIndigo</item>
+    </style>
     
 </resources>
