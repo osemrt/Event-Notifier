@@ -6,7 +6,6 @@
     android:background="@color/white"
     android:orientation="vertical">
 
-
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/AddNewEventActivity_Toolbar"
         android:layout_width="match_parent"
@@ -239,17 +238,6 @@
 
                         </LinearLayout>
 
-                        <!--                        <Button-->
-                        <!--                            android:id="@+id/AddNewEventActivity_Button_Duration"-->
-                        <!--                            android:layout_width="match_parent"-->
-                        <!--                            android:layout_height="wrap_content"-->
-                        <!--                            android:layout_marginLeft="20dp"-->
-                        <!--                            android:layout_marginRight="20dp"-->
-                        <!--                            android:layout_marginBottom="20dp"-->
-                        <!--                            android:background="@color/darkIndigo"-->
-                        <!--                            android:text="@string/duration_0_hours_0_minutes"-->
-                        <!--                            android:textColor="@color/white" />-->
-
                     </LinearLayout>
 
                     <View
@@ -261,7 +249,10 @@
                         android:id="@+id/AddNewEventActivity_LinearLayout_Reminder"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_margin="20dp"
+                        android:layout_marginStart="20dp"
+                        android:layout_marginTop="20dp"
+                        android:layout_marginEnd="20dp"
+                        android:layout_marginBottom="5dp"
                         android:gravity="center"
                         android:orientation="horizontal">
 
@@ -269,8 +260,8 @@
                             android:id="@+id/AddNewEventActivity_ImageView_Notification"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginRight="10dp"
-                            app:srcCompat="@drawable/ic_notifications_active_black_24dp" />
+                            android:layout_marginEnd="10dp"
+                            app:srcCompat="@drawable/ic_add_alert" />
 
                         <RelativeLayout
                             android:layout_width="match_parent"
@@ -278,21 +269,62 @@
                             android:layout_margin="10dp">
 
                             <TextView
-                                android:id="@+id/AddNewEventActivity_TextView_Notification"
+                                android:id="@+id/AddNewEventActivity_TextView_Add_Notification"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="@string/at_the_time_of_event"
+                                android:text="@string/add_notification"
                                 android:textColor="@color/black"
                                 android:textSize="20sp"
                                 android:textStyle="bold" />
 
-                            <Switch
-                                android:id="@+id/AddNewEventActivity_Switch_Notification"
+
+                        </RelativeLayout>
+
+
+                    </LinearLayout>
+
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/AddNewEventActivity_RecyclerView_Notifications"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="20dp"
+                        android:layout_marginEnd="20dp" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginTop="20dp"
+                        android:background="@color/Grey" />
+
+                    <LinearLayout
+                        android:id="@+id/AddNewEventActivity_LinearLayout_"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_margin="20dp"
+                        android:gravity="center"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:id="@+id/AddNewEventActivity_ImageView_Repeat"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginRight="10dp"
+                            app:srcCompat="@drawable/ic_repeat" />
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="10dp">
+
+                            <TextView
+                                android:id="@+id/AddNewEventActivity_TextView_Repeat"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_alignParentEnd="true"
-                                android:checked="true"
-                                android:theme="@style/EditScreenTextInputLayoutStyleDark" />
+                                android:text="@string/one_time_event"
+                                android:textColor="@color/black"
+                                android:textSize="20sp"
+                                android:textStyle="bold" />
 
 
                         </RelativeLayout>
@@ -406,19 +438,22 @@
                         android:layout_height="match_parent"
                         android:layout_margin="20dp"
                         android:gravity="center"
-                        android:orientation="horizontal">
+                        android:orientation="horizontal"
+                        android:weightSum="1">
 
                         <ImageView
                             android:id="@+id/AddNewEventActivity_ImageView_Location"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginRight="10dp"
+                            android:layout_marginEnd="10dp"
+                            android:layout_weight="0"
                             app:srcCompat="@drawable/ic_location_white" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginRight="8dp">
+                            android:layout_marginEnd="10dp"
+                            android:layout_weight="1">
 
                             <com.google.android.material.textfield.TextInputLayout
                                 android:id="@+id/AddNewEventActivity_TextInputLayout_Location"
@@ -436,7 +471,17 @@
                                     android:theme="@style/EditScreenTextInputLayoutStyleDark" />
                             </com.google.android.material.textfield.TextInputLayout>
 
+
                         </LinearLayout>
+
+                        <ImageButton
+                            android:id="@+id/AddNewEventActivity_ImageButton_Location"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginRight="8dp"
+                            android:layout_weight="0"
+                            android:background="@android:color/transparent"
+                            app:srcCompat="@drawable/ic_map" />
 
 
                     </LinearLayout>

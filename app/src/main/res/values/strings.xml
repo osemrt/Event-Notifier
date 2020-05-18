@@ -16,7 +16,6 @@
     <string name="event">Event</string>
     <string name="event_title">Event Title</string>
     <string name="add_a_location">Add a location</string>
-    <string name="at_the_time_of_event">At the time of event</string>
     <string name="add_people">Add People</string>
     <string name="add">Add</string>
     <string name="add_from_contacts">Add From Contacts</string>
@@ -40,4 +39,21 @@
     <string name="next_7_days">Next 7 days</string>
     <string name="next_30_days">Next 30 days</string>
     <string name="all_events">All Events</string>
+    <string name="notification_preference">Notification Preference</string>
+    <string name="_10_minutes_before">10 minutes before</string>
+    <string name="_1_hour_before">1 hour before</string>
+    <string name="_1_day_before">1 day before</string>
+    <string name="at_the_time_of_event">At the time of event</string>
+    <string name="back">BACK</string>
+    <string name="share">Share</string>
+    <string name="mail">Mail</string>
+    <string name="ok">OK</string>
+    <string name="one_time_event">One-time event</string>
+    <string name="add_notification">Add Notification</string>
+    <string name="repetition">Repetition</string>
+    <string name="daily">Daily</string>
+    <string name="monthly">Monthly</string>
+    <string name="weekly">Weekly</string>
+    <string name="yearly">Yearly</string>
+    <string name="one_time">One-Time</string>
 </resources>

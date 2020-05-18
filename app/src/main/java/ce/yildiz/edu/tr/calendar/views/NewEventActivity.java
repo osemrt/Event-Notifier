@@ -2,10 +2,12 @@ package ce.yildiz.edu.tr.calendar.views;
 
 import android.annotation.SuppressLint;
 import android.app.AlarmManager;
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -13,13 +15,17 @@ import android.graphics.drawable.GradientDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.TimePicker;
@@ -28,6 +34,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -37,14 +45,17 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
 import ce.yildiz.edu.tr.calendar.R;
 import ce.yildiz.edu.tr.calendar.Utils;
+import ce.yildiz.edu.tr.calendar.adapters.NotificationAdapter;
 import ce.yildiz.edu.tr.calendar.database.DBHelper;
 import ce.yildiz.edu.tr.calendar.database.DBTables;
 import ce.yildiz.edu.tr.calendar.models.Event;
+import ce.yildiz.edu.tr.calendar.models.Notification;
 import ce.yildiz.edu.tr.calendar.other.AlarmReceiver;
 import petrov.kristiyan.colorpicker.ColorPicker;
 
@@ -61,8 +72,16 @@ public class NewEventActivity extends AppCompatActivity {
     private TextView setDateTextView;
     private LinearLayout setTimeLinearLayout;
     private TextView setTimeTextView;
-    private TextView notificationTextView;
-    private Switch notifySwitch;
+    private RecyclerView notificationsRecyclerView;
+    private TextView addNotificationTextView;
+    private TextView repeatTextView;
+    private RadioGroup notificationPreferenceRadioGroup;
+    private RadioGroup repetitionPreferenceRadioGroup;
+    private RadioButton selectedPreferenceRadioButton;
+    private View notificationDialogView;
+    private View eventRepetitionDialogView;
+    private Button notificationBackButton;
+    private Button repetitionBackButton;
     private TextInputLayout eventNoteTextInputLayout;
     private TextView pickNoteColorTextView;
     private TextInputLayout eventLocationTextInputLayout;
@@ -73,14 +92,22 @@ public class NewEventActivity extends AppCompatActivity {
 
     private DBHelper dbHelper;
 
+    private AlertDialog notificationAlertDialog;
+    private AlertDialog repetitionAlertDialog;
+
     private int alarmYear, alarmMonth, alarmDay, alarmHour, alarmMinute;
 
     private int notColor;
+
+    private List<Notification> notifications;
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_new_event);
+
+        notifications = new ArrayList<>();
 
         defineViews();
         initViews();
@@ -98,8 +125,9 @@ public class NewEventActivity extends AppCompatActivity {
         setDateTextView = (TextView) findViewById(R.id.AddNewEventActivity_TexView_SetDate);
         setTimeLinearLayout = (LinearLayout) findViewById(R.id.AddNewEventActivity_LinearLayout_SetTime);
         setTimeTextView = (TextView) findViewById(R.id.AddNewEventActivity_TexView_SetTime);
-        notificationTextView = (TextView) findViewById(R.id.AddNewEventActivity_TextView_Notification);
-        notifySwitch = (Switch) findViewById(R.id.AddNewEventActivity_Switch_Notification);
+        notificationsRecyclerView = (RecyclerView) findViewById(R.id.AddNewEventActivity_RecyclerView_Notifications);
+        repeatTextView = (TextView) findViewById(R.id.AddNewEventActivity_TextView_Repeat);
+        addNotificationTextView = (TextView) findViewById(R.id.AddNewEventActivity_TextView_Add_Notification);
         eventNoteTextInputLayout = (TextInputLayout) findViewById(R.id.AddNewEventActivity_TextInputLayout_Note);
         pickNoteColorTextView = (TextView) findViewById(R.id.AddNewEventActivity_TextView_PickNoteColor);
         eventLocationTextInputLayout = (TextInputLayout) findViewById(R.id.AddNewEventActivity_TextInputLayout_Location);
@@ -110,6 +138,20 @@ public class NewEventActivity extends AppCompatActivity {
 
         progressBar = (ProgressBar) findViewById(R.id.AddNewEventActivity_ProgressBar);
         toolbar = (Toolbar) findViewById(R.id.AddNewEventActivity_Toolbar);
+
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setCancelable(true);
+        notificationDialogView = LayoutInflater.from(getApplicationContext().getApplicationContext()).inflate(R.layout.layout_alert_dialog_notification, null, false);
+        eventRepetitionDialogView = LayoutInflater.from(getApplicationContext().getApplicationContext()).inflate(R.layout.layout_alert_dialog_repeat, null, false);
+        repetitionPreferenceRadioGroup = (RadioGroup) eventRepetitionDialogView.findViewById(R.id.AlertDialogLayout_Repeat_RadioGroup_RepeatPreference);
+        repetitionBackButton = (Button) eventRepetitionDialogView.findViewById(R.id.AlertDialogLayout_Repeat_Button_Back);
+        notificationPreferenceRadioGroup = (RadioGroup) notificationDialogView.findViewById(R.id.AlertDialogLayout_Notification_RadioGroup_NotificationPreference);
+        notificationBackButton = (Button) notificationDialogView.findViewById(R.id.AlertDialogLayout_Notification_Button_Back);
+        builder.setView(notificationDialogView);
+        notificationAlertDialog = builder.create();
+        builder.setView(eventRepetitionDialogView);
+        repetitionAlertDialog = builder.create();
+
     }
 
     @SuppressLint("ResourceType")
@@ -152,23 +194,69 @@ public class NewEventActivity extends AppCompatActivity {
             }
         });
 
-        notificationTextView.setOnClickListener(new View.OnClickListener() {
+        addNotificationTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // TODO: Implement alert dialog
+                notificationAlertDialog.show();
             }
         });
 
-        notifySwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        notificationAlertDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
             @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
-                if (isChecked) {
-                    notificationTextView.setText("At the time of event");
-                    notificationTextView.setEnabled(true);
-                } else {
-                    notificationTextView.setText("Don't notify me");
-                    notificationTextView.setEnabled(false);
-                }
+            public void onCancel(DialogInterface dialogInterface) {
+                int selectedId = notificationPreferenceRadioGroup.getCheckedRadioButtonId();
+                selectedPreferenceRadioButton = (RadioButton) notificationDialogView.findViewById(selectedId);
+                notifications.add(new Notification(selectedPreferenceRadioButton.getText().toString()));
+                setUpRecyclerView();
+            }
+        });
+
+        ((RadioGroup) notificationDialogView.findViewById(R.id.AlertDialogLayout_Notification_RadioGroup_NotificationPreference)).setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup radioGroup, int buttonId) {
+                selectedPreferenceRadioButton = (RadioButton) notificationDialogView.findViewById(buttonId);
+                notifications.add(new Notification(selectedPreferenceRadioButton.getText().toString()));
+                notificationAlertDialog.dismiss();
+                setUpRecyclerView();
+            }
+        });
+
+        ((RadioGroup) eventRepetitionDialogView.findViewById(R.id.AlertDialogLayout_Repeat_RadioGroup_RepeatPreference)).setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup radioGroup, int buttonId) {
+                selectedPreferenceRadioButton = (RadioButton) eventRepetitionDialogView.findViewById(buttonId);
+                repeatTextView.setText("Repeat " + selectedPreferenceRadioButton.getText().toString());
+                repetitionAlertDialog.dismiss();
+            }
+        });
+
+        notificationBackButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                notificationAlertDialog.dismiss();
+            }
+        });
+
+        repeatTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                repetitionAlertDialog.show();
+            }
+        });
+
+        repetitionBackButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                repetitionAlertDialog.dismiss();
+            }
+        });
+
+        repetitionAlertDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialogInterface) {
+                int selectedId = repetitionPreferenceRadioGroup.getCheckedRadioButtonId();
+                selectedPreferenceRadioButton = (RadioButton) repetitionAlertDialog.findViewById(selectedId);
+                repeatTextView.setText(selectedPreferenceRadioButton.getText().toString());
             }
         });
 
@@ -272,6 +360,16 @@ public class NewEventActivity extends AppCompatActivity {
                 }).show();
     }
 
+    private void setUpRecyclerView() {
+        notificationsRecyclerView.setHasFixedSize(true);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
+        layoutManager.setMeasurementCacheEnabled(false);
+        notificationsRecyclerView.setLayoutManager(layoutManager);
+        NotificationAdapter notificationAdapter = new NotificationAdapter(this, notifications);
+        notificationsRecyclerView.setAdapter(notificationAdapter);
+
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -302,19 +400,21 @@ public class NewEventActivity extends AppCompatActivity {
                     event.setMonth(Utils.monthFormat.format(aDate));
                     event.setYear(Utils.yearFormat.format(aDate));
                     event.setTime(setTimeTextView.getText().toString());
-                    event.setNotify(notifySwitch.isChecked());
                     int notificationID = getNotificationID(event.getTitle(), event.getDate(), event.getTime());
                     event.setNotificationID(notificationID);
+                    cancelAlarm(notificationID);
                     event.setNote(eventNoteTextInputLayout.getEditText().getText().toString().trim());
                     if (notColor == 0) {
                         notColor = getResources().getInteger(R.color.red);
                     }
+
                     event.setColor(notColor);
                     event.setLocation(eventLocationTextInputLayout.getEditText().getText().toString().trim());
                     event.setPhoneNumber(phoneNumberTextInputLayout.getEditText().getText().toString().trim());
                     event.setEmail(mailTextInputLayout.getEditText().getText().toString().trim());
 
                     if (event.isNotify()) {
+                        //checkNotificationPreference();
                         Calendar calendar = Calendar.getInstance();
                         calendar.set(alarmYear, alarmMonth, alarmDay, alarmHour, alarmMinute, 0);
                         setAlarm(calendar, event.getTitle(), event.getTime(), event.getNotificationID());
@@ -327,6 +427,30 @@ public class NewEventActivity extends AppCompatActivity {
         }
 
         return true;
+    }
+
+    private void checkNotificationPreference() {
+        switch (selectedPreferenceRadioButton.getId()) {
+            case R.id.AlertDialogLayout_Notification_RadioButton_10minBefore:
+                alarmMinute -= 10;
+                break;
+            case R.id.AlertDialogLayout_Notification_RadioButton_1hourBefore:
+                alarmHour -= 1;
+                break;
+            case R.id.AlertDialogLayout_Notification_RadioButton_1dayBefore:
+                alarmDay -= 1;
+                break;
+        }
+    }
+
+    private String getNotificationPreference() {
+//        switch (notificationTextView.getText().toString()){
+//            case TEN_MINUTES_BEFORE.toString().toLowerCase():
+//
+//
+//        }
+        return null;
+
     }
 
 
@@ -364,6 +488,7 @@ public class NewEventActivity extends AppCompatActivity {
     }
 
     private void setAlarm(Calendar calendar, String eventTitle, String time, int notificationID) {
+        // TODO: If the time is passed then don't set alarm
         Intent intent = new Intent(this, AlarmReceiver.class);
         intent.putExtra("eventTitle", eventTitle);
         intent.putExtra("time", time);

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:weightSum="1">
+
+    <TextView
+        android:id="@+id/AlertDialogLayout_Notification_TextView_Title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0"
+        android:background="@color/darkIndigo"
+        android:gravity="center"
+        android:padding="10dp"
+        android:text="@string/notification_preference"
+        android:textColor="@color/white"
+        android:textSize="24sp"
+        android:textStyle="bold" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="30dp"
+        android:orientation="vertical">
+
+
+        <RadioGroup
+            android:id="@+id/AlertDialogLayout_Notification_RadioGroup_NotificationPreference"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <RadioButton
+                android:id="@+id/AlertDialogLayout_Notification_RadioButton_10minBefore"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/_10_minutes_before"
+                android:textColorLink="@color/darkIndigo"
+                android:textSize="18sp" />
+
+            <RadioButton
+                android:id="@+id/AlertDialogLayout_Notification_RadioButton_1hourBefore"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/_1_hour_before"
+                android:textSize="18sp" />
+
+            <RadioButton
+                android:id="@+id/AlertDialogLayout_Notification_RadioButton_1dayBefore"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/_1_day_before"
+                android:textSize="18sp" />
+
+            <RadioButton
+                android:id="@+id/AlertDialogLayout_Notification_RadioButton_AtTheTimeOfEvent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="@string/at_the_time_of_event"
+                android:textSize="18sp" />
+        </RadioGroup>
+
+
+    </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/AlertDialogLayout_Notification_Button_Back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="40dp"
+            android:layout_marginBottom="20dp"
+            android:background="@android:color/transparent"
+            android:text="@string/back"
+            android:textColor="@color/darkIndigo"
+            android:textSize="16sp" />
+
+    </RelativeLayout>
+
+</LinearLayout>
