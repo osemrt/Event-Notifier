@@ -2,6 +2,7 @@ package ce.yildiz.edu.tr.calendar.views;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.icu.util.UniversalTimeScale;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,6 +17,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.text.ParseException;
@@ -26,6 +28,7 @@ import java.util.List;
 
 import ce.yildiz.edu.tr.calendar.R;
 import ce.yildiz.edu.tr.calendar.Utils;
+import ce.yildiz.edu.tr.calendar.adapters.UpcomingEventAdapter;
 import ce.yildiz.edu.tr.calendar.database.DBHelper;
 import ce.yildiz.edu.tr.calendar.database.DBTables;
 import ce.yildiz.edu.tr.calendar.models.Event;
@@ -52,14 +55,19 @@ public class UpcomingEventsFragment extends Fragment {
 
         dbHelper = new DBHelper(getActivity());
 
-        period = Utils.Period.NEXT_7_DAYS;
+        period = Utils.Period.TODAY;
+
 
         defineViews(view);
         initViews();
         defineListeners();
 
+
+
+
         return view;
     }
+
 
     private void defineViews(View view) {
         changePeriodImageButton = (ImageButton) view.findViewById(R.id.UpcomingEventsFragment_ImageButton_Period);
@@ -68,7 +76,8 @@ public class UpcomingEventsFragment extends Fragment {
     }
 
     private void initViews() {
-      
+        periodTextView.setText("Today");
+        setUpRecyclerView();
     }
 
     private void defineListeners() {
@@ -81,6 +90,8 @@ public class UpcomingEventsFragment extends Fragment {
                 inflater.inflate(R.menu.popup_period, popup.getMenu());
                 popup.setOnMenuItemClickListener(new MyMenuItemClickListener());
                 popup.show();
+
+                setUpRecyclerView();
             }
 
             class MyMenuItemClickListener implements PopupMenu.OnMenuItemClickListener {
@@ -105,12 +116,26 @@ public class UpcomingEventsFragment extends Fragment {
                             break;
                     }
 
+                    setUpRecyclerView();
+
                     return true;
                 }
             }
 
 
         });
+    }
+
+
+    public void setUpRecyclerView(){
+        todayDate = Utils.eventDateFormat.format(Calendar.getInstance().getTime());
+        eventsRecyclerView.setHasFixedSize(true);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
+        eventsRecyclerView.setLayoutManager(layoutManager);
+        UpcomingEventAdapter upcomingEventAdapter = new UpcomingEventAdapter(getActivity(), collectEvents(todayDate), this);
+        eventsRecyclerView.setAdapter(upcomingEventAdapter);
+        upcomingEventAdapter.notifyDataSetChanged();
+
     }
 
 
