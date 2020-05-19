@@ -2,20 +2,29 @@ package ce.yildiz.edu.tr.calendar.models;
 
 public class Event {
 
+    private int id;
     private String title;
     private boolean isAllDay;
     private String date;
     private String time;
     private String month;
     private String year;
+    private String duration;
     private boolean isNotify;
-    private int notificationID;
-    private String notificationPreference;
+    private String repetition;
     private String note;
     private int color;
     private String location;
     private String phoneNumber;
-    private String email;
+    private String mail;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public String getTitle() {
         return title;
@@ -65,6 +74,14 @@ public class Event {
         this.year = year;
     }
 
+    public String getDuration() {
+        return duration;
+    }
+
+    public void setDuration(String duration) {
+        this.duration = duration;
+    }
+
     public boolean isNotify() {
         return isNotify;
     }
@@ -73,20 +90,12 @@ public class Event {
         isNotify = notify;
     }
 
-    public int getNotificationID() {
-        return notificationID;
+    public String getRepetition() {
+        return repetition;
     }
 
-    public void setNotificationID(int notificationID) {
-        this.notificationID = notificationID;
-    }
-
-    public String getNotificationPreference() {
-        return notificationPreference;
-    }
-
-    public void setNotificationPreference(String notificationPreference) {
-        this.notificationPreference = notificationPreference;
+    public void setRepetition(String repetition) {
+        this.repetition = repetition;
     }
 
     public String getNote() {
@@ -121,11 +130,11 @@ public class Event {
         this.phoneNumber = phoneNumber;
     }
 
-    public String getEmail() {
-        return email;
+    public String getMail() {
+        return mail;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setMail(String mail) {
+        this.mail = mail;
     }
 }

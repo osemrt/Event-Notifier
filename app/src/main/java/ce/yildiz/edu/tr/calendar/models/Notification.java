@@ -2,17 +2,50 @@ package ce.yildiz.edu.tr.calendar.models;
 
 public class Notification {
 
-    private String reminderTime;
+    private int id;
+    private int eventId;
+    private int channelId;
+    private String time;
 
-    public Notification(String reminderTime) {
-        this.reminderTime = reminderTime;
+    public Notification(String time) {
+        this.time = time;
     }
 
-    public String getReminderTime() {
-        return reminderTime;
+    public Notification(int eventId, int channelId, String time) {
+        this.eventId = eventId;
+        this.channelId = channelId;
+        this.time = time;
     }
 
-    public void setReminderTime(String reminderTime) {
-        this.reminderTime = reminderTime;
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getEventId() {
+        return eventId;
+    }
+
+    public void setEventId(int eventId) {
+        this.eventId = eventId;
+    }
+
+    public int getChannelId() {
+        return channelId;
+    }
+
+    public void setChannelId(int channelId) {
+        this.channelId = channelId;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
     }
 }
