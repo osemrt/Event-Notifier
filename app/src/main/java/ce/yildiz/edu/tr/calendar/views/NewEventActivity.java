@@ -11,11 +11,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
 import android.graphics.drawable.GradientDrawable;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -42,8 +38,6 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
@@ -70,9 +64,10 @@ public class NewEventActivity extends AppCompatActivity {
 
     private final String TAG = this.getClass().getSimpleName();
 
+    private final int MAPS_ACTIVITY_REQUEST = 1;
+
     private Toolbar toolbar;
     private ProgressBar progressBar;
-
     private TextInputLayout eventTitleTextInputLayout;
     private Switch allDayEventSwitch;
     private LinearLayout setDateLinearLayout;
@@ -99,41 +94,29 @@ public class NewEventActivity extends AppCompatActivity {
     private TextInputEditText mailTextInputEditText;
     private Switch mailSwitch;
 
-    private final int MAPS_ACTIVITY_REQUEST = 1;
-
-    private DBHelper dbHelper;
-
-    private FusedLocationProviderClient fusedLocationClient;
-    private double wayLatitude = 0.0, wayLongitude = 0.0;
-
     private AlertDialog notificationAlertDialog;
     private AlertDialog repetitionAlertDialog;
-
     private int alarmYear, alarmMonth, alarmDay, alarmHour, alarmMinute;
 
     private int notColor;
-
+    private DBHelper dbHelper;
     private List<Notification> notifications;
-
     private Event event;
-
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_new_event);
+        setContentView(R.layout.activity_event);
 
         event = new Event();
         notifications = new ArrayList<>();
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        dbHelper = new DBHelper(this);
 
         defineViews();
         initViews();
         defineListeners();
 
-        dbHelper = new DBHelper(this);
         setSupportActionBar(toolbar);
-
     }
 
     private void defineViews() {
@@ -415,15 +398,12 @@ public class NewEventActivity extends AppCompatActivity {
 
     }
 
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.toolbar, menu);
         return true;
     }
 
-    @SuppressLint("ResourceType")
-    @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
@@ -431,22 +411,46 @@ public class NewEventActivity extends AppCompatActivity {
                 break;
             case R.id.ToolBar_Item_Save:
                 if (confirmInputs()) {
-
                     getViewValues();
-                    if (event.isNotify()) {
-//                        //checkNotificationPreference();
-//                        Calendar calendar = Calendar.getInstance();
-//                        calendar.set(alarmYear, alarmMonth, alarmDay, alarmHour, alarmMinute, 0);
-//                        setAlarm(calendar, event.getTitle(), event.getTime(), event.getNotificationID());
-                    }
-
                     new SaveAsyncTask().execute();
-
+                    if (event.isNotify()) {
+                        setAlarms();
+                    }
                 }
                 break;
         }
 
         return true;
+    }
+
+    private void setAlarms() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(alarmYear, alarmMonth, alarmDay, alarmHour, alarmMinute, 0);
+        for (Notification notification : notifications) {
+            Calendar aCal = (Calendar) calendar.clone();
+            switch (notification.getTime()) {
+                case "10 minutes before":
+                    aCal.add(Calendar.MINUTE, -10);
+                    break;
+                case "1 hour before":
+                    aCal.add(Calendar.HOUR_OF_DAY, -1);
+                    break;
+                case "1 day before":
+                    aCal.add(Calendar.DAY_OF_MONTH, -1);
+                    break;
+            }
+            setAlarm(aCal, event.getTitle(), event.getTime(), notification.getId());
+        }
+    }
+
+    private void setAlarm(Calendar calendar, String eventTitle, String time, int notificationId) {
+        Intent intent = new Intent(this, AlarmReceiver.class);
+        intent.putExtra("eventTitle", eventTitle);
+        intent.putExtra("time", time);
+        intent.putExtra("notificationId", notificationId);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, notificationId, intent, PendingIntent.FLAG_ONE_SHOT);
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
     }
 
     @SuppressLint("ResourceType")
@@ -477,41 +481,13 @@ public class NewEventActivity extends AppCompatActivity {
         event.setPhoneNumber(phoneNumberTextInputLayout.getEditText().getText().toString().trim());
         event.setMail(mailTextInputLayout.getEditText().getText().toString().trim());
 
-
     }
-
-    private void checkNotificationPreference() {
-        switch (selectedPreferenceRadioButton.getId()) {
-            case R.id.AlertDialogLayout_Notification_RadioButton_10minBefore:
-                alarmMinute -= 10;
-                break;
-            case R.id.AlertDialogLayout_Notification_RadioButton_1hourBefore:
-                alarmHour -= 1;
-                break;
-            case R.id.AlertDialogLayout_Notification_RadioButton_1dayBefore:
-                alarmDay -= 1;
-                break;
-        }
-    }
-
-    private String getNotificationPreference() {
-//        switch (notificationTextView.getText().toString()){
-//            case TEN_MINUTES_BEFORE.toString().toLowerCase():
-//
-//
-//        }
-        return null;
-
-    }
-
 
     private boolean confirmInputs() {
         if (validateEventTitle()) {
             return true;
         }
-
         return false;
-
     }
 
     private boolean validateEventTitle() {
@@ -523,38 +499,6 @@ public class NewEventActivity extends AppCompatActivity {
             eventTitleTextInputLayout.setError(null);
             return true;
         }
-    }
-
-
-    private int getNotificationID(String eventTitle, String date, String time) {
-//        int code = 0;
-//        SQLiteDatabase sqLiteDatabase = dbHelper.getReadableDatabase();
-//        Cursor cursor = dbHelper.readNotification(sqLiteDatabase, eventTitle, date, time);
-//        while (cursor.moveToNext()) {
-//            code = cursor.getInt(cursor.getColumnIndex(DBTables.NOTIFICATION_ID));
-//        }
-//        cursor.close();
-//        sqLiteDatabase.close();
-//        return code;
-        return 0;
-    }
-
-    private void setAlarm(Calendar calendar, String eventTitle, String time, int notificationID) {
-        // TODO: If the time is passed then don't set alarm
-        Intent intent = new Intent(this, AlarmReceiver.class);
-        intent.putExtra("eventTitle", eventTitle);
-        intent.putExtra("time", time);
-        intent.putExtra("notificationId", notificationID);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, notificationID, intent, PendingIntent.FLAG_ONE_SHOT);
-        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
-    }
-
-    private void cancelAlarm(int requestCode) {
-        Intent intent = new Intent(this, AlarmReceiver.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, requestCode, intent, PendingIntent.FLAG_ONE_SHOT);
-        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        alarmManager.cancel(pendingIntent);
     }
 
     private class SaveAsyncTask extends AsyncTask<Void, Void, Void> {
