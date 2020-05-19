@@ -45,7 +45,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
 
         holder.cardView.setVisibility(View.VISIBLE);
 
-        holder.reminderTimeTextView.setText(notification.getReminderTime());
+        holder.reminderTimeTextView.setText(notification.getTime());
         holder.cancelNotificationImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

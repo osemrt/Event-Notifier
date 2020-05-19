@@ -128,7 +128,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
         public boolean onMenuItemClick(MenuItem menuItem) {
             switch (menuItem.getItemId()) {
                 case R.id.Popup_Item_Delete:
-                    deleteEvent(mEvent.getTitle(), mEvent.getDate(), mEvent.getTime());
+                    deleteEvent(mEvent.getId());
                     eventList.remove(position);
                     notifyItemRemoved(position);
                     notifyItemRangeChanged(position, eventList.size());
@@ -151,10 +151,10 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
         }
     }
 
-    private void deleteEvent(String eventTitle, String date, String time) {
+    private void deleteEvent(int eventId) {
         dbHelper = new DBHelper(context);
-        SQLiteDatabase sqLiteDatabase = dbHelper.getWritableDatabase();
-        dbHelper.deleteEvent(sqLiteDatabase, eventTitle, date, time);
+        dbHelper.deleteEvent(dbHelper.getWritableDatabase(), eventId);
+        dbHelper.deleteNotificationByEventId(dbHelper.getWritableDatabase(), eventId);
         dbHelper.close();
     }
 
@@ -162,7 +162,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
         boolean alarmed = false;
         dbHelper = new DBHelper(context);
         SQLiteDatabase sqLiteDatabase = dbHelper.getReadableDatabase();
-        Cursor cursor = dbHelper.readNotification(sqLiteDatabase, eventTitle, date, time);
+        Cursor cursor = dbHelper.readEvent(sqLiteDatabase, eventTitle, date, time);
         while (cursor.moveToNext()) {
             String notify = cursor.getString(cursor.getColumnIndex(DBTables.EVENT_NOTIFY));
             if (notify.equals("true")) {
@@ -180,7 +180,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
         boolean isAllDay = false;
         dbHelper = new DBHelper(context);
         SQLiteDatabase sqLiteDatabase = dbHelper.getReadableDatabase();
-        Cursor cursor = dbHelper.readIsAllDay(sqLiteDatabase, eventTitle, date, time);
+        Cursor cursor = dbHelper.readEvent(sqLiteDatabase, eventTitle, date, time);
         while (cursor.moveToNext()) {
             String notify = cursor.getString(cursor.getColumnIndex(DBTables.EVENT_ALL_DAY));
             if (notify.equals("true")) {

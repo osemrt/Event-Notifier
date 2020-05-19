@@ -9,6 +9,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import androidx.annotation.Nullable;
 
 import ce.yildiz.edu.tr.calendar.models.Event;
+import ce.yildiz.edu.tr.calendar.models.Notification;
 
 public class DBHelper extends SQLiteOpenHelper {
 
@@ -19,7 +20,7 @@ public class DBHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
         sqLiteDatabase.execSQL(DBQueries.CREATE_EVENT_TABLE);
-
+        sqLiteDatabase.execSQL(DBQueries.CREATE_NOTIFICATION_TABLE);
     }
 
     @Override
@@ -33,31 +34,44 @@ public class DBHelper extends SQLiteOpenHelper {
         contentValues.put(DBTables.EVENT_TITLE, event.getTitle());
         contentValues.put(DBTables.EVENT_ALL_DAY, Boolean.toString(event.isAllDay()));
         contentValues.put(DBTables.EVENT_DATE, event.getDate());
-        contentValues.put(DBTables.EVENT_TIME, event.getTime());
         contentValues.put(DBTables.EVENT_MONTH, event.getMonth());
         contentValues.put(DBTables.EVENT_YEAR, event.getYear());
+        contentValues.put(DBTables.EVENT_TIME, event.getTime());
+        contentValues.put(DBTables.EVENT_DURATION, event.getDuration());
         contentValues.put(DBTables.EVENT_NOTIFY, Boolean.toString(event.isNotify()));
-        contentValues.put(DBTables.NOTIFICATION_ID, event.getNotificationID());
+        contentValues.put(DBTables.EVENT_REPETITION, event.getRepetition());
         contentValues.put(DBTables.EVENT_NOTE, event.getNote());
         contentValues.put(DBTables.EVENT_COLOR, event.getColor());
         contentValues.put(DBTables.EVENT_LOCATION, event.getLocation());
         contentValues.put(DBTables.EVENT_PHONE_NUMBER, event.getPhoneNumber());
-        contentValues.put(DBTables.EVENT_MAIL, event.getEmail());
+        contentValues.put(DBTables.EVENT_MAIL, event.getMail());
 
         sqLiteDatabase.insert(DBTables.EVENT_TABLE_NAME, null, contentValues);
 
     }
 
+    public void saveNotification(SQLiteDatabase sqLiteDatabase, Notification notification) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DBTables.NOTIFICATION_EVENT_ID, notification.getEventId());
+        contentValues.put(DBTables.NOTIFICATION_TIME, notification.getTime());
+        contentValues.put(DBTables.NOTIFICATION_CHANNEL_ID, notification.getChannelId());
+
+        sqLiteDatabase.insert(DBTables.NOTIFICATION_TABLE_NAME, null, contentValues);
+
+    }
+
     public Cursor readEventsByDate(SQLiteDatabase sqLiteDatabase, String date) {
         String[] projection = {
+                DBTables.EVENT_ID,
                 DBTables.EVENT_TITLE,
                 DBTables.EVENT_ALL_DAY,
                 DBTables.EVENT_DATE,
-                DBTables.EVENT_TIME,
                 DBTables.EVENT_MONTH,
                 DBTables.EVENT_YEAR,
+                DBTables.EVENT_TIME,
+                DBTables.EVENT_DURATION,
                 DBTables.EVENT_NOTIFY,
-                DBTables.NOTIFICATION_ID,
+                DBTables.EVENT_REPETITION,
                 DBTables.EVENT_NOTE,
                 DBTables.EVENT_COLOR,
                 DBTables.EVENT_LOCATION,
@@ -72,14 +86,16 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public Cursor readEventsByMonth(SQLiteDatabase sqLiteDatabase, String year, String month) {
         String[] projection = {
+                DBTables.EVENT_ID,
                 DBTables.EVENT_TITLE,
                 DBTables.EVENT_ALL_DAY,
                 DBTables.EVENT_DATE,
-                DBTables.EVENT_TIME,
                 DBTables.EVENT_MONTH,
                 DBTables.EVENT_YEAR,
+                DBTables.EVENT_TIME,
+                DBTables.EVENT_DURATION,
                 DBTables.EVENT_NOTIFY,
-                DBTables.NOTIFICATION_ID,
+                DBTables.EVENT_REPETITION,
                 DBTables.EVENT_NOTE,
                 DBTables.EVENT_COLOR,
                 DBTables.EVENT_LOCATION,
@@ -91,38 +107,44 @@ public class DBHelper extends SQLiteOpenHelper {
         return sqLiteDatabase.query(DBTables.EVENT_TABLE_NAME, projection, where, whereArgs, null, null, null);
     }
 
-    public Cursor readNotification(SQLiteDatabase sqLiteDatabase, String eventTitle, String date, String time) {
-        String[] projection = {DBTables.NOTIFICATION_ID, DBTables.EVENT_NOTIFY};
-        String where = DBTables.EVENT_TITLE + "=? and " + DBTables.EVENT_DATE + "=? and " + DBTables.EVENT_TIME + "=?";
-        String[] whereArgs = {eventTitle, date, time};
+    public Cursor readEventNotifications(SQLiteDatabase sqLiteDatabase, int eventId) {
+        String[] projection = {
+                DBTables.NOTIFICATION_ID,
+                DBTables.NOTIFICATION_EVENT_ID,
+                DBTables.NOTIFICATION_TIME,
+                DBTables.NOTIFICATION_CHANNEL_ID
+        };
 
-        return sqLiteDatabase.query(DBTables.EVENT_TABLE_NAME, projection, where, whereArgs, null, null, null);
+        String where = DBTables.NOTIFICATION_EVENT_ID + "=?";
+        String[] whereArgs = {Integer.toString(eventId)};
+
+        return sqLiteDatabase.query(DBTables.NOTIFICATION_TABLE_NAME, projection, where, whereArgs, null, null, null);
     }
 
-    public Cursor readIsAllDay(SQLiteDatabase sqLiteDatabase, String eventTitle, String date, String time) {
-        String[] projection = {DBTables.EVENT_ALL_DAY};
-        String where = DBTables.EVENT_TITLE + "=? and " + DBTables.EVENT_DATE + "=? and " + DBTables.EVENT_TIME + "=?";
-        String[] whereArgs = {eventTitle, date, time};
-
-        return sqLiteDatabase.query(DBTables.EVENT_TABLE_NAME, projection, where, whereArgs, null, null, null);
-    }
-
-    public void deleteEvent(SQLiteDatabase sqLiteDatabase, String eventTitle, String date, String time) {
-        String where = DBTables.EVENT_TITLE + "=? and " + DBTables.EVENT_DATE + "=? and " + DBTables.EVENT_TIME + "=?";
-        String[] whereArgs = {eventTitle, date, time};
+    public void deleteEvent(SQLiteDatabase sqLiteDatabase, int eventId) {
+        String where = DBTables.EVENT_ID + "=?";
+        String[] whereArgs = {Integer.toString(eventId)};
         sqLiteDatabase.delete(DBTables.EVENT_TABLE_NAME, where, whereArgs);
+    }
+
+    public void deleteNotificationByEventId(SQLiteDatabase sqLiteDatabase, int eventId) {
+        String where = DBTables.NOTIFICATION_EVENT_ID + "=?";
+        String[] whereArgs = {Integer.toString(eventId)};
+        sqLiteDatabase.delete(DBTables.NOTIFICATION_TABLE_NAME, where, whereArgs);
     }
 
     public Cursor readEvent(SQLiteDatabase sqLiteDatabase, String eventTitle, String date, String time) {
         String[] projection = {
+                DBTables.EVENT_ID,
                 DBTables.EVENT_TITLE,
                 DBTables.EVENT_ALL_DAY,
                 DBTables.EVENT_DATE,
-                DBTables.EVENT_TIME,
                 DBTables.EVENT_MONTH,
                 DBTables.EVENT_YEAR,
+                DBTables.EVENT_TIME,
+                DBTables.EVENT_DURATION,
                 DBTables.EVENT_NOTIFY,
-                DBTables.NOTIFICATION_ID,
+                DBTables.EVENT_REPETITION,
                 DBTables.EVENT_NOTE,
                 DBTables.EVENT_COLOR,
                 DBTables.EVENT_LOCATION,
@@ -136,14 +158,16 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public Cursor readAllEvents(SQLiteDatabase sqLiteDatabase) {
         String[] projection = {
+                DBTables.EVENT_ID,
                 DBTables.EVENT_TITLE,
                 DBTables.EVENT_ALL_DAY,
                 DBTables.EVENT_DATE,
-                DBTables.EVENT_TIME,
                 DBTables.EVENT_MONTH,
                 DBTables.EVENT_YEAR,
+                DBTables.EVENT_TIME,
+                DBTables.EVENT_DURATION,
                 DBTables.EVENT_NOTIFY,
-                DBTables.NOTIFICATION_ID,
+                DBTables.EVENT_REPETITION,
                 DBTables.EVENT_NOTE,
                 DBTables.EVENT_COLOR,
                 DBTables.EVENT_LOCATION,
@@ -157,16 +181,17 @@ public class DBHelper extends SQLiteOpenHelper {
         contentValues.put(DBTables.EVENT_TITLE, newEvent.getTitle());
         contentValues.put(DBTables.EVENT_ALL_DAY, Boolean.toString(newEvent.isAllDay()));
         contentValues.put(DBTables.EVENT_DATE, newEvent.getDate());
-        contentValues.put(DBTables.EVENT_TIME, newEvent.getTime());
         contentValues.put(DBTables.EVENT_MONTH, newEvent.getMonth());
         contentValues.put(DBTables.EVENT_YEAR, newEvent.getYear());
+        contentValues.put(DBTables.EVENT_TIME, newEvent.getTime());
+        contentValues.put(DBTables.EVENT_DURATION, newEvent.getDuration());
         contentValues.put(DBTables.EVENT_NOTIFY, Boolean.toString(newEvent.isNotify()));
-        contentValues.put(DBTables.NOTIFICATION_ID, newEvent.getNotificationID());
+        contentValues.put(DBTables.EVENT_REPETITION, newEvent.getRepetition());
         contentValues.put(DBTables.EVENT_NOTE, newEvent.getNote());
         contentValues.put(DBTables.EVENT_COLOR, newEvent.getColor());
         contentValues.put(DBTables.EVENT_LOCATION, newEvent.getLocation());
         contentValues.put(DBTables.EVENT_PHONE_NUMBER, newEvent.getPhoneNumber());
-        contentValues.put(DBTables.EVENT_MAIL, newEvent.getEmail());
+        contentValues.put(DBTables.EVENT_MAIL, newEvent.getMail());
 
         String where = DBTables.EVENT_TITLE + "=? and " + DBTables.EVENT_DATE + "=? and " + DBTables.EVENT_TIME + "=?";
         String[] whereArgs = {oldEventTitle, oldEventDate, oldEventTime};

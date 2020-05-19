@@ -191,14 +191,16 @@ public class CalendarFragment extends Fragment implements View.OnClickListener, 
         Cursor cursor = dbHelper.readEventsByMonth(sqLiteDatabase, Year, Month);
         while (cursor.moveToNext()) {
             Event event = new Event();
+            event.setId(cursor.getInt(cursor.getColumnIndex(DBTables.EVENT_ID)));
             event.setTitle(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_TITLE)));
             event.setAllDay(Boolean.parseBoolean(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_ALL_DAY))));
             event.setDate(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_DATE)));
-            event.setTime(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_TIME)));
             event.setMonth(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_MONTH)));
             event.setYear(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_YEAR)));
+            event.setTime(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_TIME)));
+            event.setDuration(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_DURATION)));
             event.setNotify(Boolean.parseBoolean(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_NOTIFY))));
-            event.setNotificationID(cursor.getInt(cursor.getColumnIndex(DBTables.NOTIFICATION_ID)));
+            event.setRepetition(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_REPETITION)));
             event.setNote(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_NOTE)));
             event.setColor(cursor.getInt(cursor.getColumnIndex(DBTables.EVENT_COLOR)));
             event.setLocation(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_LOCATION)));
@@ -217,14 +219,16 @@ public class CalendarFragment extends Fragment implements View.OnClickListener, 
         Cursor cursor = dbHelper.readEventsByDate(sqLiteDatabase, date);
         while (cursor.moveToNext()) {
             Event event = new Event();
+            event.setId(cursor.getInt(cursor.getColumnIndex(DBTables.EVENT_ID)));
             event.setTitle(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_TITLE)));
             event.setAllDay(Boolean.parseBoolean(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_ALL_DAY))));
             event.setDate(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_DATE)));
-            event.setTime(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_TIME)));
             event.setMonth(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_MONTH)));
             event.setYear(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_YEAR)));
+            event.setTime(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_TIME)));
+            event.setDuration(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_DURATION)));
             event.setNotify(Boolean.parseBoolean(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_NOTIFY))));
-            event.setNotificationID(cursor.getInt(cursor.getColumnIndex(DBTables.NOTIFICATION_ID)));
+            event.setRepetition(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_REPETITION)));
             event.setNote(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_NOTE)));
             event.setColor(cursor.getInt(cursor.getColumnIndex(DBTables.EVENT_COLOR)));
             event.setLocation(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_LOCATION)));

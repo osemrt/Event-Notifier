@@ -11,7 +11,11 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
 import android.graphics.drawable.GradientDrawable;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -38,8 +42,6 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
-import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.material.textfield.TextInputEditText;
@@ -113,12 +115,15 @@ public class NewEventActivity extends AppCompatActivity {
 
     private List<Notification> notifications;
 
+    private Event event;
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_new_event);
 
+        event = new Event();
         notifications = new ArrayList<>();
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
@@ -325,7 +330,6 @@ public class NewEventActivity extends AppCompatActivity {
         timePickerDialog.show();
     }
 
-
     public void setTime(View view) {
         Calendar calendar = Calendar.getInstance();
         int hour = calendar.get(Calendar.HOUR_OF_DAY);
@@ -427,47 +431,53 @@ public class NewEventActivity extends AppCompatActivity {
                 break;
             case R.id.ToolBar_Item_Save:
                 if (confirmInputs()) {
-                    Date aDate = null;
-                    try {
-                        aDate = Utils.eventDateFormat.parse((String) setDateTextView.getText());
-                    } catch (ParseException e) {
-                        Log.e(TAG, "An error has occurred while parsing the date string");
-                    }
 
-                    Event event = new Event();
-                    event.setTitle(eventTitleTextInputLayout.getEditText().getText().toString().trim());
-                    event.setAllDay(allDayEventSwitch.isChecked());
-                    event.setDate(Utils.eventDateFormat.format(aDate));
-                    event.setMonth(Utils.monthFormat.format(aDate));
-                    event.setYear(Utils.yearFormat.format(aDate));
-                    event.setTime(setTimeTextView.getText().toString());
-                    int notificationID = getNotificationID(event.getTitle(), event.getDate(), event.getTime());
-                    event.setNotificationID(notificationID);
-                    cancelAlarm(notificationID);
-                    event.setNote(eventNoteTextInputLayout.getEditText().getText().toString().trim());
-                    if (notColor == 0) {
-                        notColor = getResources().getInteger(R.color.red);
-                    }
-
-                    event.setColor(notColor);
-                    event.setLocation(eventLocationTextInputLayout.getEditText().getText().toString().trim());
-                    event.setPhoneNumber(phoneNumberTextInputLayout.getEditText().getText().toString().trim());
-                    event.setEmail(mailTextInputLayout.getEditText().getText().toString().trim());
-
+                    getViewValues();
                     if (event.isNotify()) {
-                        //checkNotificationPreference();
-                        Calendar calendar = Calendar.getInstance();
-                        calendar.set(alarmYear, alarmMonth, alarmDay, alarmHour, alarmMinute, 0);
-                        setAlarm(calendar, event.getTitle(), event.getTime(), event.getNotificationID());
+//                        //checkNotificationPreference();
+//                        Calendar calendar = Calendar.getInstance();
+//                        calendar.set(alarmYear, alarmMonth, alarmDay, alarmHour, alarmMinute, 0);
+//                        setAlarm(calendar, event.getTitle(), event.getTime(), event.getNotificationID());
                     }
 
-                    new SaveEventAsyncTask().execute(event);
+                    new SaveAsyncTask().execute();
 
                 }
                 break;
         }
 
         return true;
+    }
+
+    @SuppressLint("ResourceType")
+    private void getViewValues() {
+        Date aDate = null;
+        try {
+            aDate = Utils.eventDateFormat.parse((String) setDateTextView.getText());
+        } catch (ParseException e) {
+            e.printStackTrace();
+            Log.e(TAG, "An error has occurred while parsing the date string");
+        }
+        event.setTitle(eventTitleTextInputLayout.getEditText().getText().toString().trim());
+        event.setAllDay(allDayEventSwitch.isChecked());
+        event.setDate(Utils.eventDateFormat.format(aDate));
+        event.setMonth(Utils.monthFormat.format(aDate));
+        event.setYear(Utils.yearFormat.format(aDate));
+        event.setTime(setTimeTextView.getText().toString());
+        event.setDuration(setDurationButton.getText().toString());
+        event.setNotify(!notifications.isEmpty());
+        event.setRepetition(repeatTextView.getText().toString());
+        event.setNote(eventNoteTextInputLayout.getEditText().getText().toString().trim());
+        if (notColor == 0) {
+            notColor = getResources().getInteger(R.color.red);
+        } else {
+            event.setColor(notColor);
+        }
+        event.setLocation(eventLocationTextInputLayout.getEditText().getText().toString().trim());
+        event.setPhoneNumber(phoneNumberTextInputLayout.getEditText().getText().toString().trim());
+        event.setMail(mailTextInputLayout.getEditText().getText().toString().trim());
+
+
     }
 
     private void checkNotificationPreference() {
@@ -517,15 +527,16 @@ public class NewEventActivity extends AppCompatActivity {
 
 
     private int getNotificationID(String eventTitle, String date, String time) {
-        int code = 0;
-        SQLiteDatabase sqLiteDatabase = dbHelper.getReadableDatabase();
-        Cursor cursor = dbHelper.readNotification(sqLiteDatabase, eventTitle, date, time);
-        while (cursor.moveToNext()) {
-            code = cursor.getInt(cursor.getColumnIndex(DBTables.NOTIFICATION_ID));
-        }
-        cursor.close();
-        sqLiteDatabase.close();
-        return code;
+//        int code = 0;
+//        SQLiteDatabase sqLiteDatabase = dbHelper.getReadableDatabase();
+//        Cursor cursor = dbHelper.readNotification(sqLiteDatabase, eventTitle, date, time);
+//        while (cursor.moveToNext()) {
+//            code = cursor.getInt(cursor.getColumnIndex(DBTables.NOTIFICATION_ID));
+//        }
+//        cursor.close();
+//        sqLiteDatabase.close();
+//        return code;
+        return 0;
     }
 
     private void setAlarm(Calendar calendar, String eventTitle, String time, int notificationID) {
@@ -546,7 +557,7 @@ public class NewEventActivity extends AppCompatActivity {
         alarmManager.cancel(pendingIntent);
     }
 
-    private class SaveEventAsyncTask extends AsyncTask<Event, Void, Void> {
+    private class SaveAsyncTask extends AsyncTask<Void, Void, Void> {
 
         @Override
         protected void onPreExecute() {
@@ -555,12 +566,16 @@ public class NewEventActivity extends AppCompatActivity {
         }
 
         @Override
-        protected Void doInBackground(Event... events) {
-            SQLiteDatabase sqLiteDatabase = dbHelper.getWritableDatabase();
-            dbHelper.saveEvent(sqLiteDatabase, events[0]);
-            sqLiteDatabase.close();
+        protected Void doInBackground(Void... voids) {
+            dbHelper.saveEvent(dbHelper.getWritableDatabase(), event);
+            int event_id = getEventId(event.getTitle(), event.getDate(), event.getTime());
+            for (Notification notification : notifications) {
+                notification.setEventId(event_id);
+                dbHelper.saveNotification(dbHelper.getWritableDatabase(), notification);
+            }
             return null;
         }
+
 
         @Override
         protected void onPostExecute(Void aVoid) {
@@ -570,6 +585,21 @@ public class NewEventActivity extends AppCompatActivity {
             finish();
         }
     }
+
+    private int getEventId(String eventTitle, String eventDate, String eventTime) {
+        SQLiteDatabase sqLiteDatabase = dbHelper.getReadableDatabase();
+        Cursor cursor = dbHelper.readEvent(sqLiteDatabase, eventTitle, eventDate, eventTime);
+
+        int eventId = -1;
+        while (cursor.moveToNext()) {
+            eventId = cursor.getInt(cursor.getColumnIndex(DBTables.EVENT_ID));
+        }
+
+        cursor.close();
+        sqLiteDatabase.close();
+        return eventId;
+    }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
