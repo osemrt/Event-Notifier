@@ -6,9 +6,8 @@
     android:background="@color/white"
     android:orientation="vertical">
 
-
     <androidx.appcompat.widget.Toolbar
-        android:id="@+id/EditEventActivity_Toolbar"
+        android:id="@+id/AddNewEventActivity_Toolbar"
         android:layout_width="match_parent"
         android:layout_height="65dp"
         android:background="@color/darkIndigo"
@@ -16,16 +15,47 @@
         android:minHeight="?attr/actionBarSize"
         android:theme="?attr/colorPrimaryDark"
         app:navigationIcon="@drawable/ic_arrow_back_white"
-        app:title="Edit Event"
+        app:title="New Event"
         app:titleTextColor="@color/white" />
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/darkIndigo"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:padding="15dp">
+
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="20dp"
+            app:srcCompat="@drawable/ic_event" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/AddNewEventActivity_TextInputLayout_EventTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:theme="@style/EditScreenTextInputLayoutStyleLight"
+            app:errorEnabled="true">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:hint="@string/event_title"
+                android:inputType="text"
+                android:textSize="16sp"
+                android:theme="@style/EditScreenTextInputLayoutStyleLight" />
+        </com.google.android.material.textfield.TextInputLayout>
+    </LinearLayout>
 
     <FrameLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
 
         <ProgressBar
-            android:id="@+id/EditEventActivity_ProgressBar"
+            android:id="@+id/AddNewEventActivity_ProgressBar"
             android:layout_width="64dp"
             android:layout_height="64dp"
             android:layout_gravity="center"
@@ -45,53 +75,7 @@
                     android:orientation="vertical">
 
                     <LinearLayout
-                        android:id="@+id/EditEventActivity_LinearLayout_EventTitle"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_margin="20dp"
-                        android:gravity="center"
-                        android:orientation="horizontal">
-
-                        <ImageView
-                            android:id="@+id/EditEventActivity_ImageView_Event"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="10dp"
-                            app:srcCompat="@drawable/ic_event_grey" />
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="8dp">
-
-                            <com.google.android.material.textfield.TextInputLayout
-                                android:id="@+id/EditEventActivity_TextInputLayout_EventTitle"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:theme="@style/EditScreenTextInputLayoutStyleDark"
-                                app:errorEnabled="true">
-
-                                <com.google.android.material.textfield.TextInputEditText
-                                    android:layout_width="match_parent"
-                                    android:layout_height="match_parent"
-                                    android:hint="@string/event_title"
-                                    android:inputType="text"
-                                    android:textSize="20sp"
-                                    android:theme="@style/EditScreenTextInputLayoutStyleDark" />
-                            </com.google.android.material.textfield.TextInputLayout>
-
-                        </LinearLayout>
-
-
-                    </LinearLayout>
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="@color/Grey" />
-
-                    <LinearLayout
-                        android:id="@+id/EditEventActivity_LinearLayout_DateTime"
+                        android:id="@+id/AddNewEventActivity_LinearLayout_DateTime"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical">
@@ -104,7 +88,7 @@
                             android:orientation="horizontal">
 
                             <ImageView
-                                android:id="@+id/EditEventActivity_ImageView_AllDay"
+                                android:id="@+id/AddNewEventActivity_ImageView_AllDay"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginRight="10dp"
@@ -116,7 +100,7 @@
                                 android:layout_margin="10dp">
 
                                 <TextView
-                                    android:id="@+id/EditEventActivity_TextView_AllDayEvent"
+                                    android:id="@+id/AddNewEventActivity_TextView_AllDayEvent"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="All day Event"
@@ -125,7 +109,7 @@
                                     android:textStyle="bold" />
 
                                 <Switch
-                                    android:id="@+id/EditEventActivity_Switch_AllDayEvent"
+                                    android:id="@+id/AddNewEventActivity_Switch_AllDayEvent"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:layout_alignParentEnd="true"
@@ -141,129 +125,137 @@
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="20dp"
-                            android:gravity="center"
-                            android:orientation="horizontal">
+                            android:orientation="vertical">
 
                             <LinearLayout
-                                android:id="@+id/EditEventActivity_LinearLayout_SetDate"
-                                android:layout_width="wrap_content"
+                                android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_marginEnd="30dp"
+                                android:layout_marginBottom="20dp"
                                 android:gravity="center"
-                                android:orientation="vertical">
+                                android:orientation="horizontal">
 
                                 <LinearLayout
-                                    android:layout_width="match_parent"
+                                    android:id="@+id/AddNewEventActivity_LinearLayout_SetDate"
+                                    android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
+                                    android:layout_marginEnd="30dp"
                                     android:gravity="center"
-                                    android:orientation="horizontal">
+                                    android:orientation="vertical">
 
-                                    <ImageView
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:layout_marginEnd="3dp"
-                                        android:src="@drawable/ic_date_range_grey" />
-
-                                    <TextView
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:text="@string/date"
-                                        android:textColor="@color/Grey"
-                                        android:textSize="20sp"
-                                        android:textStyle="bold" />
-
-
-                                </LinearLayout>
-
-
-                                <LinearLayout
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:gravity="center"
-                                    android:orientation="horizontal">
-
-
-                                    <TextView
-                                        android:id="@+id/EditEventActivity_TexView_SetDate"
-                                        android:layout_width="wrap_content"
+                                    <LinearLayout
+                                        android:layout_width="match_parent"
                                         android:layout_height="wrap_content"
                                         android:gravity="center"
-                                        android:text="@string/_06_apr_2020"
-                                        android:textColor="@color/black"
-                                        android:textSize="20sp" />
+                                        android:orientation="horizontal">
+
+                                        <ImageView
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:layout_marginEnd="3dp"
+                                            android:src="@drawable/ic_date_range_grey" />
+
+                                        <TextView
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="@string/date"
+                                            android:textColor="@color/Grey"
+                                            android:textSize="20sp"
+                                            android:textStyle="bold" />
+
+
+                                    </LinearLayout>
+
+
+                                    <LinearLayout
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:gravity="center"
+                                        android:orientation="horizontal">
+
+
+                                        <TextView
+                                            android:id="@+id/AddNewEventActivity_TexView_SetDate"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:gravity="center"
+                                            android:text="@string/_06_apr_2020"
+                                            android:textColor="@color/black"
+                                            android:textSize="20sp" />
+
+
+                                    </LinearLayout>
 
 
                                 </LinearLayout>
 
+                                <LinearLayout
+                                    android:id="@+id/AddNewEventActivity_LinearLayout_SetTime"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:gravity="center"
+                                    android:orientation="vertical">
+
+                                    <LinearLayout
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:gravity="center"
+                                        android:orientation="horizontal">
+
+                                        <ImageView
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:layout_marginEnd="3dp"
+                                            android:src="@drawable/ic_access_time_grey" />
+
+                                        <TextView
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="@string/time"
+                                            android:textColor="@color/Grey"
+                                            android:textSize="20sp"
+                                            android:textStyle="bold" />
+
+
+                                    </LinearLayout>
+
+
+                                    <LinearLayout
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:gravity="center"
+                                        android:orientation="horizontal">
+
+
+                                        <TextView
+                                            android:id="@+id/AddNewEventActivity_TexView_SetTime"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:gravity="center"
+                                            android:text="@string/_12_00_am"
+                                            android:textColor="@color/black"
+                                            android:textSize="20sp" />
+
+
+                                    </LinearLayout>
+
+
+                                </LinearLayout>
 
                             </LinearLayout>
 
-                            <LinearLayout
-                                android:id="@+id/EditEventActivity_LinearLayout_SetTime"
-                                android:layout_width="wrap_content"
+                            <Button
+                                android:id="@+id/AddNewEventActivity_Button_Duration"
+                                android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:gravity="center"
-                                android:orientation="vertical">
+                                android:layout_marginLeft="20dp"
+                                android:layout_marginRight="20dp"
+                                android:layout_marginBottom="20dp"
+                                android:background="@color/darkIndigo"
 
-                                <LinearLayout
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:gravity="center"
-                                    android:orientation="horizontal">
-
-                                    <ImageView
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:layout_marginEnd="3dp"
-                                        android:src="@drawable/ic_access_time_grey" />
-
-                                    <TextView
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:text="@string/time"
-                                        android:textColor="@color/Grey"
-                                        android:textSize="20sp"
-                                        android:textStyle="bold" />
-
-
-                                </LinearLayout>
-
-
-                                <LinearLayout
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:gravity="center"
-                                    android:orientation="horizontal">
-
-
-                                    <TextView
-                                        android:id="@+id/EditEventActivity_TexView_SetTime"
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:gravity="center"
-                                        android:text="@string/_12_00_am"
-                                        android:textColor="@color/black"
-                                        android:textSize="20sp" />
-
-
-                                </LinearLayout>
-
-
-                            </LinearLayout>
-
+                                android:text="@string/duration_0_hours_0_minutes"
+                                android:textColor="@color/white" />
                         </LinearLayout>
 
-                        <!--                        <Button-->
-                        <!--                            android:id="@+id/EditEventActivity_Button_Duration"-->
-                        <!--                            android:layout_width="match_parent"-->
-                        <!--                            android:layout_height="wrap_content"-->
-                        <!--                            android:layout_marginLeft="20dp"-->
-                        <!--                            android:layout_marginRight="20dp"-->
-                        <!--                            android:layout_marginBottom="20dp"-->
-                        <!--                            android:background="@color/darkIndigo"-->
-                        <!--                            android:text="@string/duration_0_hours_0_minutes"-->
-                        <!--                            android:textColor="@color/white" />-->
 
                     </LinearLayout>
 
@@ -273,19 +265,22 @@
                         android:background="@color/Grey" />
 
                     <LinearLayout
-                        android:id="@+id/EditEventActivity_LinearLayout_Reminder"
+                        android:id="@+id/AddNewEventActivity_LinearLayout_Reminder"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_margin="20dp"
+                        android:layout_marginStart="20dp"
+                        android:layout_marginTop="20dp"
+                        android:layout_marginEnd="20dp"
+                        android:layout_marginBottom="5dp"
                         android:gravity="center"
                         android:orientation="horizontal">
 
                         <ImageView
-                            android:id="@+id/EditEventActivity_ImageView_Notification"
+                            android:id="@+id/AddNewEventActivity_ImageView_Notification"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginRight="10dp"
-                            app:srcCompat="@drawable/ic_notifications_active_black_24dp" />
+                            android:layout_marginEnd="10dp"
+                            app:srcCompat="@drawable/ic_add_alert" />
 
                         <RelativeLayout
                             android:layout_width="match_parent"
@@ -293,21 +288,62 @@
                             android:layout_margin="10dp">
 
                             <TextView
-                                android:id="@+id/EditEventActivity_TextView_Notification"
+                                android:id="@+id/AddNewEventActivity_TextView_Add_Notification"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="@string/at_the_time_of_event"
+                                android:text="@string/add_notification"
                                 android:textColor="@color/black"
                                 android:textSize="20sp"
                                 android:textStyle="bold" />
 
-                            <Switch
-                                android:id="@+id/EditEventActivity_Switch_Notification"
+
+                        </RelativeLayout>
+
+
+                    </LinearLayout>
+
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/AddNewEventActivity_RecyclerView_Notifications"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="20dp"
+                        android:layout_marginEnd="20dp" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginTop="20dp"
+                        android:background="@color/Grey" />
+
+                    <LinearLayout
+                        android:id="@+id/AddNewEventActivity_LinearLayout_"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_margin="20dp"
+                        android:gravity="center"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:id="@+id/AddNewEventActivity_ImageView_Repeat"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginRight="10dp"
+                            app:srcCompat="@drawable/ic_repeat" />
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="10dp">
+
+                            <TextView
+                                android:id="@+id/AddNewEventActivity_TextView_Repeat"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_alignParentEnd="true"
-                                android:checked="true"
-                                android:theme="@style/EditScreenTextInputLayoutStyleDark" />
+                                android:text="@string/one_time_event"
+                                android:textColor="@color/black"
+                                android:textSize="20sp"
+                                android:textStyle="bold" />
 
 
                         </RelativeLayout>
@@ -321,7 +357,7 @@
                         android:background="@color/Grey" />
 
                     <LinearLayout
-                        android:id="@+id/EditEventActivity_LinearLayout_Note"
+                        android:id="@+id/AddNewEventActivity_LinearLayout_Note"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_margin="20dp"
@@ -329,7 +365,7 @@
                         android:orientation="horizontal">
 
                         <ImageView
-                            android:id="@+id/EditEventActivity_ImageView_Note"
+                            android:id="@+id/AddNewEventActivity_ImageView_Note"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginEnd="10dp"
@@ -341,7 +377,7 @@
                             android:layout_marginEnd="8dp">
 
                             <com.google.android.material.textfield.TextInputLayout
-                                android:id="@+id/EditEventActivity_TextInputLayout_Note"
+                                android:id="@+id/AddNewEventActivity_TextInputLayout_Note"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:theme="@style/EditScreenTextInputLayoutStyleDark"
@@ -369,7 +405,7 @@
                         android:background="@color/Grey" />
 
                     <LinearLayout
-                        android:id="@+id/EditEventActivity_LinearLayout_NoteColor"
+                        android:id="@+id/AddNewEventActivity_LinearLayout_NoteColor"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_margin="20dp"
@@ -377,7 +413,7 @@
                         android:orientation="horizontal">
 
                         <ImageView
-                            android:id="@+id/EditEventActivity_ImageView_NoteColor"
+                            android:id="@+id/AddNewEventActivity_ImageView_NoteColor"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginRight="10dp"
@@ -389,7 +425,7 @@
                             android:layout_margin="10dp">
 
                             <TextView
-                                android:id="@+id/EditEventActivity_TextView_NoteColor"
+                                android:id="@+id/AddNewEventActivity_TextView_NoteColor"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="@string/note_color"
@@ -399,7 +435,7 @@
 
 
                             <TextView
-                                android:id="@+id/EditEventActivity_TextView_PickNoteColor"
+                                android:id="@+id/AddNewEventActivity_TextView_PickNoteColor"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_alignParentEnd="true"
@@ -416,27 +452,30 @@
                         android:background="@color/Grey" />
 
                     <LinearLayout
-                        android:id="@+id/EditEventActivity_LinearLayout_Location"
+                        android:id="@+id/AddNewEventActivity_LinearLayout_Location"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_margin="20dp"
                         android:gravity="center"
-                        android:orientation="horizontal">
+                        android:orientation="horizontal"
+                        android:weightSum="1">
 
                         <ImageView
-                            android:id="@+id/EditEventActivity_ImageView_Location"
+                            android:id="@+id/AddNewEventActivity_ImageView_Location"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginRight="10dp"
+                            android:layout_marginEnd="10dp"
+                            android:layout_weight="0"
                             app:srcCompat="@drawable/ic_location_white" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginRight="8dp">
+                            android:layout_marginEnd="10dp"
+                            android:layout_weight="1">
 
                             <com.google.android.material.textfield.TextInputLayout
-                                android:id="@+id/EditEventActivity_TextInputLayout_Location"
+                                android:id="@+id/AddNewEventActivity_TextInputLayout_Location"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:theme="@style/EditScreenTextInputLayoutStyleDark"
@@ -446,12 +485,23 @@
                                     android:layout_width="match_parent"
                                     android:layout_height="match_parent"
                                     android:hint="@string/add_a_location"
-                                    android:inputType="text"
+                                    android:inputType="textMultiLine"
                                     android:textSize="20sp"
                                     android:theme="@style/EditScreenTextInputLayoutStyleDark" />
                             </com.google.android.material.textfield.TextInputLayout>
 
+
                         </LinearLayout>
+
+                        <ImageButton
+                            android:id="@+id/AddNewEventActivity_ImageButton_Location"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="8dp"
+                            android:layout_weight="0"
+                            android:background="@android:color/transparent"
+                            android:onClick="getLocation"
+                            app:srcCompat="@drawable/ic_map" />
 
 
                     </LinearLayout>
@@ -467,7 +517,7 @@
                         android:orientation="vertical">
 
                         <LinearLayout
-                            android:id="@+id/EditEventActivity_LinearLayout_AddPeople"
+                            android:id="@+id/AddNewEventActivity_LinearLayout_AddPeople"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:layout_margin="20dp"
@@ -475,7 +525,7 @@
                             android:orientation="horizontal">
 
                             <ImageView
-                                android:id="@+id/EditEventActivity_ImageView_People"
+                                android:id="@+id/AddNewEventActivity_ImageView_People"
                                 android:layout_width="wrap_content"
                                 android:layout_height="match_parent"
                                 android:layout_marginEnd="10dp"
@@ -485,7 +535,7 @@
 
                             <com.google.android.material.textfield.TextInputLayout
 
-                                android:id="@+id/EditEventActivity_TextInputLayout_PhoneNumber"
+                                android:id="@+id/AddNewEventActivity_TextInputLayout_PhoneNumber"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
                                 android:layout_marginEnd="10dp"
@@ -505,8 +555,28 @@
                             </com.google.android.material.textfield.TextInputLayout>
 
 
+                            <!--                            <Button-->
+                            <!--                                android:id="@+id/AddNewEventActivity_Button_Add"-->
+                            <!--                                android:layout_width="wrap_content"-->
+                            <!--                                android:layout_height="wrap_content"-->
+                            <!--                                android:layout_weight="0.0"-->
+                            <!--                                android:background="@color/darkIndigo"-->
+                            <!--                                android:text="@string/add"-->
+                            <!--                                android:textColor="@color/white" />-->
+
+
                         </LinearLayout>
 
+                        <!--                        <Button-->
+                        <!--                            android:id="@+id/AddNewEventActivity_Button_AddFromContacts"-->
+                        <!--                            android:layout_width="match_parent"-->
+                        <!--                            android:layout_height="wrap_content"-->
+                        <!--                            android:layout_marginLeft="20dp"-->
+                        <!--                            android:layout_marginRight="20dp"-->
+                        <!--                            android:layout_marginBottom="20dp"-->
+                        <!--                            android:background="@color/darkIndigo"-->
+                        <!--                            android:text="@string/add_from_contacts"-->
+                        <!--                            android:textColor="@color/white" />-->
 
                     </LinearLayout>
 
@@ -516,7 +586,7 @@
                         android:background="@color/Grey" />
 
                     <LinearLayout
-                        android:id="@+id/EditEventActivity_LinearLayout_Email"
+                        android:id="@+id/AddNewEventActivity_LinearLayout_Email"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_margin="20dp"
@@ -525,7 +595,7 @@
                         android:weightSum="1">
 
                         <ImageView
-                            android:id="@+id/EditEventActivity_ImageView_Email"
+                            android:id="@+id/AddNewEventActivity_ImageView_Email"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginEnd="10dp"
@@ -533,7 +603,7 @@
                             app:srcCompat="@drawable/ic_mail" />
 
                         <com.google.android.material.textfield.TextInputLayout
-                            android:id="@+id/EditEventActivity_TextInputLayout_Mail"
+                            android:id="@+id/AddNewEventActivity_TextInputLayout_Mail"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
@@ -541,7 +611,7 @@
                             app:errorEnabled="true">
 
                             <com.google.android.material.textfield.TextInputEditText
-                                android:id="@+id/EditEventActivity_TextInputEditText_Mail"
+                                android:id="@+id/AddNewEventActivity_TextInputEditText_Mail"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
                                 android:layout_marginEnd="15dp"
@@ -553,10 +623,11 @@
                         </com.google.android.material.textfield.TextInputLayout>
 
                         <Switch
-                            android:id="@+id/EditEventActivity_Switch_Mail"
+                            android:id="@+id/AddNewEventActivity_Switch_Mail"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_weight="0"
+                            android:checked="true"
                             android:theme="@style/EditScreenTextInputLayoutStyleDark" />
 
 
@@ -566,7 +637,6 @@
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
                         android:background="@color/Grey" />
-
 
                 </LinearLayout>
             </ScrollView>

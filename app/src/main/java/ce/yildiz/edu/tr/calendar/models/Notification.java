@@ -7,14 +7,17 @@ public class Notification {
     private int channelId;
     private String time;
 
-    public Notification(String time) {
-        this.time = time;
-    }
-
     public Notification(int eventId, int channelId, String time) {
         this.eventId = eventId;
         this.channelId = channelId;
         this.time = time;
+    }
+
+    public Notification(String time) {
+        this.time = time;
+    }
+
+    public Notification() {
     }
 
     public int getId() {

@@ -43,6 +43,7 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
 
         switch (item.getItemId()) {
             case R.id.BottomNavigation_Item_Calendar:
+                ((CalendarFragment) calendarFragment).setUpCalendar();
                 fragmentManager.beginTransaction()
                         .hide(userSettingsFragment)
                         .hide(upcomingEventsFragment)
@@ -50,6 +51,7 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
                         .commit();
                 break;
             case R.id.BottomNavigation_Item_UpcomingEvents:
+                ((UpcomingEventsFragment) upcomingEventsFragment).setUpRecyclerView();
                 fragmentManager.beginTransaction()
                         .hide(calendarFragment)
                         .hide(userSettingsFragment)
@@ -67,5 +69,6 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
 
         return true;
     }
+
 
 }

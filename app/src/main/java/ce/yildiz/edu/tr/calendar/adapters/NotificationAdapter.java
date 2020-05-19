@@ -2,6 +2,7 @@ package ce.yildiz.edu.tr.calendar.adapters;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.os.AsyncTask;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,6 +31,14 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         this.context = context;
         this.notifications = notifications;
 
+    }
+
+    public List<Notification> getNotifications() {
+        return notifications;
+    }
+
+    public void setNotifications(List<Notification> notifications) {
+        this.notifications = notifications;
     }
 
     @NonNull
@@ -65,7 +74,6 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         builder.setView(dialogView);
         final AlertDialog alertDialog = builder.create();
 
-
         final RadioGroup notificationPreferenceRadioGroup = (RadioGroup) dialogView.findViewById(R.id.AlertDialogLayout_Notification_RadioGroup_NotificationPreference);
         Button backButton = (Button) dialogView.findViewById(R.id.AlertDialogLayout_Notification_Button_Back);
 
@@ -88,11 +96,12 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
             @Override
             public void onCheckedChanged(RadioGroup radioGroup, int buttonId) {
                 RadioButton selectedPreferenceRadioButton = (RadioButton) dialogView.findViewById(buttonId);
-                notifications.set(position, new Notification(selectedPreferenceRadioButton.getText().toString()));
+                notifications.set(position, new Notification(notification.getId(), notification.getChannelId(), selectedPreferenceRadioButton.getText().toString()));
                 notifyDataSetChanged();
                 alertDialog.dismiss();
             }
         });
+
     }
 
     private int getIdOfRadioButton(String text) {
@@ -132,8 +141,5 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
 
     }
 
-    private void setUpAasdsadlertDialog() {
-
-    }
 
 }
