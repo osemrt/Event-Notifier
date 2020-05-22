@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -30,6 +31,8 @@ import ce.yildiz.edu.tr.calendar.views.CalendarFragment;
 import ce.yildiz.edu.tr.calendar.views.EditEventActivity;
 
 public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> {
+
+    private final String TAG = this.getClass().getSimpleName();
 
     private static final int EDIT_EVENT_ACTIVITY_REQUEST_CODE = 1;
 
@@ -126,7 +129,15 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
 
         @Override
         public boolean onMenuItemClick(MenuItem menuItem) {
+            Intent intent = null;
             switch (menuItem.getItemId()) {
+                case R.id.Popup_Item_Edit:
+                    intent = new Intent(context, EditEventActivity.class);
+                    intent.putExtra("eventTitle", mEvent.getTitle());
+                    intent.putExtra("eventDate", mEvent.getDate());
+                    intent.putExtra("eventTime", mEvent.getTime());
+                    calendarFragment.startActivityForResult(intent, EDIT_EVENT_ACTIVITY_REQUEST_CODE);
+                    return true;
                 case R.id.Popup_Item_Delete:
                     deleteEvent(mEvent.getId());
                     eventList.remove(position);
@@ -139,14 +150,30 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
                         alertDialog.dismiss();
                     }
                     return true;
-                case R.id.Popup_Item_Edit:
-                    Intent intent = new Intent(context, EditEventActivity.class);
-                    intent.putExtra("eventTitle", mEvent.getTitle());
-                    intent.putExtra("eventDate", mEvent.getDate());
-                    intent.putExtra("eventTime", mEvent.getTime());
-                    calendarFragment.startActivityForResult(intent, EDIT_EVENT_ACTIVITY_REQUEST_CODE);
+                case R.id.Popup_Item_Share:
+                    intent = new Intent();
+                    intent.setAction(Intent.ACTION_SEND);
+                    intent.putExtra(Intent.EXTRA_TEXT, mEvent.toString());
+                    intent.setType("text/plain");
+                    calendarFragment.startActivity(Intent.createChooser(intent, null));
+                    return true;
+                case R.id.Popup_Item_Mail:
+                    // String receiver_email = receiver_editText.getText().toString();
+                    String subject = mEvent.getTitle();
+                    String message = mEvent.toString();
+
+                    // String[] addresses = receiver_email.split(", ");
+
+                    intent = new Intent(Intent.ACTION_SEND);
+                    intent.setType("text/plain");
+                    // intent.putExtra(Intent.EXTRA_EMAIL, addresses);
+                    intent.putExtra(Intent.EXTRA_SUBJECT, subject);
+                    intent.putExtra(Intent.EXTRA_TEXT, message);
+
+                    calendarFragment.startActivity(Intent.createChooser(intent, "Send Email"));
                     return true;
             }
+
             return false;
         }
     }

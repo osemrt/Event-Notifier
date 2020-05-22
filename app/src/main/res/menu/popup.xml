@@ -6,4 +6,10 @@
     <item
         android:id="@+id/Popup_Item_Delete"
         android:title="@string/delete" />
+    <item
+        android:id="@+id/Popup_Item_Share"
+        android:title="@string/share" />
+    <item
+        android:id="@+id/Popup_Item_Mail"
+        android:title="@string/mail" />
 </menu>

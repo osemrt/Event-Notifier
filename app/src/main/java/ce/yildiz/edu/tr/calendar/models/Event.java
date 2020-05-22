@@ -137,4 +137,16 @@ public class Event {
     public void setMail(String mail) {
         this.mail = mail;
     }
+
+    @Override
+    public String toString() {
+        return title + '\n' +
+                "DATE=" + date + '\n' +
+                "TIME=" + time + '\n' +
+                duration + '\n' +
+                "NOTE=" + note + '\n' +
+                "LOCATION=" + location + '\n';
+    }
+
+
 }
