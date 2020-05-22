@@ -9,11 +9,13 @@ import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.GradientDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -105,6 +107,7 @@ public class NewEventActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+        setTheme(getFlag("isDark") ? R.style.DarkTheme : R.style.DarkIndigoTheme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event);
 
@@ -146,10 +149,10 @@ public class NewEventActivity extends AppCompatActivity {
         builder.setCancelable(true);
         notificationDialogView = LayoutInflater.from(getApplicationContext().getApplicationContext()).inflate(R.layout.layout_alert_dialog_notification, null, false);
         eventRepetitionDialogView = LayoutInflater.from(getApplicationContext().getApplicationContext()).inflate(R.layout.layout_alert_dialog_repeat, null, false);
-        repetitionPreferenceRadioGroup = (RadioGroup) eventRepetitionDialogView.findViewById(R.id.AlertDialogLayout_Repeat_RadioGroup_RepeatPreference);
-        repetitionBackButton = (Button) eventRepetitionDialogView.findViewById(R.id.AlertDialogLayout_Repeat_Button_Back);
-        notificationPreferenceRadioGroup = (RadioGroup) notificationDialogView.findViewById(R.id.AlertDialogLayout_Notification_RadioGroup_NotificationPreference);
-        notificationBackButton = (Button) notificationDialogView.findViewById(R.id.AlertDialogLayout_Notification_Button_Back);
+        repetitionPreferenceRadioGroup = (RadioGroup) eventRepetitionDialogView.findViewById(R.id.AlertDialogLayout_RadioGroup);
+        repetitionBackButton = (Button) eventRepetitionDialogView.findViewById(R.id.AlertDialogLayout_Button_Back);
+        notificationPreferenceRadioGroup = (RadioGroup) notificationDialogView.findViewById(R.id.AlertDialogLayout_RadioGroup);
+        notificationBackButton = (Button) notificationDialogView.findViewById(R.id.AlertDialogLayout_Button_Back);
         builder.setView(notificationDialogView);
         notificationAlertDialog = builder.create();
         builder.setView(eventRepetitionDialogView);
@@ -221,7 +224,7 @@ public class NewEventActivity extends AppCompatActivity {
             }
         });
 
-        ((RadioGroup) notificationDialogView.findViewById(R.id.AlertDialogLayout_Notification_RadioGroup_NotificationPreference)).setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+        ((RadioGroup) notificationDialogView.findViewById(R.id.AlertDialogLayout_RadioGroup)).setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup radioGroup, int buttonId) {
                 selectedPreferenceRadioButton = (RadioButton) notificationDialogView.findViewById(buttonId);
@@ -231,7 +234,7 @@ public class NewEventActivity extends AppCompatActivity {
             }
         });
 
-        ((RadioGroup) eventRepetitionDialogView.findViewById(R.id.AlertDialogLayout_Repeat_RadioGroup_RepeatPreference)).setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+        ((RadioGroup) eventRepetitionDialogView.findViewById(R.id.AlertDialogLayout_RadioGroup)).setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup radioGroup, int buttonId) {
                 selectedPreferenceRadioButton = (RadioButton) eventRepetitionDialogView.findViewById(buttonId);
@@ -556,5 +559,10 @@ public class NewEventActivity extends AppCompatActivity {
             }
         }
 
+    }
+
+    private boolean getFlag(String key) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        return sharedPreferences.getBoolean(key, false);
     }
 }

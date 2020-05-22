@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:weightSum="1">
+    android:orientation="vertical">
 
     <TextView
-        android:id="@+id/AlertDialogLayout_Repeat_TextView_Title"
+        android:id="@+id/AlertDialogLayout_AppTheme_TextView_Title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?attr/mainColor"
         android:gravity="center"
         android:padding="10dp"
-        android:text="@string/repetition"
+        android:text="@string/choose_theme"
         android:textColor="@color/white"
         android:textSize="24sp"
         android:textStyle="bold" />
@@ -30,42 +30,20 @@
             android:layout_height="match_parent">
 
             <RadioButton
-                android:id="@+id/AlertDialogLayout_Repeat_RadioButton_OneTime"
+                android:id="@+id/AlertDialogLayout_RadioButton_Indigo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/one_time"
+                android:text="@string/indigo"
                 android:textColorLink="@color/darkIndigo"
                 android:textSize="18sp" />
 
             <RadioButton
-                android:id="@+id/AlertDialogLayout_Repeat_RadioButton_Daily"
+                android:id="@+id/AlertDialogLayout_RadioButton_Dark"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/daily"
-                android:textColorLink="@color/darkIndigo"
+                android:text="@string/dark"
                 android:textSize="18sp" />
 
-            <RadioButton
-                android:id="@+id/AlertDialogLayout_Repeat_RadioButton_Weekly"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/weekly"
-                android:textSize="18sp" />
-
-            <RadioButton
-                android:id="@+id/AlertDialogLayout_Repeat_RadioButton_Monthly"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/monthly"
-                android:textSize="18sp" />
-
-            <RadioButton
-                android:id="@+id/AlertDialogLayout_Repeat_RadioButton_Yearly"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:checked="true"
-                android:text="@string/yearly"
-                android:textSize="18sp" />
         </RadioGroup>
 
 

@@ -10,7 +10,7 @@
         android:id="@+id/AddNewEventActivity_Toolbar"
         android:layout_width="match_parent"
         android:layout_height="65dp"
-        android:background="@color/darkIndigo"
+        android:background="?mainColor"
         android:gravity="center"
         android:minHeight="?attr/actionBarSize"
         android:theme="?attr/colorPrimaryDark"
@@ -21,7 +21,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/darkIndigo"
+        android:background="?mainColor"
         android:gravity="center"
         android:orientation="horizontal"
         android:padding="15dp">
@@ -104,7 +104,7 @@
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="All day Event"
-                                    android:textColor="@color/black"
+                                    android:textColor="?attr/textColor"
                                     android:textSize="20sp"
                                     android:textStyle="bold" />
 
@@ -114,8 +114,7 @@
                                     android:layout_height="wrap_content"
                                     android:layout_alignParentEnd="true"
                                     android:checked="false"
-                                    android:enabled="true"
-                                    android:theme="@style/EditScreenTextInputLayoutStyleDark" />
+                                    android:enabled="true" />
 
 
                             </RelativeLayout>
@@ -158,7 +157,7 @@
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
                                             android:text="@string/date"
-                                            android:textColor="@color/Grey"
+                                            android:textColor="?attr/textColor"
                                             android:textSize="20sp"
                                             android:textStyle="bold" />
 
@@ -211,7 +210,7 @@
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
                                             android:text="@string/time"
-                                            android:textColor="@color/Grey"
+                                            android:textColor="?attr/textColor"
                                             android:textSize="20sp"
                                             android:textStyle="bold" />
 
@@ -250,7 +249,7 @@
                                 android:layout_marginLeft="20dp"
                                 android:layout_marginRight="20dp"
                                 android:layout_marginBottom="20dp"
-                                android:background="@color/darkIndigo"
+                                android:background="?mainColor"
 
                                 android:text="@string/duration_0_hours_0_minutes"
                                 android:textColor="@color/white" />
@@ -292,7 +291,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="@string/add_notification"
-                                android:textColor="@color/black"
+                                android:textColor="?attr/textColor"
                                 android:textSize="20sp"
                                 android:textStyle="bold" />
 
@@ -341,7 +340,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="@string/one_time_event"
-                                android:textColor="@color/black"
+                                android:textColor="?attr/textColor"
                                 android:textSize="20sp"
                                 android:textStyle="bold" />
 
@@ -380,7 +379,6 @@
                                 android:id="@+id/AddNewEventActivity_TextInputLayout_Note"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:theme="@style/EditScreenTextInputLayoutStyleDark"
                                 app:counterEnabled="true"
                                 app:counterMaxLength="150"
                                 app:errorEnabled="true">
@@ -390,8 +388,7 @@
                                     android:layout_height="match_parent"
                                     android:hint="@string/add_your_notes"
                                     android:inputType="text"
-                                    android:textSize="20sp"
-                                    android:theme="@style/EditScreenTextInputLayoutStyleDark" />
+                                    android:textSize="20sp" />
                             </com.google.android.material.textfield.TextInputLayout>
 
                         </LinearLayout>
@@ -429,7 +426,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="@string/note_color"
-                                android:textColor="@color/black"
+                                android:textColor="?attr/textColor"
                                 android:textSize="20sp"
                                 android:textStyle="bold" />
 
@@ -478,7 +475,6 @@
                                 android:id="@+id/AddNewEventActivity_TextInputLayout_Location"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:theme="@style/EditScreenTextInputLayoutStyleDark"
                                 app:errorEnabled="true">
 
                                 <com.google.android.material.textfield.TextInputEditText
@@ -486,8 +482,7 @@
                                     android:layout_height="match_parent"
                                     android:hint="@string/add_a_location"
                                     android:inputType="textMultiLine"
-                                    android:textSize="20sp"
-                                    android:theme="@style/EditScreenTextInputLayoutStyleDark" />
+                                    android:textSize="20sp" />
                             </com.google.android.material.textfield.TextInputLayout>
 
 
@@ -540,7 +535,6 @@
                                 android:layout_height="match_parent"
                                 android:layout_marginEnd="10dp"
                                 android:layout_weight="0.8"
-                                android:theme="@style/EditScreenTextInputLayoutStyleDark"
                                 app:errorEnabled="true">
 
                                 <com.google.android.material.textfield.TextInputEditText
@@ -548,35 +542,14 @@
                                     android:layout_height="wrap_content"
                                     android:hint="Add phone number"
                                     android:inputType="phone"
-                                    android:textSize="20sp"
-                                    android:theme="@style/EditScreenTextInputLayoutStyleDark" />
+                                    android:textSize="20sp" />
 
 
                             </com.google.android.material.textfield.TextInputLayout>
 
 
-                            <!--                            <Button-->
-                            <!--                                android:id="@+id/AddNewEventActivity_Button_Add"-->
-                            <!--                                android:layout_width="wrap_content"-->
-                            <!--                                android:layout_height="wrap_content"-->
-                            <!--                                android:layout_weight="0.0"-->
-                            <!--                                android:background="@color/darkIndigo"-->
-                            <!--                                android:text="@string/add"-->
-                            <!--                                android:textColor="@color/white" />-->
-
-
                         </LinearLayout>
 
-                        <!--                        <Button-->
-                        <!--                            android:id="@+id/AddNewEventActivity_Button_AddFromContacts"-->
-                        <!--                            android:layout_width="match_parent"-->
-                        <!--                            android:layout_height="wrap_content"-->
-                        <!--                            android:layout_marginLeft="20dp"-->
-                        <!--                            android:layout_marginRight="20dp"-->
-                        <!--                            android:layout_marginBottom="20dp"-->
-                        <!--                            android:background="@color/darkIndigo"-->
-                        <!--                            android:text="@string/add_from_contacts"-->
-                        <!--                            android:textColor="@color/white" />-->
 
                     </LinearLayout>
 
@@ -607,7 +580,6 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:theme="@style/EditScreenTextInputLayoutStyleDark"
                             app:errorEnabled="true">
 
                             <com.google.android.material.textfield.TextInputEditText
@@ -618,8 +590,7 @@
                                 android:layout_weight="0"
                                 android:hint="@string/send_mail"
                                 android:inputType="textEmailAddress"
-                                android:textSize="20sp"
-                                android:theme="@style/EditScreenTextInputLayoutStyleDark" />
+                                android:textSize="20sp" />
                         </com.google.android.material.textfield.TextInputLayout>
 
                         <Switch
@@ -627,8 +598,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_weight="0"
-                            android:checked="true"
-                            android:theme="@style/EditScreenTextInputLayoutStyleDark" />
+                            android:checked="true" />
 
 
                     </LinearLayout>

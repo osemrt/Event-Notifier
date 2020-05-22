@@ -124,7 +124,7 @@ public class CalendarFragment extends Fragment implements View.OnClickListener, 
         }
 
 
-        GridAdapter gridAdapter = new GridAdapter(getActivity().getApplicationContext(), dates, calendar, events);
+        GridAdapter gridAdapter = new GridAdapter(getActivity().getBaseContext(), dates, calendar, events);
         datesGridView.setAdapter(gridAdapter);
 
     }
@@ -134,7 +134,7 @@ public class CalendarFragment extends Fragment implements View.OnClickListener, 
     public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
         final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setCancelable(true);
-        View dialogView = LayoutInflater.from(getActivity().getApplicationContext()).inflate(R.layout.layout_alert_dialog, parent, false);
+        View dialogView = LayoutInflater.from(getActivity().getBaseContext()).inflate(R.layout.layout_alert_dialog, parent, false);
         builder.setView(dialogView);
         alertDialog = builder.create();
         alertDialog.show();
@@ -175,7 +175,7 @@ public class CalendarFragment extends Fragment implements View.OnClickListener, 
         addNewEventButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), NewEventActivity.class);
+                Intent intent = new Intent(getContext(), NewEventActivity.class);
                 intent.putExtra("date", date);
                 startActivityForResult(intent, ADD_NEW_EVENT_ACTIVITY_REQUEST_CODE);
                 alertDialog.dismiss();

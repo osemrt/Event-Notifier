@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="ds">
+        <attr name="mainColor" format="color" />
+        <attr name="Background" format="color" />
+        <attr name="viewBackGround" format="color" />
+        <attr name="headViewColor" format="color" />
+        <attr name="unChecked" format="color" />
+        <attr name="iconColor" format="color" />
+        <attr name="textColor" format="color"/>
+    </declare-styleable>
+
+</resources>

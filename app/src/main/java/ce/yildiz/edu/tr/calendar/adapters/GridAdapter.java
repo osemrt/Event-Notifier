@@ -2,6 +2,9 @@ package ce.yildiz.edu.tr.calendar.adapters;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.res.TypedArray;
+import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,20 +25,28 @@ import ce.yildiz.edu.tr.calendar.Utils;
 import ce.yildiz.edu.tr.calendar.models.Event;
 
 public class GridAdapter extends ArrayAdapter {
+
+    private Utils.AppTheme appTheme;
+
     private List<Date> dates;
     private Calendar selectedCalendar;
     private List<Event> events;
     private LayoutInflater layoutInflater;
     private TextView dayTextView;
     private TextView eventCountTextView;
+    private ArrayList<Integer> colors;
 
     public GridAdapter(@NonNull Context context, List<Date> dates, Calendar selectedCalendar, List<Event> events) {
         super(context, R.layout.layout_cell);
+
 
         this.dates = dates;
         this.selectedCalendar = selectedCalendar;
         this.events = events;
         this.layoutInflater = LayoutInflater.from(context);
+
+        getAppTheme();
+        colors = getColors();
     }
 
 
@@ -75,17 +86,23 @@ public class GridAdapter extends ArrayAdapter {
         LinearLayout bgLinearLayout = convertView.findViewById(R.id.LayoutCell_LinearLayout);
 
         if (displayYear == selectedYear && displayMonth == selectedMonth) {
-            convertView.setBackgroundColor(getContext().getResources().getColor(R.color.lightIndigo));
-            dayTextView.setTextColor(getContext().getResources().getColor(R.color.black));
+            convertView.setBackgroundColor(getContext().getResources().getColor(colors.get(2)));
+            dayTextView.setTextColor(getContext().getResources().getColor(colors.get(3)));
+            eventCountTextView.setTextColor(getContext().getResources().getColor(colors.get(6)));
+
         } else {
-            dayTextView.setTextColor(getContext().getResources().getColor(R.color.lightGrey));
+            dayTextView.setTextColor(getContext().getResources().getColor(colors.get(1)));
+
         }
 
         if (displayYear == currentYear && displayMonth == currentMonth && displayDay == currentDay) {
             if (displayYear == selectedYear && displayMonth == selectedMonth) {
-                bgLinearLayout.setBackgroundColor(getContext().getResources().getColor(R.color.Indigo));
-                dayTextView.setTextColor(getContext().getResources().getColor(R.color.white));
-                eventCountTextView.setTextColor(getContext().getResources().getColor(R.color.white));
+
+                bgLinearLayout.setBackgroundColor(getContext().getResources().getColor(colors.get(4)));
+                dayTextView.setTextColor(getContext().getResources().getColor(colors.get(5)));
+                eventCountTextView.setTextColor(getContext().getResources().getColor(colors.get(5)));
+
+
             }
         }
 
@@ -119,5 +136,44 @@ public class GridAdapter extends ArrayAdapter {
     @Override
     public Object getItem(int position) {
         return dates.get(position);
+    }
+
+    private void getAppTheme() {
+        if (getFlag()) {
+            appTheme = Utils.AppTheme.DARK;
+        } else {
+            appTheme = Utils.AppTheme.INDIGO;
+        }
+    }
+
+    private boolean getFlag() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+        return sharedPreferences.getBoolean("isDark", false);
+    }
+
+    private ArrayList<Integer> getColors() {
+        ArrayList<Integer> colors = new ArrayList<>();
+        switch (appTheme) {
+            case INDIGO:
+                colors.add(R.color.white); // disabled date backgroundColor
+                colors.add(R.color.lightGrey); // disabled date textColor
+                colors.add(R.color.lightIndigo); // active date backgroundColor
+                colors.add(R.color.darkIndigo); // active date textColor
+                colors.add(R.color.darkIndigo); // current date backgroundColor
+                colors.add(R.color.white); // current date textColor
+                colors.add(R.color.darkIndigo); // event count textColor
+                break;
+            case DARK:
+                colors.add(R.color.darkGrey); // disabled date backgroundColor
+                colors.add(R.color.lightGrey2); // disabled date textColor
+                colors.add(R.color.darkGrey2); // active date backgroundColor
+                colors.add(R.color.white); // active date textColor
+                colors.add(R.color.black); // current date backgroundColor
+                colors.add(R.color.white); // current date textColor
+                colors.add(R.color.white); // event count textColor
+                break;
+
+        }
+        return colors;
     }
 }

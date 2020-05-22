@@ -74,8 +74,8 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         builder.setView(dialogView);
         final AlertDialog alertDialog = builder.create();
 
-        final RadioGroup notificationPreferenceRadioGroup = (RadioGroup) dialogView.findViewById(R.id.AlertDialogLayout_Notification_RadioGroup_NotificationPreference);
-        Button backButton = (Button) dialogView.findViewById(R.id.AlertDialogLayout_Notification_Button_Back);
+        final RadioGroup notificationPreferenceRadioGroup = (RadioGroup) dialogView.findViewById(R.id.AlertDialogLayout_RadioGroup);
+        Button backButton = (Button) dialogView.findViewById(R.id.AlertDialogLayout_Button_Back);
 
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -92,7 +92,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
             }
         });
 
-        ((RadioGroup) dialogView.findViewById(R.id.AlertDialogLayout_Notification_RadioGroup_NotificationPreference)).setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+        ((RadioGroup) dialogView.findViewById(R.id.AlertDialogLayout_RadioGroup)).setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup radioGroup, int buttonId) {
                 RadioButton selectedPreferenceRadioButton = (RadioButton) dialogView.findViewById(buttonId);

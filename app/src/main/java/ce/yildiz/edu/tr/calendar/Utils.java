@@ -26,6 +26,11 @@ public class Utils {
         AT_THE_TIME_OF_EVENT
     }
 
+    public enum AppTheme {
+        INDIGO,
+        DARK,
+    }
+
     public static final int MAX_CALENDAR_DAYS = 42;
 
     public static final SimpleDateFormat dateFormat = new SimpleDateFormat("MMMM yyyy", Locale.ENGLISH);

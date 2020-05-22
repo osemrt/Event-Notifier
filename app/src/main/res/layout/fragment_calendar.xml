@@ -2,6 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
+    android:background="?attr/Background"
     android:layout_height="match_parent">
 
 
@@ -14,7 +15,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/Indigo"
+            android:background="?attr/mainColor"
             android:gravity="center"
             android:orientation="horizontal"
             android:padding="20dp">
@@ -67,10 +68,10 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="@color/yellow"
+                android:background="?attr/headViewColor"
                 android:gravity="center"
                 android:text="@string/mon"
-                android:textColor="@color/black"
+                android:textColor="@color/white"
                 android:textStyle="bold" />
 
             <TextView
@@ -78,7 +79,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="@color/pink"
+                android:background="?attr/headViewColor"
                 android:gravity="center"
                 android:text="@string/tue"
                 android:textColor="@color/white"
@@ -89,10 +90,10 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="@color/cyan"
+                android:background="?attr/headViewColor"
                 android:gravity="center"
                 android:text="@string/wed"
-                android:textColor="@color/black"
+                android:textColor="@color/white"
                 android:textStyle="bold" />
 
             <TextView
@@ -100,7 +101,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="@color/deepPurple"
+                android:background="?attr/headViewColor"
                 android:gravity="center"
                 android:text="@string/thu"
                 android:textColor="@color/white"
@@ -111,7 +112,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="@color/green"
+                android:background="?attr/headViewColor"
                 android:gravity="center"
                 android:text="@string/fri"
                 android:textColor="@color/white"
@@ -123,7 +124,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="@color/brown"
+                android:background="?attr/headViewColor"
                 android:gravity="center"
                 android:text="@string/sat"
                 android:textColor="@color/white"
@@ -134,7 +135,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="@color/red"
+                android:background="?attr/headViewColor"
                 android:gravity="center"
                 android:text="@string/sun"
                 android:textColor="@color/white"

@@ -71,6 +71,7 @@
                             android:id="@+id/UpcomingLayoutCell_TextView_EventDate"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:textColor="?attr/textColor"
                             android:text="10-May-2020" />
                     </LinearLayout>
 
@@ -93,6 +94,7 @@
                         <TextView
                             android:id="@+id/UpcomingLayoutCell_TextView_EventTime"
                             android:layout_width="match_parent"
+                            android:textColor="?attr/textColor"
                             android:layout_height="wrap_content"
                             android:text="06:00 - 07:00" />
                     </LinearLayout>
@@ -104,6 +106,7 @@
                 <TextView
                     android:id="@+id/UpcomingLayoutCell_TextView_EventNote"
                     android:layout_width="match_parent"
+                    android:textColor="?attr/textColor"
                     android:layout_height="wrap_content"
                     android:text="Don't forget to buy a gift" />
 

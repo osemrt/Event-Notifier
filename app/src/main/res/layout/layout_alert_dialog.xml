@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="0"
-        android:background="@color/darkIndigo"
+        android:background="?attr/mainColor"
         android:gravity="center"
         android:padding="10dp"
         android:text="@string/events"
@@ -54,7 +54,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="0"
-        android:background="@color/darkIndigo"
+        android:background="?attr/mainColor"
         android:text="@string/add_event"
         android:textColor="@color/white"
         android:textSize="16sp" />

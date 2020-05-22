@@ -38,7 +38,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Lunch with Finn and Ally"
-                    android:textColor="@color/black"
+                    android:textColor="?attr/textColor"
                     android:textSize="18sp"
                     android:textStyle="bold" />
 
@@ -61,6 +61,7 @@
                     <TextView
                         android:id="@+id/LayoutCell_TextView_EventTime"
                         android:layout_width="match_parent"
+                        android:textColor="?attr/textColor"
                         android:layout_height="wrap_content"
                         android:text="06:00 - 07:00" />
                 </LinearLayout>
@@ -69,6 +70,7 @@
                     android:id="@+id/LayoutCell_TextView_EventNote"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:textColor="?attr/textColor"
                     android:text="Don't forget to buy a gift" />
 
             </LinearLayout>

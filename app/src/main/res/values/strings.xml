@@ -64,4 +64,8 @@
     <string name="default_reminder_time">Reminder Time</string>
     <string name="default_reminder_frequency">Reminder Frequency</string>
     <string name="app_theme">App Theme</string>
+    <string name="dark">Dark</string>
+    <string name="indigo">Indigo</string>
+    <string name="choose_theme">Choose Theme</string>
+    <string name="ringtone">Ringtone</string>
 </resources>

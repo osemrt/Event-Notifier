@@ -7,7 +7,7 @@
         android:id="@+id/UserSettingsFragment_Header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/Indigo">
+        android:background="?attr/mainColor">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -51,7 +51,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/UserSettingsFragment_Header">
+        android:layout_below="@+id/UserSettingsFragment_Header"
+        android:background="?attr/Background">
 
         <LinearLayout xmlns:app="http://schemas.android.com/apk/res-auto"
             android:layout_width="match_parent"
@@ -88,7 +89,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="@string/default_ringtone"
-                            android:textColor="@color/Grey"
+                            android:textColor="?attr/textColor"
                             android:textSize="20sp"
                             android:textStyle="bold" />
 
@@ -96,7 +97,8 @@
                             android:id="@+id/UserSettingsFragment_TextView_DefaultRingtone"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="TextView" />
+                            android:text="TextView"
+                            android:textColor="?attr/textColor" />
 
                     </LinearLayout>
                 </LinearLayout>
@@ -140,7 +142,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="@string/default_reminder_time"
-                            android:textColor="@color/Grey"
+                            android:textColor="?attr/textColor"
                             android:textSize="20sp"
                             android:textStyle="bold" />
 
@@ -148,7 +150,8 @@
                             android:id="@+id/UserSettingsFragment_TextView_DefaultReminderTime"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="TextView" />
+                            android:text="TextView"
+                            android:textColor="?attr/textColor" />
 
                     </LinearLayout>
 
@@ -191,7 +194,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="@string/default_reminder_frequency"
-                            android:textColor="@color/Grey"
+                            android:textColor="?attr/textColor"
                             android:textSize="20sp"
                             android:textStyle="bold" />
 
@@ -199,7 +202,8 @@
                             android:id="@+id/UserSettingsFragment_TextView_DefaultReminderFrequency"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="TextView" />
+                            android:text="TextView"
+                            android:textColor="?attr/textColor" />
 
                     </LinearLayout>
 
@@ -245,7 +249,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="@string/app_theme"
-                            android:textColor="@color/Grey"
+                            android:textColor="?attr/textColor"
                             android:textSize="20sp"
                             android:textStyle="bold" />
 
@@ -253,7 +257,8 @@
                             android:id="@+id/UserSettingsFragment_TextView_AppTheme"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Dark Theme" />
+                            android:text="Dark Theme"
+                            android:textColor="?attr/textColor" />
 
                     </LinearLayout>
                 </LinearLayout>

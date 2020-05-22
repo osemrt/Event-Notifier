@@ -1,6 +1,10 @@
 package ce.yildiz.edu.tr.calendar.views;
 
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.MenuItem;
 
 import androidx.annotation.NonNull;
@@ -26,6 +30,7 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setTheme(getFlag("isDark") ? R.style.DarkTheme : R.style.DarkIndigoTheme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -36,7 +41,15 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
         fragmentManager.beginTransaction().add(R.id.MainActivity_FrameLayout_Container, upcomingEventsFragment).hide(upcomingEventsFragment).commit();
         fragmentManager.beginTransaction().add(R.id.MainActivity_FrameLayout_Container, calendarFragment).commit();
 
+        if (getFlag("isChanged")) {
+            bottomNavigationView.setSelectedItemId(R.id.BottomNavigation_Item_Settings);
+            bottomNavigationView.performClick();
+            saveFlag("isChanged", false);
+        }
+
+
     }
+
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
@@ -68,6 +81,19 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
         }
 
         return true;
+    }
+
+    private void saveFlag(String key, boolean flag) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean(key, flag);
+        editor.apply();
+    }
+
+
+    private boolean getFlag(String key) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        return sharedPreferences.getBoolean(key, false);
     }
 
 
