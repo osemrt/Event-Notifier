@@ -545,13 +545,16 @@ public class EditEventActivity extends AppCompatActivity {
         Intent intent = new Intent(this, ServiceAutoLauncher.class);
         intent.putExtra("eventTitle", mEvent.getTitle());
         intent.putExtra("eventNote", mEvent.getNote());
+        intent.putExtra("eventColor", mEvent.getColor());
         intent.putExtra("eventTimeStamp", mEvent.getDate() + ", " + mEvent.getTime());
         intent.putExtra("interval", getInterval());
+        String asd = getInterval();
+        Log.d(TAG, "setAlarm: " + asd);
         intent.putExtra("notificationId", notification.getChannelId());
 
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, notification.getId(), intent, PendingIntent.FLAG_ONE_SHOT);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, notification.getId(), intent, PendingIntent.FLAG_CANCEL_CURRENT);
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        alarmManager.set(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent);
+        alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent);
     }
 
     private String getInterval() {

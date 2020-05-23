@@ -443,6 +443,7 @@ public class NewEventActivity extends AppCompatActivity {
         Intent intent = new Intent(this, ServiceAutoLauncher.class);
         intent.putExtra("eventTitle", event.getTitle());
         intent.putExtra("eventNote", event.getNote());
+        intent.putExtra("eventColor", event.getColor());
         intent.putExtra("eventTimeStamp", event.getDate() + ", " + event.getTime());
         intent.putExtra("interval", getInterval());
         intent.putExtra("notificationId", notification.getChannelId());

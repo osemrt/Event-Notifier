@@ -73,7 +73,7 @@ public class Utils {
         colors.add(context.getResources().getString(R.color.lime));
         colors.add(context.getResources().getString(R.color.lightIndigo));
         colors.add(context.getResources().getString(R.color.black));
-        colors.add(context.getResources().getString(R.color.white));
+        colors.add(context.getResources().getString(R.color.color9));
         colors.add(context.getResources().getString(R.color.lite_blue));
         colors.add(context.getResources().getString(R.color.red));
         colors.add(context.getResources().getString(R.color.brown));
