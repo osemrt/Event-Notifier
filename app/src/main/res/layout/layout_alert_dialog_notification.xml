@@ -60,7 +60,6 @@
                 android:id="@+id/AlertDialogLayout_Notification_RadioButton_AtTheTimeOfEvent"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:checked="true"
                 android:text="@string/at_the_time_of_event"
                 android:textSize="18sp" />
         </RadioGroup>

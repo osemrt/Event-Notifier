@@ -7,7 +7,6 @@ import android.app.DatePickerDialog;
 import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -32,6 +31,7 @@ import android.widget.RadioGroup;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -40,6 +40,8 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.snackbar.BaseTransientBottomBar;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
@@ -48,6 +50,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -59,7 +62,7 @@ import ce.yildiz.edu.tr.calendar.database.DBHelper;
 import ce.yildiz.edu.tr.calendar.database.DBTables;
 import ce.yildiz.edu.tr.calendar.models.Event;
 import ce.yildiz.edu.tr.calendar.models.Notification;
-import ce.yildiz.edu.tr.calendar.other.AlarmReceiver;
+import ce.yildiz.edu.tr.calendar.other.ServiceAutoLauncher;
 import petrov.kristiyan.colorpicker.ColorPicker;
 
 public class NewEventActivity extends AppCompatActivity {
@@ -110,6 +113,7 @@ public class NewEventActivity extends AppCompatActivity {
 
         defineViews();
         initViews();
+        initVariables();
         createAlertDialogs();
         defineListeners();
 
@@ -154,6 +158,16 @@ public class NewEventActivity extends AppCompatActivity {
         GradientDrawable bgShape = (GradientDrawable) pickNoteColorTextView.getBackground();
         bgShape.setColor(getResources().getInteger(R.color.red));
 
+    }
+
+    private void initVariables() {
+        Calendar mCal = Calendar.getInstance();
+        mCal.setTimeZone(TimeZone.getDefault());
+        alarmYear = mCal.get(Calendar.YEAR);
+        alarmMonth = mCal.get(Calendar.MONTH);
+        alarmDay = mCal.get(Calendar.DAY_OF_MONTH);
+        alarmHour = mCal.get(Calendar.HOUR_OF_DAY);
+        alarmMinute = mCal.get(Calendar.MINUTE);
     }
 
     private void createAlertDialogs() {
@@ -299,9 +313,9 @@ public class NewEventActivity extends AppCompatActivity {
             @Override
             public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
                 Calendar aCal = Calendar.getInstance();
+                aCal.setTimeZone(TimeZone.getDefault());
                 aCal.set(Calendar.HOUR_OF_DAY, hourOfDay);
                 aCal.set(Calendar.MINUTE, minute);
-                aCal.setTimeZone(TimeZone.getDefault());
                 SimpleDateFormat simpleDateFormat = new SimpleDateFormat("K:mm a", Locale.ENGLISH);
                 String eventTime = simpleDateFormat.format(aCal.getTime());
 
@@ -309,7 +323,6 @@ public class NewEventActivity extends AppCompatActivity {
                 alarmMinute = minute;
 
                 setTimeTextView.setText(eventTime);
-
             }
         }, hour, minute, false);
         timePickerDialog.show();
@@ -326,10 +339,10 @@ public class NewEventActivity extends AppCompatActivity {
             @Override
             public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
                 Calendar aCal = Calendar.getInstance();
+                aCal.setTimeZone(TimeZone.getDefault());
                 aCal.set(Calendar.YEAR, year);
                 aCal.set(Calendar.MONTH, month);
                 aCal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                aCal.setTimeZone(TimeZone.getDefault());
                 SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH);
                 String eventTime = simpleDateFormat.format(aCal.getTime());
 
@@ -397,38 +410,61 @@ public class NewEventActivity extends AppCompatActivity {
                 }
                 break;
         }
-
         return true;
     }
 
     private void setAlarms() {
         Calendar calendar = Calendar.getInstance();
-        calendar.set(alarmYear, alarmMonth, alarmDay, alarmHour, alarmMinute, 0);
+        calendar.set(alarmYear, alarmMonth, alarmDay);
+
+        calendar.set(Calendar.HOUR_OF_DAY, alarmHour);
+        calendar.set(Calendar.MINUTE, alarmMinute);
+        calendar.set(Calendar.SECOND, 0);
+
         for (Notification notification : notifications) {
             Calendar aCal = (Calendar) calendar.clone();
-            switch (notification.getTime()) {
-                case "10 minutes before":
-                    aCal.add(Calendar.MINUTE, -10);
-                    break;
-                case "1 hour before":
-                    aCal.add(Calendar.HOUR_OF_DAY, -1);
-                    break;
-                case "1 day before":
-                    aCal.add(Calendar.DAY_OF_MONTH, -1);
-                    break;
+            String notificationPreference = notification.getTime();
+
+            if (notificationPreference.equals(getString(R.string._10_minutes_before))) {
+                aCal.add(Calendar.MINUTE, -10);
+            } else if (notificationPreference.equals(getString(R.string._1_hour_before))) {
+                aCal.add(Calendar.HOUR_OF_DAY, -1);
+            } else if (notificationPreference.equals(getString(R.string._1_day_before))) {
+                aCal.add(Calendar.DAY_OF_MONTH, -1);
+            } else {
+                Log.i(TAG, "setAlarms: ");
             }
-            setAlarm(aCal, event.getTitle(), event.getTime(), notification.getId());
+
+            setAlarm(notification, aCal.getTimeInMillis());
         }
     }
 
-    private void setAlarm(Calendar calendar, String eventTitle, String time, int notificationId) {
-        Intent intent = new Intent(this, AlarmReceiver.class);
-        intent.putExtra("eventTitle", eventTitle);
-        intent.putExtra("time", time);
-        intent.putExtra("notificationId", notificationId);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, notificationId, intent, PendingIntent.FLAG_ONE_SHOT);
+    private void setAlarm(Notification notification, long triggerAtMillis) {
+        Intent intent = new Intent(this, ServiceAutoLauncher.class);
+        intent.putExtra("eventTitle", event.getTitle());
+        intent.putExtra("eventNote", event.getNote());
+        intent.putExtra("eventTimeStamp", event.getDate() + ", " + event.getTime());
+        intent.putExtra("interval", getInterval());
+        intent.putExtra("notificationId", notification.getChannelId());
+
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, notification.getId(), intent, PendingIntent.FLAG_ONE_SHOT);
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent);
+    }
+
+    private String getInterval() {
+        String interval = getString(R.string.one_time);
+        String repeatingPeriod = repeatTextView.getText().toString();
+        if (repeatingPeriod.equals(getString(R.string.daily))) {
+            interval = getString(R.string.daily);
+        } else if (repeatingPeriod.equals(getString(R.string.weekly))) {
+            interval = getString(R.string.weekly);
+        } else if (repeatingPeriod.equals(getString(R.string.monthly))) {
+            interval = getString(R.string.monthly);
+        } else if (repeatingPeriod.equals(getString(R.string.yearly))) {
+            interval = getString(R.string.yearly);
+        }
+        return interval;
     }
 
     @SuppressLint("ResourceType")
@@ -462,10 +498,15 @@ public class NewEventActivity extends AppCompatActivity {
     }
 
     private boolean confirmInputs() {
-        if (validateEventTitle()) {
-            return true;
+        if (!validateEventTitle()) {
+            return false;
         }
-        return false;
+
+        if (!validateNotifications()) {
+            Snackbar.make(addNotificationTextView, "You cannot set a notification to the past.", BaseTransientBottomBar.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
     }
 
     private boolean validateEventTitle() {
@@ -477,6 +518,35 @@ public class NewEventActivity extends AppCompatActivity {
             eventTitleTextInputLayout.setError(null);
             return true;
         }
+    }
+
+    private boolean validateNotifications() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(alarmYear, alarmMonth, alarmDay);
+
+        calendar.set(Calendar.HOUR_OF_DAY, alarmHour);
+        calendar.set(Calendar.MINUTE, alarmMinute);
+        calendar.set(Calendar.SECOND, 0);
+
+        for (Notification notification : notifications) {
+            Calendar aCal = (Calendar) calendar.clone();
+            String notificationPreference = notification.getTime();
+
+            if (notificationPreference.equals(getString(R.string._10_minutes_before))) {
+                aCal.add(Calendar.MINUTE, -10);
+            } else if (notificationPreference.equals(getString(R.string._1_hour_before))) {
+                aCal.add(Calendar.HOUR_OF_DAY, -1);
+            } else if (notificationPreference.equals(getString(R.string._1_day_before))) {
+                aCal.add(Calendar.DAY_OF_MONTH, -1);
+            } else {
+                Log.i(TAG, "setAlarms: ");
+            }
+
+            if (aCal.before(Calendar.getInstance())) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private class SaveAsyncTask extends AsyncTask<Void, Void, Void> {
@@ -521,7 +591,6 @@ public class NewEventActivity extends AppCompatActivity {
         sqLiteDatabase.close();
         return eventId;
     }
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {

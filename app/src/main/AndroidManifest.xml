@@ -36,14 +36,22 @@
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_notify" />
+
         <activity
             android:name=".views.MapsActivity"
             android:label="@string/title_activity_maps" />
 
-        <receiver
-            android:name=".other.AlarmReceiver"
-            android:enabled="true"
-            android:exported="true" />
+        <service android:name=".other.AlarmService" />
+
+        <receiver android:name=".other.ServiceAutoLauncher">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <category android:name="android.intent.category.HOME" />
+            </intent-filter>
+        </receiver>
 
         <activity android:name=".views.NewEventActivity" />
         <activity android:name=".views.EditEventActivity" />

@@ -7,7 +7,6 @@ import android.app.DatePickerDialog;
 import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -40,6 +39,8 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.snackbar.BaseTransientBottomBar;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
@@ -59,7 +60,7 @@ import ce.yildiz.edu.tr.calendar.database.DBHelper;
 import ce.yildiz.edu.tr.calendar.database.DBTables;
 import ce.yildiz.edu.tr.calendar.models.Event;
 import ce.yildiz.edu.tr.calendar.models.Notification;
-import ce.yildiz.edu.tr.calendar.other.AlarmReceiver;
+import ce.yildiz.edu.tr.calendar.other.ServiceAutoLauncher;
 import petrov.kristiyan.colorpicker.ColorPicker;
 
 public class EditEventActivity extends AppCompatActivity {
@@ -80,7 +81,6 @@ public class EditEventActivity extends AppCompatActivity {
     private RecyclerView notificationsRecyclerView;
     private TextView addNotificationTextView;
     private TextView repeatTextView;
-    private RadioButton selectedPreferenceRadioButton;
     private TextInputLayout eventNoteTextInputLayout;
     private TextView pickNoteColorTextView;
     private TextInputLayout eventLocationTextInputLayout;
@@ -96,11 +96,11 @@ public class EditEventActivity extends AppCompatActivity {
 
     private int notColor;
     private DBHelper dbHelper;
-    private List<Notification> notifications;
-    private List<Notification> oldNotifications;
-    private NotificationAdapter notificationAdapter;
-    private Event event;
+    private List<Notification> currentNotifications;
+    private List<Notification> eventNotifications;
     private int oldEventId;
+    private NotificationAdapter notificationAdapter;
+    private Event mEvent;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -108,12 +108,11 @@ public class EditEventActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event);
 
-        event = new Event();
-        notifications = new ArrayList<>();
         dbHelper = new DBHelper(this);
 
         defineViews();
         initViews();
+        initVariables();
         createAlertDialogs();
         defineListeners();
 
@@ -152,42 +151,41 @@ public class EditEventActivity extends AppCompatActivity {
         String eventTitle = intent.getStringExtra("eventTitle");
         String eventDate = intent.getStringExtra("eventDate");
         String eventTime = intent.getStringExtra("eventTime");
-        readEvent(eventTitle, eventDate, eventTime);
-        oldEventId = event.getId();
+        mEvent = readEvent(eventTitle, eventDate, eventTime);
+        oldEventId = mEvent.getId();
 
+        eventTitleTextInputLayout.getEditText().setText(mEvent.getTitle());
 
-        eventTitleTextInputLayout.getEditText().setText(event.getTitle());
+        setDateTextView.setText(mEvent.getDate());
 
-        setDateTextView.setText(event.getDate());
-
-        if (event.isAllDay()) {
+        if (mEvent.isAllDay()) {
             allDayEventSwitch.setChecked(true);
             setTimeLinearLayout.setVisibility(View.GONE);
 
         } else {
             allDayEventSwitch.setChecked(false);
-            setTimeTextView.setText(event.getTime());
+            setTimeTextView.setText(mEvent.getTime());
         }
 
-        setDurationButton.setText(event.getDuration());
+        setDurationButton.setText(mEvent.getDuration());
 
-        readNotifications(event.getId());
-        oldNotifications = new ArrayList<>(notifications);
+        eventNotifications = readNotifications(mEvent.getId());
+        cancelAlarms(eventNotifications);
+        currentNotifications = new ArrayList<>(eventNotifications);
         setUpRecyclerView();
 
-        repeatTextView.setText(event.getRepetition());
+        repeatTextView.setText(mEvent.getRepetition());
 
-        eventNoteTextInputLayout.getEditText().setText(event.getNote());
+        eventNoteTextInputLayout.getEditText().setText(mEvent.getNote());
 
         GradientDrawable bgShape = (GradientDrawable) pickNoteColorTextView.getBackground();
-        bgShape.setColor(event.getColor());
+        bgShape.setColor(mEvent.getColor());
 
-        eventLocationTextInputLayout.getEditText().setText(event.getLocation());
+        eventLocationTextInputLayout.getEditText().setText(mEvent.getLocation());
 
-        phoneNumberTextInputLayout.getEditText().setText(event.getPhoneNumber());
+        phoneNumberTextInputLayout.getEditText().setText(mEvent.getPhoneNumber());
 
-
-        if (event.getMail() == null | "".equals(event.getMail())) {
+        if (mEvent.getMail() == null | "".equals(mEvent.getMail())) {
             mailSwitch.setChecked(false);
             mailTextInputEditText.setText("");
             mailTextInputEditText.setEnabled(false);
@@ -196,9 +194,21 @@ public class EditEventActivity extends AppCompatActivity {
             mailSwitch.setChecked(true);
             mailTextInputEditText.setEnabled(true);
             mailTextInputLayout.setEnabled(true);
-            mailTextInputLayout.getEditText().setText(event.getMail());
+            mailTextInputLayout.getEditText().setText(mEvent.getMail());
         }
+    }
 
+    private void initVariables() {
+        Calendar mCal = Calendar.getInstance();
+        mCal.setTimeZone(TimeZone.getDefault());
+        try {
+            mCal.setTime(Utils.eventDateFormat.parse(setDateTextView.getText().toString()));
+            alarmYear = mCal.get(Calendar.YEAR);
+            alarmMonth = mCal.get(Calendar.MONTH);
+            alarmDay = mCal.get(Calendar.DAY_OF_MONTH);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
     }
 
     private void createAlertDialogs() {
@@ -211,7 +221,7 @@ public class EditEventActivity extends AppCompatActivity {
         notificationRadioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
-                notifications.add(new Notification(((RadioButton) notificationDialogView.findViewById(checkedId)).getText().toString()));
+                currentNotifications.add(new Notification(((RadioButton) notificationDialogView.findViewById(checkedId)).getText().toString()));
                 notificationAlertDialog.dismiss();
                 setUpRecyclerView();
             }
@@ -293,7 +303,7 @@ public class EditEventActivity extends AppCompatActivity {
                 repetitionAlertDialog.show();
             }
         });
-        
+
         pickNoteColorTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -324,7 +334,8 @@ public class EditEventActivity extends AppCompatActivity {
         });
     }
 
-    private void readEvent(String eventTitle, String eventDate, String eventTime) {
+    private Event readEvent(String eventTitle, String eventDate, String eventTime) {
+        Event event = new Event();
         SQLiteDatabase sqLiteDatabase = dbHelper.getReadableDatabase();
         Cursor cursor = dbHelper.readEvent(sqLiteDatabase, eventTitle, eventDate, eventTime);
         while (cursor.moveToNext()) {
@@ -347,9 +358,12 @@ public class EditEventActivity extends AppCompatActivity {
 
         cursor.close();
         sqLiteDatabase.close();
+
+        return event;
     }
 
-    private void readNotifications(int eventId) {
+    private ArrayList<Notification> readNotifications(int eventId) {
+        ArrayList<Notification> notifications = new ArrayList<>();
         SQLiteDatabase sqLiteDatabase = dbHelper.getReadableDatabase();
         Cursor cursor = dbHelper.readEventNotifications(sqLiteDatabase, eventId);
         while (cursor.moveToNext()) {
@@ -360,6 +374,8 @@ public class EditEventActivity extends AppCompatActivity {
             notification.setChannelId(cursor.getInt(cursor.getColumnIndex(DBTables.NOTIFICATION_CHANNEL_ID)));
             notifications.add(notification);
         }
+
+        return notifications;
     }
 
 
@@ -456,7 +472,7 @@ public class EditEventActivity extends AppCompatActivity {
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         layoutManager.setMeasurementCacheEnabled(false);
         notificationsRecyclerView.setLayoutManager(layoutManager);
-        notificationAdapter = new NotificationAdapter(this, notifications);
+        notificationAdapter = new NotificationAdapter(this, currentNotifications);
         notificationsRecyclerView.setAdapter(notificationAdapter);
 
     }
@@ -476,8 +492,7 @@ public class EditEventActivity extends AppCompatActivity {
                 if (confirmInputs()) {
                     getViewValues();
                     new UpdateAsyncTask().execute();
-                    if (event.isNotify()) {
-                        cancelAlarms();
+                    if (mEvent.isNotify()) {
                         setAlarms();
                     }
                 }
@@ -487,14 +502,14 @@ public class EditEventActivity extends AppCompatActivity {
         return true;
     }
 
-    private void cancelAlarms() {
+    private void cancelAlarms(List<Notification> notifications) {
         for (Notification notification : notifications) {
             cancelAlarm(notification.getId());
         }
     }
 
     private void cancelAlarm(int requestCode) {
-        Intent intent = new Intent(this, AlarmReceiver.class);
+        Intent intent = new Intent(this, ServiceAutoLauncher.class);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, requestCode, intent, PendingIntent.FLAG_ONE_SHOT);
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         alarmManager.cancel(pendingIntent);
@@ -502,32 +517,56 @@ public class EditEventActivity extends AppCompatActivity {
 
     private void setAlarms() {
         Calendar calendar = Calendar.getInstance();
-        calendar.set(alarmYear, alarmMonth, alarmDay, alarmHour, alarmMinute, 0);
+        calendar.set(alarmYear, alarmMonth, alarmDay);
+
+        calendar.set(Calendar.HOUR_OF_DAY, alarmHour);
+        calendar.set(Calendar.MINUTE, alarmMinute);
+        calendar.set(Calendar.SECOND, 0);
+
         for (Notification notification : notificationAdapter.getNotifications()) {
             Calendar aCal = (Calendar) calendar.clone();
-            switch (notification.getTime()) {
-                case "10 minutes before":
-                    aCal.add(Calendar.MINUTE, -10);
-                    break;
-                case "1 hour before":
-                    aCal.add(Calendar.HOUR_OF_DAY, -1);
-                    break;
-                case "1 day before":
-                    aCal.add(Calendar.DAY_OF_MONTH, -1);
-                    break;
+            String notificationPreference = notification.getTime();
+
+            if (notificationPreference.equals(getString(R.string._10_minutes_before))) {
+                aCal.add(Calendar.MINUTE, -10);
+            } else if (notificationPreference.equals(getString(R.string._1_hour_before))) {
+                aCal.add(Calendar.HOUR_OF_DAY, -1);
+            } else if (notificationPreference.equals(getString(R.string._1_day_before))) {
+                aCal.add(Calendar.DAY_OF_MONTH, -1);
+            } else {
+                Log.i(TAG, "setAlarms: ");
             }
-            setAlarm(aCal, event.getTitle(), event.getTime(), notification.getId());
+
+            setAlarm(notification, aCal.getTimeInMillis());
         }
     }
 
-    private void setAlarm(Calendar calendar, String eventTitle, String time, int notificationId) {
-        Intent intent = new Intent(this, AlarmReceiver.class);
-        intent.putExtra("eventTitle", eventTitle);
-        intent.putExtra("time", time);
-        intent.putExtra("notificationId", notificationId);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, notificationId, intent, PendingIntent.FLAG_ONE_SHOT);
+    private void setAlarm(Notification notification, long triggerAtMillis) {
+        Intent intent = new Intent(this, ServiceAutoLauncher.class);
+        intent.putExtra("eventTitle", mEvent.getTitle());
+        intent.putExtra("eventNote", mEvent.getNote());
+        intent.putExtra("eventTimeStamp", mEvent.getDate() + ", " + mEvent.getTime());
+        intent.putExtra("interval", getInterval());
+        intent.putExtra("notificationId", notification.getChannelId());
+
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, notification.getId(), intent, PendingIntent.FLAG_ONE_SHOT);
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent);
+    }
+
+    private String getInterval() {
+        String interval = getString(R.string.one_time);
+        String repeatingPeriod = repeatTextView.getText().toString();
+        if (repeatingPeriod.equals(getString(R.string.daily))) {
+            interval = getString(R.string.daily);
+        } else if (repeatingPeriod.equals(getString(R.string.weekly))) {
+            interval = getString(R.string.weekly);
+        } else if (repeatingPeriod.equals(getString(R.string.monthly))) {
+            interval = getString(R.string.monthly);
+        } else if (repeatingPeriod.equals(getString(R.string.yearly))) {
+            interval = getString(R.string.yearly);
+        }
+        return interval;
     }
 
     @SuppressLint("ResourceType")
@@ -539,32 +578,37 @@ public class EditEventActivity extends AppCompatActivity {
             e.printStackTrace();
             Log.e(TAG, "An error has occurred while parsing the date string");
         }
-        event.setTitle(eventTitleTextInputLayout.getEditText().getText().toString().trim());
-        event.setAllDay(allDayEventSwitch.isChecked());
-        event.setDate(Utils.eventDateFormat.format(aDate));
-        event.setMonth(Utils.monthFormat.format(aDate));
-        event.setYear(Utils.yearFormat.format(aDate));
-        event.setTime(setTimeTextView.getText().toString());
-        event.setDuration(setDurationButton.getText().toString());
-        event.setNotify(!notificationAdapter.getNotifications().isEmpty());
-        event.setRepetition(repeatTextView.getText().toString());
-        event.setNote(eventNoteTextInputLayout.getEditText().getText().toString().trim());
+        mEvent.setTitle(eventTitleTextInputLayout.getEditText().getText().toString().trim());
+        mEvent.setAllDay(allDayEventSwitch.isChecked());
+        mEvent.setDate(Utils.eventDateFormat.format(aDate));
+        mEvent.setMonth(Utils.monthFormat.format(aDate));
+        mEvent.setYear(Utils.yearFormat.format(aDate));
+        mEvent.setTime(setTimeTextView.getText().toString());
+        mEvent.setDuration(setDurationButton.getText().toString());
+        mEvent.setNotify(!notificationAdapter.getNotifications().isEmpty());
+        mEvent.setRepetition(repeatTextView.getText().toString());
+        mEvent.setNote(eventNoteTextInputLayout.getEditText().getText().toString().trim());
         if (notColor == 0) {
             notColor = getResources().getInteger(R.color.red);
         } else {
-            event.setColor(notColor);
+            mEvent.setColor(notColor);
         }
-        event.setLocation(eventLocationTextInputLayout.getEditText().getText().toString().trim());
-        event.setPhoneNumber(phoneNumberTextInputLayout.getEditText().getText().toString().trim());
-        event.setMail(mailTextInputLayout.getEditText().getText().toString().trim());
+        mEvent.setLocation(eventLocationTextInputLayout.getEditText().getText().toString().trim());
+        mEvent.setPhoneNumber(phoneNumberTextInputLayout.getEditText().getText().toString().trim());
+        mEvent.setMail(mailTextInputLayout.getEditText().getText().toString().trim());
 
     }
 
     private boolean confirmInputs() {
-        if (validateEventTitle()) {
-            return true;
+        if (!validateEventTitle()) {
+            return false;
         }
-        return false;
+
+        if (!validateNotifications()) {
+            Snackbar.make(addNotificationTextView, "You cannot set a notification to the past.", BaseTransientBottomBar.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
     }
 
     private boolean validateEventTitle() {
@@ -578,6 +622,35 @@ public class EditEventActivity extends AppCompatActivity {
         }
     }
 
+    private boolean validateNotifications() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(alarmYear, alarmMonth, alarmDay);
+
+        calendar.set(Calendar.HOUR_OF_DAY, alarmHour);
+        calendar.set(Calendar.MINUTE, alarmMinute);
+        calendar.set(Calendar.SECOND, 0);
+
+        for (Notification notification : notificationAdapter.getNotifications()) {
+            Calendar aCal = (Calendar) calendar.clone();
+            String notificationPreference = notification.getTime();
+
+            if (notificationPreference.equals(getString(R.string._10_minutes_before))) {
+                aCal.add(Calendar.MINUTE, -10);
+            } else if (notificationPreference.equals(getString(R.string._1_hour_before))) {
+                aCal.add(Calendar.HOUR_OF_DAY, -1);
+            } else if (notificationPreference.equals(getString(R.string._1_day_before))) {
+                aCal.add(Calendar.DAY_OF_MONTH, -1);
+            } else {
+                Log.i(TAG, "setAlarms: ");
+            }
+
+            if (aCal.before(Calendar.getInstance())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     private class UpdateAsyncTask extends AsyncTask<Void, Void, Void> {
 
         @Override
@@ -588,13 +661,13 @@ public class EditEventActivity extends AppCompatActivity {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            dbHelper.updateEvent(dbHelper.getWritableDatabase(), oldEventId, event);
-            for (Notification notification : oldNotifications) {
+            dbHelper.updateEvent(dbHelper.getWritableDatabase(), oldEventId, mEvent);
+            for (Notification notification : eventNotifications) {
                 dbHelper.deleteNotificationById(dbHelper.getWritableDatabase(), notification.getId());
             }
 
             for (Notification notification : notificationAdapter.getNotifications()) {
-                notification.setEventId(event.getId());
+                notification.setEventId(mEvent.getId());
                 dbHelper.saveNotification(dbHelper.getWritableDatabase(), notification);
             }
             return null;
