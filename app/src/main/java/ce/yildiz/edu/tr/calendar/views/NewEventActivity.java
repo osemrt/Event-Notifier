@@ -80,13 +80,6 @@ public class NewEventActivity extends AppCompatActivity {
     private RecyclerView notificationsRecyclerView;
     private TextView addNotificationTextView;
     private TextView repeatTextView;
-    private RadioGroup notificationPreferenceRadioGroup;
-    private RadioGroup repetitionPreferenceRadioGroup;
-    private RadioButton selectedPreferenceRadioButton;
-    private View notificationDialogView;
-    private View eventRepetitionDialogView;
-    private Button notificationBackButton;
-    private Button repetitionBackButton;
     private TextInputLayout eventNoteTextInputLayout;
     private TextView pickNoteColorTextView;
     private TextInputLayout eventLocationTextInputLayout;
@@ -117,10 +110,12 @@ public class NewEventActivity extends AppCompatActivity {
 
         defineViews();
         initViews();
+        createAlertDialogs();
         defineListeners();
 
         setSupportActionBar(toolbar);
     }
+
 
     private void defineViews() {
         eventTitleTextInputLayout = (TextInputLayout) findViewById(R.id.AddNewEventActivity_TextInputLayout_EventTitle);
@@ -145,19 +140,6 @@ public class NewEventActivity extends AppCompatActivity {
         progressBar = (ProgressBar) findViewById(R.id.AddNewEventActivity_ProgressBar);
         toolbar = (Toolbar) findViewById(R.id.AddNewEventActivity_Toolbar);
 
-        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setCancelable(true);
-        notificationDialogView = LayoutInflater.from(getApplicationContext().getApplicationContext()).inflate(R.layout.layout_alert_dialog_notification, null, false);
-        eventRepetitionDialogView = LayoutInflater.from(getApplicationContext().getApplicationContext()).inflate(R.layout.layout_alert_dialog_repeat, null, false);
-        repetitionPreferenceRadioGroup = (RadioGroup) eventRepetitionDialogView.findViewById(R.id.AlertDialogLayout_RadioGroup);
-        repetitionBackButton = (Button) eventRepetitionDialogView.findViewById(R.id.AlertDialogLayout_Button_Back);
-        notificationPreferenceRadioGroup = (RadioGroup) notificationDialogView.findViewById(R.id.AlertDialogLayout_RadioGroup);
-        notificationBackButton = (Button) notificationDialogView.findViewById(R.id.AlertDialogLayout_Button_Back);
-        builder.setView(notificationDialogView);
-        notificationAlertDialog = builder.create();
-        builder.setView(eventRepetitionDialogView);
-        repetitionAlertDialog = builder.create();
-
     }
 
     @SuppressLint("ResourceType")
@@ -172,6 +154,51 @@ public class NewEventActivity extends AppCompatActivity {
         GradientDrawable bgShape = (GradientDrawable) pickNoteColorTextView.getBackground();
         bgShape.setColor(getResources().getInteger(R.color.red));
 
+    }
+
+    private void createAlertDialogs() {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setCancelable(true);
+
+        // Notification AlertDialog
+        final View notificationDialogView = LayoutInflater.from(this).inflate(R.layout.layout_alert_dialog_notification, null, false);
+        RadioGroup notificationRadioGroup = (RadioGroup) notificationDialogView.findViewById(R.id.AlertDialogLayout_RadioGroup);
+        notificationRadioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                notifications.add(new Notification(((RadioButton) notificationDialogView.findViewById(checkedId)).getText().toString()));
+                notificationAlertDialog.dismiss();
+                setUpRecyclerView();
+            }
+        });
+        builder.setView(notificationDialogView);
+        notificationAlertDialog = builder.create();
+        ((Button) notificationDialogView.findViewById(R.id.AlertDialogLayout_Button_Back)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                notificationAlertDialog.dismiss();
+            }
+        });
+
+        // Event repetition AlertDialog
+        final View eventRepetitionDialogView = LayoutInflater.from(this).inflate(R.layout.layout_alert_dialog_repeat, null, false);
+        RadioGroup eventRepetitionRadioGroup = (RadioGroup) eventRepetitionDialogView.findViewById(R.id.AlertDialogLayout_RadioGroup);
+        eventRepetitionRadioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @SuppressLint("SetTextI18n")
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                repeatTextView.setText("Repeat " + ((RadioButton) eventRepetitionDialogView.findViewById(checkedId)).getText().toString());
+                repetitionAlertDialog.dismiss();
+            }
+        });
+        builder.setView(eventRepetitionDialogView);
+        repetitionAlertDialog = builder.create();
+        ((Button) eventRepetitionDialogView.findViewById(R.id.AlertDialogLayout_Button_Back)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                repetitionAlertDialog.dismiss();
+            }
+        });
     }
 
     private void defineListeners() {
@@ -214,62 +241,10 @@ public class NewEventActivity extends AppCompatActivity {
             }
         });
 
-        notificationAlertDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-            @Override
-            public void onCancel(DialogInterface dialogInterface) {
-                int selectedId = notificationPreferenceRadioGroup.getCheckedRadioButtonId();
-                selectedPreferenceRadioButton = (RadioButton) notificationDialogView.findViewById(selectedId);
-                notifications.add(new Notification(selectedPreferenceRadioButton.getText().toString()));
-                setUpRecyclerView();
-            }
-        });
-
-        ((RadioGroup) notificationDialogView.findViewById(R.id.AlertDialogLayout_RadioGroup)).setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup radioGroup, int buttonId) {
-                selectedPreferenceRadioButton = (RadioButton) notificationDialogView.findViewById(buttonId);
-                notifications.add(new Notification(selectedPreferenceRadioButton.getText().toString()));
-                notificationAlertDialog.dismiss();
-                setUpRecyclerView();
-            }
-        });
-
-        ((RadioGroup) eventRepetitionDialogView.findViewById(R.id.AlertDialogLayout_RadioGroup)).setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup radioGroup, int buttonId) {
-                selectedPreferenceRadioButton = (RadioButton) eventRepetitionDialogView.findViewById(buttonId);
-                repeatTextView.setText("Repeat " + selectedPreferenceRadioButton.getText().toString());
-                repetitionAlertDialog.dismiss();
-            }
-        });
-
-        notificationBackButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                notificationAlertDialog.dismiss();
-            }
-        });
-
         repeatTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 repetitionAlertDialog.show();
-            }
-        });
-
-        repetitionBackButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                repetitionAlertDialog.dismiss();
-            }
-        });
-
-        repetitionAlertDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-            @Override
-            public void onCancel(DialogInterface dialogInterface) {
-                int selectedId = repetitionPreferenceRadioGroup.getCheckedRadioButtonId();
-                selectedPreferenceRadioButton = (RadioButton) repetitionAlertDialog.findViewById(selectedId);
-                repeatTextView.setText(selectedPreferenceRadioButton.getText().toString());
             }
         });
 

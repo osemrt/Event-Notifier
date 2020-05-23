@@ -81,6 +81,7 @@ public class UserSettingsFragment extends Fragment {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 ringtoneTextView.setText(((RadioButton) ringtoneDialogView.findViewById(group.getCheckedRadioButtonId())).getText().toString());
+                ringtoneAlertDialog.dismiss();
             }
         });
         builder.setView(ringtoneDialogView);
@@ -99,6 +100,7 @@ public class UserSettingsFragment extends Fragment {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 reminderTimeTextView.setText(((RadioButton) reminderTimeDialogView.findViewById(group.getCheckedRadioButtonId())).getText().toString());
+                reminderTimeAlertDialog.dismiss();
             }
         });
         builder.setView(reminderTimeDialogView);
@@ -117,6 +119,7 @@ public class UserSettingsFragment extends Fragment {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 reminderFrequencyTextView.setText(((RadioButton) reminderFrequencyDialogView.findViewById(group.getCheckedRadioButtonId())).getText().toString());
+                reminderFrequencyAlertDialog.dismiss();
             }
         });
         builder.setView(reminderFrequencyDialogView);
@@ -135,6 +138,7 @@ public class UserSettingsFragment extends Fragment {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 appThemeTextView.setText(((RadioButton) appThemeDialogView.findViewById(group.getCheckedRadioButtonId())).getText().toString());
+                appThemeAlertDialog.dismiss();
             }
         });
         builder.setView(appThemeDialogView);
@@ -173,9 +177,9 @@ public class UserSettingsFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 appThemeAlertDialog.show();
-                appThemeAlertDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                appThemeAlertDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
                     @Override
-                    public void onCancel(DialogInterface dialog) {
+                    public void onDismiss(DialogInterface dialog) {
                         changeTheme(appThemeTextView.getText());
                     }
                 });

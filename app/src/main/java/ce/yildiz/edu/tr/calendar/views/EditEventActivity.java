@@ -80,13 +80,7 @@ public class EditEventActivity extends AppCompatActivity {
     private RecyclerView notificationsRecyclerView;
     private TextView addNotificationTextView;
     private TextView repeatTextView;
-    private RadioGroup notificationPreferenceRadioGroup;
-    private RadioGroup repetitionPreferenceRadioGroup;
     private RadioButton selectedPreferenceRadioButton;
-    private View notificationDialogView;
-    private View eventRepetitionDialogView;
-    private Button notificationBackButton;
-    private Button repetitionBackButton;
     private TextInputLayout eventNoteTextInputLayout;
     private TextView pickNoteColorTextView;
     private TextInputLayout eventLocationTextInputLayout;
@@ -120,6 +114,7 @@ public class EditEventActivity extends AppCompatActivity {
 
         defineViews();
         initViews();
+        createAlertDialogs();
         defineListeners();
 
         setSupportActionBar(toolbar);
@@ -147,19 +142,6 @@ public class EditEventActivity extends AppCompatActivity {
 
         progressBar = (ProgressBar) findViewById(R.id.AddNewEventActivity_ProgressBar);
         toolbar = (Toolbar) findViewById(R.id.AddNewEventActivity_Toolbar);
-
-        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setCancelable(true);
-        notificationDialogView = LayoutInflater.from(this).inflate(R.layout.layout_alert_dialog_notification, null, false);
-        eventRepetitionDialogView = LayoutInflater.from(this).inflate(R.layout.layout_alert_dialog_repeat, null, false);
-        repetitionPreferenceRadioGroup = (RadioGroup) eventRepetitionDialogView.findViewById(R.id.AlertDialogLayout_RadioGroup);
-        repetitionBackButton = (Button) eventRepetitionDialogView.findViewById(R.id.AlertDialogLayout_Button_Back);
-        notificationPreferenceRadioGroup = (RadioGroup) notificationDialogView.findViewById(R.id.AlertDialogLayout_RadioGroup);
-        notificationBackButton = (Button) notificationDialogView.findViewById(R.id.AlertDialogLayout_Button_Back);
-        builder.setView(notificationDialogView);
-        notificationAlertDialog = builder.create();
-        builder.setView(eventRepetitionDialogView);
-        repetitionAlertDialog = builder.create();
 
     }
 
@@ -219,42 +201,50 @@ public class EditEventActivity extends AppCompatActivity {
 
     }
 
-    private void readEvent(String eventTitle, String eventDate, String eventTime) {
-        SQLiteDatabase sqLiteDatabase = dbHelper.getReadableDatabase();
-        Cursor cursor = dbHelper.readEvent(sqLiteDatabase, eventTitle, eventDate, eventTime);
-        while (cursor.moveToNext()) {
-            event.setId(cursor.getInt(cursor.getColumnIndex(DBTables.EVENT_ID)));
-            event.setTitle(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_TITLE)));
-            event.setAllDay(Boolean.parseBoolean(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_ALL_DAY))));
-            event.setDate(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_DATE)));
-            event.setMonth(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_MONTH)));
-            event.setYear(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_YEAR)));
-            event.setTime(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_TIME)));
-            event.setDuration(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_DURATION)));
-            event.setNotify(Boolean.parseBoolean(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_NOTIFY))));
-            event.setRepetition(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_REPETITION)));
-            event.setNote(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_NOTE)));
-            event.setColor(cursor.getInt(cursor.getColumnIndex(DBTables.EVENT_COLOR)));
-            event.setLocation(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_LOCATION)));
-            event.setPhoneNumber(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_PHONE_NUMBER)));
-            event.setPhoneNumber(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_MAIL)));
-        }
+    private void createAlertDialogs() {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setCancelable(true);
 
-        cursor.close();
-        sqLiteDatabase.close();
-    }
+        // Notification AlertDialog
+        final View notificationDialogView = LayoutInflater.from(this).inflate(R.layout.layout_alert_dialog_notification, null, false);
+        RadioGroup notificationRadioGroup = (RadioGroup) notificationDialogView.findViewById(R.id.AlertDialogLayout_RadioGroup);
+        notificationRadioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                notifications.add(new Notification(((RadioButton) notificationDialogView.findViewById(checkedId)).getText().toString()));
+                notificationAlertDialog.dismiss();
+                setUpRecyclerView();
+            }
+        });
+        builder.setView(notificationDialogView);
+        notificationAlertDialog = builder.create();
+        ((Button) notificationDialogView.findViewById(R.id.AlertDialogLayout_Button_Back)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                notificationAlertDialog.dismiss();
+            }
+        });
 
-    private void readNotifications(int eventId) {
-        SQLiteDatabase sqLiteDatabase = dbHelper.getReadableDatabase();
-        Cursor cursor = dbHelper.readEventNotifications(sqLiteDatabase, eventId);
-        while (cursor.moveToNext()) {
-            Notification notification = new Notification();
-            notification.setId(cursor.getInt(cursor.getColumnIndex(DBTables.NOTIFICATION_ID)));
-            notification.setEventId(cursor.getInt(cursor.getColumnIndex(DBTables.NOTIFICATION_EVENT_ID)));
-            notification.setTime(cursor.getString(cursor.getColumnIndex(DBTables.NOTIFICATION_TIME)));
-            notification.setChannelId(cursor.getInt(cursor.getColumnIndex(DBTables.NOTIFICATION_CHANNEL_ID)));
-            notifications.add(notification);
-        }
+        // Event repetition AlertDialog
+        final View eventRepetitionDialogView = LayoutInflater.from(this).inflate(R.layout.layout_alert_dialog_repeat, null, false);
+        RadioGroup eventRepetitionRadioGroup = (RadioGroup) eventRepetitionDialogView.findViewById(R.id.AlertDialogLayout_RadioGroup);
+        eventRepetitionRadioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @SuppressLint("SetTextI18n")
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                repeatTextView.setText("Repeat " + ((RadioButton) eventRepetitionDialogView.findViewById(checkedId)).getText().toString());
+                repetitionAlertDialog.dismiss();
+            }
+        });
+        builder.setView(eventRepetitionDialogView);
+        repetitionAlertDialog = builder.create();
+        ((Button) eventRepetitionDialogView.findViewById(R.id.AlertDialogLayout_Button_Back)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                repetitionAlertDialog.dismiss();
+            }
+        });
+
     }
 
     private void defineListeners() {
@@ -297,65 +287,13 @@ public class EditEventActivity extends AppCompatActivity {
             }
         });
 
-        notificationAlertDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-            @Override
-            public void onCancel(DialogInterface dialogInterface) {
-                int selectedId = notificationPreferenceRadioGroup.getCheckedRadioButtonId();
-                selectedPreferenceRadioButton = (RadioButton) notificationDialogView.findViewById(selectedId);
-                notifications.add(new Notification(selectedPreferenceRadioButton.getText().toString()));
-                setUpRecyclerView();
-            }
-        });
-
-        ((RadioGroup) notificationDialogView.findViewById(R.id.AlertDialogLayout_RadioGroup)).setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup radioGroup, int buttonId) {
-                selectedPreferenceRadioButton = (RadioButton) notificationDialogView.findViewById(buttonId);
-                notifications.add(new Notification(selectedPreferenceRadioButton.getText().toString()));
-                notificationAlertDialog.dismiss();
-                setUpRecyclerView();
-            }
-        });
-
-        ((RadioGroup) eventRepetitionDialogView.findViewById(R.id.AlertDialogLayout_RadioGroup)).setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup radioGroup, int buttonId) {
-                selectedPreferenceRadioButton = (RadioButton) eventRepetitionDialogView.findViewById(buttonId);
-                repeatTextView.setText("Repeat " + selectedPreferenceRadioButton.getText().toString());
-                repetitionAlertDialog.dismiss();
-            }
-        });
-
-        notificationBackButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                notificationAlertDialog.dismiss();
-            }
-        });
-
         repeatTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 repetitionAlertDialog.show();
             }
         });
-
-        repetitionBackButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                repetitionAlertDialog.dismiss();
-            }
-        });
-
-        repetitionAlertDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-            @Override
-            public void onCancel(DialogInterface dialogInterface) {
-                int selectedId = repetitionPreferenceRadioGroup.getCheckedRadioButtonId();
-                selectedPreferenceRadioButton = (RadioButton) repetitionAlertDialog.findViewById(selectedId);
-                repeatTextView.setText(selectedPreferenceRadioButton.getText().toString());
-            }
-        });
-
+        
         pickNoteColorTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -385,6 +323,45 @@ public class EditEventActivity extends AppCompatActivity {
             }
         });
     }
+
+    private void readEvent(String eventTitle, String eventDate, String eventTime) {
+        SQLiteDatabase sqLiteDatabase = dbHelper.getReadableDatabase();
+        Cursor cursor = dbHelper.readEvent(sqLiteDatabase, eventTitle, eventDate, eventTime);
+        while (cursor.moveToNext()) {
+            event.setId(cursor.getInt(cursor.getColumnIndex(DBTables.EVENT_ID)));
+            event.setTitle(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_TITLE)));
+            event.setAllDay(Boolean.parseBoolean(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_ALL_DAY))));
+            event.setDate(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_DATE)));
+            event.setMonth(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_MONTH)));
+            event.setYear(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_YEAR)));
+            event.setTime(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_TIME)));
+            event.setDuration(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_DURATION)));
+            event.setNotify(Boolean.parseBoolean(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_NOTIFY))));
+            event.setRepetition(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_REPETITION)));
+            event.setNote(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_NOTE)));
+            event.setColor(cursor.getInt(cursor.getColumnIndex(DBTables.EVENT_COLOR)));
+            event.setLocation(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_LOCATION)));
+            event.setPhoneNumber(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_PHONE_NUMBER)));
+            event.setPhoneNumber(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_MAIL)));
+        }
+
+        cursor.close();
+        sqLiteDatabase.close();
+    }
+
+    private void readNotifications(int eventId) {
+        SQLiteDatabase sqLiteDatabase = dbHelper.getReadableDatabase();
+        Cursor cursor = dbHelper.readEventNotifications(sqLiteDatabase, eventId);
+        while (cursor.moveToNext()) {
+            Notification notification = new Notification();
+            notification.setId(cursor.getInt(cursor.getColumnIndex(DBTables.NOTIFICATION_ID)));
+            notification.setEventId(cursor.getInt(cursor.getColumnIndex(DBTables.NOTIFICATION_EVENT_ID)));
+            notification.setTime(cursor.getString(cursor.getColumnIndex(DBTables.NOTIFICATION_TIME)));
+            notification.setChannelId(cursor.getInt(cursor.getColumnIndex(DBTables.NOTIFICATION_CHANNEL_ID)));
+            notifications.add(notification);
+        }
+    }
+
 
     private void setDuration(View view) {
         Calendar calendar = Calendar.getInstance();
