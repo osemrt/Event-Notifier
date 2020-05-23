@@ -7,8 +7,12 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.media.AudioAttributes;
+import android.media.Ringtone;
 import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -30,6 +34,7 @@ public class AlarmService extends Service {
     private Bundle bundle;
     private String eventTitle;
     private String eventNote;
+    private int eventColor;
     private String interval;
     private String eventTimeStamp;
     private int notificationId;
@@ -37,9 +42,11 @@ public class AlarmService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.d(TAG, "onStartCommand: ");
         bundle = intent.getExtras();
         eventTitle = bundle.getString("eventTitle");
         eventNote = bundle.getString("eventNote");
+        eventColor = bundle.getInt("eventColor");
         eventTimeStamp = bundle.getString("eventTimeStamp");
         interval = bundle.getString("interval");
         notificationId = bundle.getInt("notificationId");
@@ -51,42 +58,81 @@ public class AlarmService extends Service {
     }
 
     private void showNotification() {
+        Log.d(TAG, "showNotification: Start");
+        // Uri ringtoneUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        Uri ringtoneUri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.consequence);
+        Ringtone r = RingtoneManager.getRingtone(this, ringtoneUri);
+        r.play();
+
+        boolean vibrate = true;
+        long[] vibratePattern = new long[]{0L, 1000L};
+
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, "0");
+        NotificationManager mNotifyManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        grantUriPermission("com.android.systemui", ringtoneUri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
         Intent activityIntent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, notificationId, activityIntent, PendingIntent.FLAG_ONE_SHOT);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel notificationChannel = new NotificationChannel("0", "Event Notification", NotificationManager.IMPORTANCE_HIGH);
-            notificationChannel.setDescription("Get notifications about your events");
-            NotificationManager notificationManager = this.getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(notificationChannel);
+            int importance = NotificationManager.IMPORTANCE_HIGH;
+
+            AudioAttributes att = new AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build();
+
+            NotificationChannel mChannel = new NotificationChannel("0", "Event Notification", NotificationManager.IMPORTANCE_HIGH);
+            mChannel.setDescription(eventNote);
+            mChannel.enableLights(true);
+            mChannel.enableVibration(true);
+            mChannel.setVibrationPattern(vibratePattern);
+            mChannel.setLightColor(eventColor);
+            mChannel.setSound(ringtoneUri, att);
+            mChannel.setBypassDnd(true);
+            mChannel.setLockscreenVisibility(NotificationCompat.VISIBILITY_PUBLIC);
+            mChannel.setShowBadge(true);
+
+            if (mNotifyManager != null) {
+                mNotifyManager.createNotificationChannel(mChannel);
+            }
+
+            notificationBuilder
+                    .setSmallIcon(R.drawable.ic_notification)
+                    .setPriority(NotificationCompat.PRIORITY_MAX)
+                    .setCategory(NotificationCompat.CATEGORY_EVENT)
+                    .setVibrate(vibratePattern)
+                    .setSound(ringtoneUri)
+                    .setColor(eventColor)
+                    .setContentTitle(eventTitle)
+                    .setStyle(new NotificationCompat.BigTextStyle().bigText(eventNote))
+                    .setAutoCancel(true)
+                    .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                    .setContentIntent(pendingIntent);
+
+        } else {
+            notificationBuilder.setContentTitle(eventTitle)
+                    .setSmallIcon(R.drawable.ic_notification)
+                    .setPriority(NotificationCompat.PRIORITY_MAX)
+                    .setCategory(NotificationCompat.CATEGORY_EVENT)
+                    .setDefaults(Notification.DEFAULT_LIGHTS | Notification.DEFAULT_VIBRATE | Notification.DEFAULT_SOUND)
+                    .setVibrate(vibratePattern)
+                    .setSound(ringtoneUri)
+                    .setStyle(new NotificationCompat.BigTextStyle().bigText(eventNote))
+                    .setColor(eventColor)
+                    .setAutoCancel(true)
+                    .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                    .setContentIntent(pendingIntent);
+
         }
 
-        Notification notification = new Notification.Builder(this, "0")
-                .setContentTitle(eventTitle)
-                .setContentText(eventNote)
-                .setSmallIcon(R.drawable.ic_notify)
-                .setContentIntent(pendingIntent)
-                .setDeleteIntent(pendingIntent)
-                .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
-                .setGroup("Group_calendar_view")
-                .setDefaults(Notification.DEFAULT_SOUND | Notification.DEFAULT_LIGHTS | Notification.DEFAULT_VIBRATE)
-                .setAutoCancel(true)
-                .build();
+        notificationBuilder.setContentText(eventNote);
 
-//        Notification notification = new Notification.Builder(this, "0")
-//                .setSmallIcon(R.drawable.ic_notify)
-//                .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
-//                .setContentTitle(eventTitle)
-//                .setContentText(eventNote)
-//                .setDeleteIntent(pendingIntent)
-//                .setColor(getResources().getColor(R.color.darkIndigo))
-//                .setGroup("Group_calendar_view")
-//                .build();
+        if (mNotifyManager != null) {
+            mNotifyManager.notify(notificationId, notificationBuilder.build());
+        }
 
-        Log.d("APP_TEST", "setNewAlarm: Alarm at " + eventNote + "\n" + eventTimeStamp);
-
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-        notificationManager.notify(notificationId, notification);
+        Log.d(TAG, "showNotification: End");
     }
 
     private void setNewAlarm() {
@@ -98,7 +144,7 @@ public class AlarmService extends Service {
         if (triggerAtMillis != 0) {
             AlarmManager alarmManager = (AlarmManager) getSystemService(this.ALARM_SERVICE);
             Log.d("APP_TEST", "repeatingAlarm: Alarm at " + Long.toString(triggerAtMillis));
-            alarmManager.set(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent);
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent);
         }
 
 

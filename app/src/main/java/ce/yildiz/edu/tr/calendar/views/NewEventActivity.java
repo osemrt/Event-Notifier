@@ -450,7 +450,7 @@ public class NewEventActivity extends AppCompatActivity {
 
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, notification.getId(), intent, PendingIntent.FLAG_ONE_SHOT);
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        alarmManager.set(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent);
+        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent);
     }
 
     private String getInterval() {

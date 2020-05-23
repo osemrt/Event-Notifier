@@ -11,6 +11,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
         android:allowBackup="true"
@@ -44,14 +45,21 @@
             android:name=".views.MapsActivity"
             android:label="@string/title_activity_maps" />
 
-        <service android:name=".other.AlarmService" />
+        <service
+            android:name=".other.AlarmService"
+            android:enabled="true"
+            android:exported="true" />
 
-        <receiver android:name=".other.ServiceAutoLauncher">
+        <receiver
+            android:name=".other.ServiceAutoLauncher"
+            android:enabled="true"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <category android:name="android.intent.category.HOME" />
             </intent-filter>
         </receiver>
+
 
         <activity android:name=".views.NewEventActivity" />
         <activity android:name=".views.EditEventActivity" />
