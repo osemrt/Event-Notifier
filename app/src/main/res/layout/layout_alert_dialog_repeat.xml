@@ -66,7 +66,6 @@
                 android:id="@+id/AlertDialogLayout_Repeat_RadioButton_Yearly"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:checked="true"
                 android:text="@string/yearly"
                 android:textSize="18sp" />
         </RadioGroup>

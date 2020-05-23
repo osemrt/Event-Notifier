@@ -3,7 +3,6 @@ package ce.yildiz.edu.tr.calendar.adapters;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.res.TypedArray;
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -45,7 +44,7 @@ public class GridAdapter extends ArrayAdapter {
         this.events = events;
         this.layoutInflater = LayoutInflater.from(context);
 
-        getAppTheme();
+        this.appTheme = getAppTheme();
         colors = getColors();
     }
 
@@ -138,17 +137,22 @@ public class GridAdapter extends ArrayAdapter {
         return dates.get(position);
     }
 
-    private void getAppTheme() {
-        if (getFlag()) {
-            appTheme = Utils.AppTheme.DARK;
-        } else {
-            appTheme = Utils.AppTheme.INDIGO;
+    private Utils.AppTheme getAppTheme() {
+        Utils.AppTheme theme = Utils.AppTheme.INDIGO;
+        switch (getString()) {
+            case "Dark":
+                theme = Utils.AppTheme.DARK;
+                break;
+            case "Indigo":
+                theme = Utils.AppTheme.INDIGO;
+                break;
         }
+        return theme;
     }
 
-    private boolean getFlag() {
+    private String getString() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-        return sharedPreferences.getBoolean("isDark", false);
+        return sharedPreferences.getString("theme", "Indigo");
     }
 
     private ArrayList<Integer> getColors() {

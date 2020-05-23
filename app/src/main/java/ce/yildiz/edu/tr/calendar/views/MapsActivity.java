@@ -71,7 +71,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        setTheme(getFlag("isDark") ? R.style.DarkTheme : R.style.DarkIndigoTheme);
+        setTheme(getAppTheme());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
@@ -278,9 +278,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-    private boolean getFlag(String key) {
+    private int getAppTheme() {
+        switch (getString("theme")) {
+            case "Dark":
+                return R.style.DarkTheme;
+            case "Indigo":
+                return R.style.DarkIndigoTheme;
+        }
+
+        return R.style.DarkIndigoTheme;
+    }
+
+    private String getString(String key) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        return sharedPreferences.getBoolean(key, false);
+        return sharedPreferences.getString(key, "Indigo");
     }
 
 }

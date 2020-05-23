@@ -103,7 +103,7 @@ public class NewEventActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        setTheme(getFlag("isDark") ? R.style.DarkTheme : R.style.DarkIndigoTheme);
+        setTheme(getAppTheme());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event);
 
@@ -158,6 +158,10 @@ public class NewEventActivity extends AppCompatActivity {
         GradientDrawable bgShape = (GradientDrawable) pickNoteColorTextView.getBackground();
         bgShape.setColor(getResources().getInteger(R.color.red));
 
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        repeatTextView.setText(sharedPreferences.getString("frequency", "One-Time"));
+        notifications.add(new Notification(sharedPreferences.getString("reminder", "10 minutes before")));
+        setUpRecyclerView();
     }
 
     private void initVariables() {
@@ -447,6 +451,7 @@ public class NewEventActivity extends AppCompatActivity {
         intent.putExtra("eventTimeStamp", event.getDate() + ", " + event.getTime());
         intent.putExtra("interval", getInterval());
         intent.putExtra("notificationId", notification.getChannelId());
+        intent.putExtra("soundName", getString("ringtone"));
 
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, notification.getId(), intent, PendingIntent.FLAG_ONE_SHOT);
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
@@ -489,6 +494,7 @@ public class NewEventActivity extends AppCompatActivity {
         event.setNote(eventNoteTextInputLayout.getEditText().getText().toString().trim());
         if (notColor == 0) {
             notColor = getResources().getInteger(R.color.red);
+            event.setColor(notColor);
         } else {
             event.setColor(notColor);
         }
@@ -606,8 +612,19 @@ public class NewEventActivity extends AppCompatActivity {
 
     }
 
-    private boolean getFlag(String key) {
+    private int getAppTheme() {
+        switch (getString("theme")) {
+            case "Dark":
+                return R.style.DarkTheme;
+            case "Indigo":
+                return R.style.DarkIndigoTheme;
+        }
+
+        return R.style.DarkIndigoTheme;
+    }
+
+    private String getString(String key) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        return sharedPreferences.getBoolean(key, false);
+        return sharedPreferences.getString(key, "Indigo");
     }
 }

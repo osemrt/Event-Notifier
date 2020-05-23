@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Calendar</string>
+    <string name="app_name">Event Notifier</string>
     <string name="current_date">Current Date</string>
     <string name="mon">Mon</string>
     <string name="tue">Tue</string>
@@ -68,4 +68,9 @@
     <string name="indigo">Indigo</string>
     <string name="choose_theme">Choose Theme</string>
     <string name="ringtone">Ringtone</string>
+    <string name="consequence">Consequence</string>
+    <string name="juntos">Juntos</string>
+    <string name="piece_of_cake">Piece of cake</string>
+    <string name="point_blank">Point blank</string>
+    <string name="slow_spring_board">Slow spring board</string>
 </resources>

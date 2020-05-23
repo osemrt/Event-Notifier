@@ -20,7 +20,6 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
 
 import java.util.Calendar;
 
@@ -38,6 +37,7 @@ public class AlarmService extends Service {
     private String interval;
     private String eventTimeStamp;
     private int notificationId;
+    private String soundName;
 
 
     @Override
@@ -50,6 +50,7 @@ public class AlarmService extends Service {
         eventTimeStamp = bundle.getString("eventTimeStamp");
         interval = bundle.getString("interval");
         notificationId = bundle.getInt("notificationId");
+        soundName = bundle.getString("soundName");
 
         showNotification();
         setNewAlarm();
@@ -58,9 +59,8 @@ public class AlarmService extends Service {
     }
 
     private void showNotification() {
-        Log.d(TAG, "showNotification: Start");
         // Uri ringtoneUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        Uri ringtoneUri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.consequence);
+        Uri ringtoneUri = Uri.parse("android.resource://" + getPackageName() + "/" + getSoundResourceId(soundName));
         Ringtone r = RingtoneManager.getRingtone(this, ringtoneUri);
         r.play();
 
@@ -183,6 +183,23 @@ public class AlarmService extends Service {
 
         cal.set(Calendar.DAY_OF_MONTH, maximumDay);
         return cal.getTimeInMillis();
+    }
+
+    private int getSoundResourceId(String soundName) {
+        switch (soundName) {
+            case "consequence":
+                return R.raw.consequence;
+            case "Juntos":
+                return R.raw.juntos;
+            case "Piece of cake":
+                return R.raw.piece_of_cake;
+            case "Point blank":
+                return R.raw.point_blank;
+            case "Slow spring board":
+                return R.raw.slow_spring_board;
+        }
+
+        return R.raw.consequence;
     }
 
 

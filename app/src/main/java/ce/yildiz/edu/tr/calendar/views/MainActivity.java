@@ -1,7 +1,5 @@
 package ce.yildiz.edu.tr.calendar.views;
 
-import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -30,7 +28,7 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        setTheme(getFlag("isDark") ? R.style.DarkTheme : R.style.DarkIndigoTheme);
+        setTheme(getAppTheme());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -46,10 +44,7 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
             bottomNavigationView.performClick();
             saveFlag("isChanged", false);
         }
-
-
     }
-
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
@@ -83,6 +78,17 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
         return true;
     }
 
+    private int getAppTheme() {
+        switch (getString("theme")) {
+            case "Dark":
+                return R.style.DarkTheme;
+            case "Indigo":
+                return R.style.DarkIndigoTheme;
+        }
+
+        return R.style.DarkIndigoTheme;
+    }
+
     private void saveFlag(String key, boolean flag) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -90,10 +96,14 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
         editor.apply();
     }
 
-
     private boolean getFlag(String key) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         return sharedPreferences.getBoolean(key, false);
+    }
+
+    private String getString(String key) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        return sharedPreferences.getString(key, "Indigo");
     }
 
 

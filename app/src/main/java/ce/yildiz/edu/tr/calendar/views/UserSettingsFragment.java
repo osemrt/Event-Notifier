@@ -40,6 +40,8 @@ public class UserSettingsFragment extends Fragment {
     private AlertDialog reminderFrequencyAlertDialog;
     private AlertDialog appThemeAlertDialog;
 
+    private boolean isChanged;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -67,7 +69,11 @@ public class UserSettingsFragment extends Fragment {
     }
 
     private void initViews() {
-
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        ringtoneTextView.setText(sharedPreferences.getString("ringtone", "Consequence"));
+        reminderTimeTextView.setText(sharedPreferences.getString("reminder", "10 minutes before"));
+        reminderFrequencyTextView.setText(sharedPreferences.getString("frequency", "One-Time"));
+        appThemeTextView.setText(sharedPreferences.getString("theme", "Indigo"));
     }
 
     private void createAlertDialogs() {
@@ -81,6 +87,7 @@ public class UserSettingsFragment extends Fragment {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 ringtoneTextView.setText(((RadioButton) ringtoneDialogView.findViewById(group.getCheckedRadioButtonId())).getText().toString());
+                save("ringtone", ((RadioButton) ringtoneDialogView.findViewById(group.getCheckedRadioButtonId())).getText().toString());
                 ringtoneAlertDialog.dismiss();
             }
         });
@@ -100,6 +107,7 @@ public class UserSettingsFragment extends Fragment {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 reminderTimeTextView.setText(((RadioButton) reminderTimeDialogView.findViewById(group.getCheckedRadioButtonId())).getText().toString());
+                save("reminder", ((RadioButton) reminderTimeDialogView.findViewById(group.getCheckedRadioButtonId())).getText().toString());
                 reminderTimeAlertDialog.dismiss();
             }
         });
@@ -119,6 +127,7 @@ public class UserSettingsFragment extends Fragment {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 reminderFrequencyTextView.setText(((RadioButton) reminderFrequencyDialogView.findViewById(group.getCheckedRadioButtonId())).getText().toString());
+                save("frequency", ((RadioButton) reminderFrequencyDialogView.findViewById(group.getCheckedRadioButtonId())).getText().toString());
                 reminderFrequencyAlertDialog.dismiss();
             }
         });
@@ -137,6 +146,11 @@ public class UserSettingsFragment extends Fragment {
         appThemeRadioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
+                if (!appThemeTextView.getText().toString().equalsIgnoreCase(((RadioButton) appThemeDialogView.findViewById(group.getCheckedRadioButtonId())).getText().toString())) {
+                    save("theme", ((RadioButton) appThemeDialogView.findViewById(group.getCheckedRadioButtonId())).getText().toString());
+                    saveFlag("isChanged", true);
+                    isChanged = true;
+                }
                 appThemeTextView.setText(((RadioButton) appThemeDialogView.findViewById(group.getCheckedRadioButtonId())).getText().toString());
                 appThemeAlertDialog.dismiss();
             }
@@ -180,7 +194,7 @@ public class UserSettingsFragment extends Fragment {
                 appThemeAlertDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
                     @Override
                     public void onDismiss(DialogInterface dialog) {
-                        changeTheme(appThemeTextView.getText());
+                        changeTheme();
                     }
                 });
 
@@ -188,21 +202,18 @@ public class UserSettingsFragment extends Fragment {
         });
     }
 
-    private void changeTheme(CharSequence text) {
-        if ("Dark".equals(appThemeTextView.getText())) {
-            saveFlag("isDark", true);
-            saveFlag("isChanged", true);
-        } else {
-            saveFlag("isDark", false);
-            saveFlag("isChanged", true);
+    private void changeTheme() {
+        String s = getString("theme");
+        if (isChanged) {
+            restartApp();
         }
-
-        restartApp();
     }
 
-    private void restartApp() {
-        startActivity(new Intent(getActivity(), MainActivity.class));
-        getActivity().finish();
+    private void save(String key, String value) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(key, value);
+        editor.apply();
     }
 
     private void saveFlag(String key, boolean flag) {
@@ -210,6 +221,16 @@ public class UserSettingsFragment extends Fragment {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean(key, flag);
         editor.apply();
+    }
+
+    private String getString(String key) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        return sharedPreferences.getString(key, "");
+    }
+
+    private void restartApp() {
+        startActivity(new Intent(getActivity(), MainActivity.class));
+        getActivity().finish();
     }
 
 }
