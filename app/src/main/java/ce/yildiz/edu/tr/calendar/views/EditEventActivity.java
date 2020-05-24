@@ -1,5 +1,6 @@
 package ce.yildiz.edu.tr.calendar.views;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
@@ -9,6 +10,7 @@ import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.GradientDrawable;
@@ -36,6 +38,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -68,6 +72,7 @@ public class EditEventActivity extends AppCompatActivity {
     private final String TAG = this.getClass().getSimpleName();
 
     private final int MAPS_ACTIVITY_REQUEST = 1;
+    private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
 
     private Toolbar toolbar;
     private ProgressBar progressBar;
@@ -93,6 +98,8 @@ public class EditEventActivity extends AppCompatActivity {
     private AlertDialog notificationAlertDialog;
     private AlertDialog repetitionAlertDialog;
     private int alarmYear, alarmMonth, alarmDay, alarmHour, alarmMinute;
+
+    private boolean mLocationPermissionGranted;
 
     private int notColor;
     private DBHelper dbHelper;
@@ -208,6 +215,10 @@ public class EditEventActivity extends AppCompatActivity {
             alarmDay = mCal.get(Calendar.DAY_OF_MONTH);
         } catch (ParseException e) {
             e.printStackTrace();
+        }
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            mLocationPermissionGranted = true;
         }
     }
 
@@ -701,20 +712,6 @@ public class EditEventActivity extends AppCompatActivity {
         return eventId;
     }
 
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if (requestCode == MAPS_ACTIVITY_REQUEST) {
-            if (resultCode == RESULT_OK) {
-                eventLocationTextInputLayout.getEditText().setText(data.getStringExtra("address"));
-
-            } else {
-                super.onActivityResult(requestCode, resultCode, data);
-            }
-        }
-
-    }
-
     private boolean getFlag(String key) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         return sharedPreferences.getBoolean(key, false);
@@ -734,5 +731,43 @@ public class EditEventActivity extends AppCompatActivity {
     private String getString(String key) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         return sharedPreferences.getString(key, "Indigo");
+    }
+
+    private void getLocationPermission() {
+        mLocationPermissionGranted = false;
+        if (ContextCompat.checkSelfPermission(this.getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            mLocationPermissionGranted = true;
+        } else {
+            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+        }
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
+        mLocationPermissionGranted = false;
+        switch (requestCode) {
+            case PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    mLocationPermissionGranted = true;
+                    startActivityForResult(new Intent(getApplicationContext(), MapsActivity.class), MAPS_ACTIVITY_REQUEST);
+                }
+            }
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (requestCode == MAPS_ACTIVITY_REQUEST) {
+            if (resultCode == RESULT_OK) {
+                eventLocationTextInputLayout.getEditText().setText(data.getStringExtra("address"));
+
+            } else {
+                startActivityForResult(new Intent(getApplicationContext(), MapsActivity.class), MAPS_ACTIVITY_REQUEST);
+                super.onActivityResult(requestCode, resultCode, data);
+            }
+        }
+
     }
 }
