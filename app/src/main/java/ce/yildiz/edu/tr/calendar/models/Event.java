@@ -11,12 +11,14 @@ public class Event {
     private String year;
     private String duration;
     private boolean isNotify;
-    private String repetition;
+    private boolean isRecurring;
+    private String recurringPeriod;
     private String note;
     private int color;
     private String location;
     private String phoneNumber;
     private String mail;
+    private int parentId;
 
     public int getId() {
         return id;
@@ -90,12 +92,20 @@ public class Event {
         isNotify = notify;
     }
 
-    public String getRepetition() {
-        return repetition;
+    public boolean isRecurring() {
+        return isRecurring;
     }
 
-    public void setRepetition(String repetition) {
-        this.repetition = repetition;
+    public void setRecurring(boolean recurring) {
+        isRecurring = recurring;
+    }
+
+    public String getRecurringPeriod() {
+        return recurringPeriod;
+    }
+
+    public void setRecurringPeriod(String recurringPeriod) {
+        this.recurringPeriod = recurringPeriod;
     }
 
     public String getNote() {
@@ -136,6 +146,14 @@ public class Event {
 
     public void setMail(String mail) {
         this.mail = mail;
+    }
+
+    public int getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(int parentId) {
+        this.parentId = parentId;
     }
 
     @Override
