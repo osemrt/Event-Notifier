@@ -197,4 +197,5 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
         dbHelper.deleteNotificationByEventId(dbHelper.getWritableDatabase(), eventId);
         dbHelper.close();
     }
+
 }

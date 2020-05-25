@@ -484,10 +484,23 @@ public class EditEventActivity extends AppCompatActivity {
                 break;
             case R.id.ToolBar_Item_Save:
                 if (confirmInputs()) {
-                    getViewValues();
-                    new UpdateAsyncTask().execute();
-                    if (mEvent.isNotify()) {
-                        setAlarms();
+                    if (mEvent.isRecurring()) {
+
+                        new AlertDialog.Builder(this)
+                                .setTitle("Editing a Recurring Event")
+                                .setMessage("Are you sure you want to edit this recurring event? All occurrences of this event will also be edited.")
+                                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        getViewValues();
+                                        new UpdateAsyncTask().execute();
+                                        if (mEvent.isNotify()) {
+                                            setAlarms();
+                                        }
+                                    }
+                                })
+                                .setNegativeButton(android.R.string.no, null)
+                                .setIcon(R.drawable.ic_warning)
+                                .show();
                     }
                 }
                 break;
@@ -610,22 +623,6 @@ public class EditEventActivity extends AppCompatActivity {
         if (!validateNotifications()) {
             Snackbar.make(addNotificationTextView, "You cannot set a notification to the past.", BaseTransientBottomBar.LENGTH_SHORT).show();
             return false;
-        }
-
-        if (mEvent.isRecurring()) {
-            final boolean[] result = {false};
-            new AlertDialog.Builder(this)
-                    .setTitle("Editing a Recurring Event")
-                    .setMessage("Are you sure you want to edit this recurring event? All occurrences of this event will also be edited.")
-                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            result[0] = true;
-                        }
-                    })
-                    .setNegativeButton(android.R.string.no, null)
-                    .setIcon(R.drawable.ic_warning)
-                    .show();
-            return result[0];
         }
 
         return true;

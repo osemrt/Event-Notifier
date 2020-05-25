@@ -127,7 +127,7 @@ public class UserSettingsFragment extends Fragment {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 reminderFrequencyTextView.setText(((RadioButton) reminderFrequencyDialogView.findViewById(group.getCheckedRadioButtonId())).getText().toString());
-                save("frequency", ((RadioButton) reminderFrequencyDialogView.findViewById(group.getCheckedRadioButtonId())).getText().toString());
+                save("frequency", "Repeat " + ((RadioButton) reminderFrequencyDialogView.findViewById(group.getCheckedRadioButtonId())).getText().toString());
                 reminderFrequencyAlertDialog.dismiss();
             }
         });

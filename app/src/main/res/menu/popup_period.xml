@@ -9,7 +9,4 @@
     <item
         android:id="@+id/PopupPeriod_Item_Next30Days"
         android:title="@string/next_30_days" />
-    <item
-        android:id="@+id/PopupPeriod_Item_AllEvents"
-        android:title="@string/all_events" />
 </menu>

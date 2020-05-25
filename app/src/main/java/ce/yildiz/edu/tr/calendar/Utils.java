@@ -12,12 +12,17 @@ import java.util.Locale;
 
 public class Utils {
 
-    public enum Period {
-        TODAY,
-        NEXT_7_DAYS,
-        NEXT_30_DAYS,
-        ALL_EVENTS
-    }
+    public static final int MAX_CALENDAR_DAYS = 42;
+
+    public static final String DAILY = "Repeat Daily";
+    public static final String WEEKLY = "Repeat Weekly";
+    public static final String MONTHLY = "Repeat Monthly";
+    public static final String YEARLY = "Repeat Yearly";
+
+    public static final String TODAY = "Today";
+    public static final String NEXT_7_DAYS = "Next 7 days";
+    public static final String NEXT_30_DAYS = "Next 30 days";
+    public static final String THIS_YEAR = "This Year";
 
     public enum NotificationPreference {
         TEN_MINUTES_BEFORE,
@@ -30,8 +35,6 @@ public class Utils {
         INDIGO,
         DARK,
     }
-
-    public static final int MAX_CALENDAR_DAYS = 42;
 
     public static final SimpleDateFormat dateFormat = new SimpleDateFormat("MMMM yyyy", Locale.ENGLISH);
     public static final SimpleDateFormat monthFormat = new SimpleDateFormat("MMMM", Locale.ENGLISH);
