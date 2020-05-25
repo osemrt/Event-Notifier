@@ -8,6 +8,7 @@ import android.app.DatePickerDialog;
 import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -155,15 +156,13 @@ public class EditEventActivity extends AppCompatActivity {
     private void initViews() {
 
         Intent intent = getIntent();
-        String eventTitle = intent.getStringExtra("eventTitle");
-        String eventDate = intent.getStringExtra("eventDate");
-        String eventTime = intent.getStringExtra("eventTime");
-        mEvent = readEvent(eventTitle, eventDate, eventTime);
+        int eventId = intent.getIntExtra("eventId", 0);
+        mEvent = readEvent(eventId);
         oldEventId = mEvent.getId();
 
         eventTitleTextInputLayout.getEditText().setText(mEvent.getTitle());
 
-        setDateTextView.setText(mEvent.getDate());
+        setDateTextView.setText(intent.getStringExtra("eventDate"));
 
         if (mEvent.isAllDay()) {
             allDayEventSwitch.setChecked(true);
@@ -181,7 +180,7 @@ public class EditEventActivity extends AppCompatActivity {
         currentNotifications = new ArrayList<>(eventNotifications);
         setUpRecyclerView();
 
-        repeatTextView.setText(mEvent.getRepetition());
+        repeatTextView.setText(mEvent.getRecurringPeriod());
 
         eventNoteTextInputLayout.getEditText().setText(mEvent.getNote());
 
@@ -325,7 +324,11 @@ public class EditEventActivity extends AppCompatActivity {
         locationImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivityForResult(new Intent(getApplicationContext(), MapsActivity.class), MAPS_ACTIVITY_REQUEST);
+                if (!mLocationPermissionGranted) {
+                    getLocationPermission();
+                } else {
+                    startActivityForResult(new Intent(getApplicationContext(), MapsActivity.class), MAPS_ACTIVITY_REQUEST);
+                }
             }
         });
 
@@ -345,31 +348,11 @@ public class EditEventActivity extends AppCompatActivity {
         });
     }
 
-    private Event readEvent(String eventTitle, String eventDate, String eventTime) {
-        Event event = new Event();
+    private Event readEvent(int eventId) {
         SQLiteDatabase sqLiteDatabase = dbHelper.getReadableDatabase();
-        Cursor cursor = dbHelper.readEvent(sqLiteDatabase, eventTitle, eventDate, eventTime);
-        while (cursor.moveToNext()) {
-            event.setId(cursor.getInt(cursor.getColumnIndex(DBTables.EVENT_ID)));
-            event.setTitle(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_TITLE)));
-            event.setAllDay(Boolean.parseBoolean(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_ALL_DAY))));
-            event.setDate(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_DATE)));
-            event.setMonth(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_MONTH)));
-            event.setYear(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_YEAR)));
-            event.setTime(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_TIME)));
-            event.setDuration(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_DURATION)));
-            event.setNotify(Boolean.parseBoolean(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_NOTIFY))));
-            event.setRepetition(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_REPETITION)));
-            event.setNote(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_NOTE)));
-            event.setColor(cursor.getInt(cursor.getColumnIndex(DBTables.EVENT_COLOR)));
-            event.setLocation(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_LOCATION)));
-            event.setPhoneNumber(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_PHONE_NUMBER)));
-            event.setPhoneNumber(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_MAIL)));
-        }
-
-        cursor.close();
+        Event event = dbHelper.readEvent(sqLiteDatabase, eventId);
+        event.setRecurringPeriod(dbHelper.readRecurringPeriod(sqLiteDatabase, event.getId()));
         sqLiteDatabase.close();
-
         return event;
     }
 
@@ -601,7 +584,8 @@ public class EditEventActivity extends AppCompatActivity {
         mEvent.setTime(setTimeTextView.getText().toString());
         mEvent.setDuration(setDurationButton.getText().toString());
         mEvent.setNotify(!notificationAdapter.getNotifications().isEmpty());
-        mEvent.setRepetition(repeatTextView.getText().toString());
+        mEvent.setRecurring(isRecurring(repeatTextView.getText().toString()));
+        mEvent.setRecurringPeriod(repeatTextView.getText().toString());
         mEvent.setNote(eventNoteTextInputLayout.getEditText().getText().toString().trim());
         if (notColor == 0) {
             notColor = getResources().getInteger(R.color.red);
@@ -614,6 +598,10 @@ public class EditEventActivity extends AppCompatActivity {
 
     }
 
+    private boolean isRecurring(String toString) {
+        return !toString.equals(getResources().getString(R.string.one_time));
+    }
+
     private boolean confirmInputs() {
         if (!validateEventTitle()) {
             return false;
@@ -623,6 +611,23 @@ public class EditEventActivity extends AppCompatActivity {
             Snackbar.make(addNotificationTextView, "You cannot set a notification to the past.", BaseTransientBottomBar.LENGTH_SHORT).show();
             return false;
         }
+
+        if (mEvent.isRecurring()) {
+            final boolean[] result = {false};
+            new AlertDialog.Builder(this)
+                    .setTitle("Editing a Recurring Event")
+                    .setMessage("Are you sure you want to edit this recurring event? All occurrences of this event will also be edited.")
+                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            result[0] = true;
+                        }
+                    })
+                    .setNegativeButton(android.R.string.no, null)
+                    .setIcon(R.drawable.ic_warning)
+                    .show();
+            return result[0];
+        }
+
         return true;
     }
 
@@ -700,16 +705,8 @@ public class EditEventActivity extends AppCompatActivity {
 
     private int getEventId(String eventTitle, String eventDate, String eventTime) {
         SQLiteDatabase sqLiteDatabase = dbHelper.getReadableDatabase();
-        Cursor cursor = dbHelper.readEvent(sqLiteDatabase, eventTitle, eventDate, eventTime);
-
-        int eventId = -1;
-        while (cursor.moveToNext()) {
-            eventId = cursor.getInt(cursor.getColumnIndex(DBTables.EVENT_ID));
-        }
-
-        cursor.close();
-        sqLiteDatabase.close();
-        return eventId;
+        Event event = dbHelper.readEventByTimestamp(sqLiteDatabase, eventTitle, eventDate, eventTime);
+        return event.getId();
     }
 
     private boolean getFlag(String key) {

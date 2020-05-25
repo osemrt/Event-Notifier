@@ -16,7 +16,7 @@
         android:padding="10dp"
         android:text="@string/events"
         android:textColor="@color/white"
-        android:textSize="24sp"
+        android:textSize="20sp"
         android:textStyle="bold" />
 
     <ScrollView
@@ -57,5 +57,5 @@
         android:background="?attr/mainColor"
         android:text="@string/add_event"
         android:textColor="@color/white"
-        android:textSize="16sp" />
+        android:textSize="18sp" />
 </LinearLayout>

@@ -52,7 +52,7 @@
 
                     <ImageView
                         android:id="@+id/imageView2"
-                        android:layout_width="24dp"
+                        android:layout_width="0dp"
                         android:layout_height="30dp"
                         android:layout_marginEnd="5dp"
                         android:layout_weight="1"
@@ -61,17 +61,17 @@
                     <TextView
                         android:id="@+id/LayoutCell_TextView_EventTime"
                         android:layout_width="match_parent"
-                        android:textColor="?attr/textColor"
                         android:layout_height="wrap_content"
-                        android:text="06:00 - 07:00" />
+                        android:text="06:00 - 07:00"
+                        android:textColor="?attr/textColor" />
                 </LinearLayout>
 
                 <TextView
                     android:id="@+id/LayoutCell_TextView_EventNote"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textColor="?attr/textColor"
-                    android:text="Don't forget to buy a gift" />
+                    android:text="Don't forget to buy a gift"
+                    android:textColor="?attr/textColor" />
 
             </LinearLayout>
 
@@ -95,8 +95,8 @@
                     android:id="@+id/LayoutCell_ImageButton_Notification"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_centerHorizontal="true"
                     android:layout_alignParentBottom="true"
+                    android:layout_centerHorizontal="true"
                     android:background="@color/white"
                     app:srcCompat="@drawable/ic_small_notification" />
 

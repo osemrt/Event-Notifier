@@ -1,9 +1,9 @@
 package ce.yildiz.edu.tr.calendar.adapters;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -23,7 +23,6 @@ import java.util.List;
 
 import ce.yildiz.edu.tr.calendar.R;
 import ce.yildiz.edu.tr.calendar.database.DBHelper;
-import ce.yildiz.edu.tr.calendar.database.DBTables;
 import ce.yildiz.edu.tr.calendar.models.Event;
 import ce.yildiz.edu.tr.calendar.views.EditEventActivity;
 import ce.yildiz.edu.tr.calendar.views.UpcomingEventsFragment;
@@ -71,11 +70,15 @@ public class UpcomingEventAdapter extends RecyclerView.Adapter<UpcomingEventAdap
             }
         });
 
-        if (!isAlarmed(event.getTitle(), event.getDate(), event.getTime())) {
+        if (!event.isNotify()) {
             holder.notificationImageButton.setVisibility(View.GONE);
         }
-        if (isAllDay(event.getTitle(), event.getDate(), event.getTime())) {
+        if (event.isAllDay()) {
             holder.eventTimeLinearLayout.setVisibility(View.GONE);
+        }
+
+        if (!event.isRecurring()) {
+            holder.recurringEventLinearLayout.setVisibility(View.GONE);
         }
 
     }
@@ -104,6 +107,7 @@ public class UpcomingEventAdapter extends RecyclerView.Adapter<UpcomingEventAdap
         private ImageButton optionsImageButton;
         private ImageButton notificationImageButton;
         private LinearLayout eventTimeLinearLayout;
+        private LinearLayout recurringEventLinearLayout;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -116,6 +120,7 @@ public class UpcomingEventAdapter extends RecyclerView.Adapter<UpcomingEventAdap
             optionsImageButton = (ImageButton) itemView.findViewById(R.id.UpcomingLayoutCell_ImageButton_Options);
             notificationImageButton = (ImageButton) itemView.findViewById(R.id.UpcomingLayoutCell_ImageButton_Notification);
             eventTimeLinearLayout = (LinearLayout) itemView.findViewById(R.id.UpcomingLayoutCell_LinearLayout_Time);
+            recurringEventLinearLayout = (LinearLayout) itemView.findViewById(R.id.UpcomingLayoutCell_LinearLayout_Loop);
         }
     }
 
@@ -130,68 +135,68 @@ public class UpcomingEventAdapter extends RecyclerView.Adapter<UpcomingEventAdap
 
         @Override
         public boolean onMenuItemClick(MenuItem menuItem) {
+            Intent intent = null;
             switch (menuItem.getItemId()) {
-                case R.id.Popup_Item_Delete:
-                    deleteEvent(mEvent.getId());
-                    events.remove(position);
-                    notifyItemRemoved(position);
-                    notifyItemRangeChanged(position, events.size());
-                    notifyDataSetChanged();
-                    Toast.makeText(context, "Event removed!", Toast.LENGTH_SHORT).show();
-                    return true;
                 case R.id.Popup_Item_Edit:
-                    Intent intent = new Intent(context, EditEventActivity.class);
-                    intent.putExtra("eventTitle", mEvent.getTitle());
+                    intent = new Intent(context, EditEventActivity.class);
+                    intent.putExtra("eventId", mEvent.getId());
                     intent.putExtra("eventDate", mEvent.getDate());
-                    intent.putExtra("eventTime", mEvent.getTime());
                     upcomingEventsFragment.startActivityForResult(intent, EDIT_EVENT_ACTIVITY_REQUEST_CODE);
                     return true;
+                case R.id.Popup_Item_Delete:
+                    new AlertDialog.Builder(context)
+                            .setTitle("Deleting a Recurring Event")
+                            .setMessage("Are you sure you want to delete this recurring event? All occurrences of this event will also be deleted.")
+                            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    deleteEvent(mEvent.getId());
+                                    events.remove(position);
+                                    notifyItemRemoved(position);
+                                    notifyItemRangeChanged(position, events.size());
+                                    notifyDataSetChanged();
+                                    Toast.makeText(context, "Event removed!", Toast.LENGTH_SHORT).show();
+                                }
+                            })
+                            .setNegativeButton(android.R.string.no, null)
+                            .setIcon(R.drawable.ic_warning)
+                            .show();
+                    return true;
+                case R.id.Popup_Item_Share:
+                    intent = new Intent();
+                    intent.setAction(Intent.ACTION_SEND);
+                    intent.putExtra(Intent.EXTRA_TEXT, mEvent.toString());
+                    intent.setType("text/plain");
+                    upcomingEventsFragment.startActivity(Intent.createChooser(intent, null));
+                    return true;
+                case R.id.Popup_Item_Mail:
+                    // String receiver_email = receiver_editText.getText().toString();
+                    String subject = mEvent.getTitle();
+                    String message = mEvent.toString();
+
+                    // String[] addresses = receiver_email.split(", ");
+
+                    intent = new Intent(Intent.ACTION_SEND);
+                    intent.setType("text/plain");
+                    // intent.putExtra(Intent.EXTRA_EMAIL, addresses);
+                    intent.putExtra(Intent.EXTRA_SUBJECT, subject);
+                    intent.putExtra(Intent.EXTRA_TEXT, message);
+
+                    upcomingEventsFragment.startActivity(Intent.createChooser(intent, "Send Email"));
+                    return true;
             }
+
             return false;
         }
+
     }
 
     private void deleteEvent(int eventId) {
         dbHelper = new DBHelper(context);
         dbHelper.deleteEvent(dbHelper.getWritableDatabase(), eventId);
+        dbHelper.deleteRecurringPattern(dbHelper.getWritableDatabase(), eventId);
+        dbHelper.deleteEventInstanceException(dbHelper.getWritableDatabase(), eventId);
         dbHelper.deleteNotificationByEventId(dbHelper.getWritableDatabase(), eventId);
         dbHelper.close();
-    }
-
-    private boolean isAlarmed(String eventTitle, String date, String time) {
-        boolean alarmed = false;
-        dbHelper = new DBHelper(context);
-        SQLiteDatabase sqLiteDatabase = dbHelper.getReadableDatabase();
-        Cursor cursor = dbHelper.readEvent(sqLiteDatabase, eventTitle, date, time);
-        while (cursor.moveToNext()) {
-            String notify = cursor.getString(cursor.getColumnIndex(DBTables.EVENT_NOTIFY));
-            if (notify.equals("true")) {
-                alarmed = true;
-            } else {
-                alarmed = false;
-            }
-        }
-        cursor.close();
-        sqLiteDatabase.close();
-        return alarmed;
-    }
-
-    private boolean isAllDay(String eventTitle, String date, String time) {
-        boolean isAllDay = false;
-        dbHelper = new DBHelper(context);
-        SQLiteDatabase sqLiteDatabase = dbHelper.getReadableDatabase();
-        Cursor cursor = dbHelper.readEvent(sqLiteDatabase, eventTitle, date, time);
-        while (cursor.moveToNext()) {
-            String notify = cursor.getString(cursor.getColumnIndex(DBTables.EVENT_ALL_DAY));
-            if (notify.equals("true")) {
-                isAllDay = true;
-            } else {
-                isAllDay = false;
-            }
-        }
-        cursor.close();
-        sqLiteDatabase.close();
-        return isAllDay;
     }
 
 }

@@ -2,6 +2,7 @@ package ce.yildiz.edu.tr.calendar.adapters;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -72,12 +73,13 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
             }
         });
 
-        if (!isAlarmed(event.getTitle(), event.getDate(), event.getTime())) {
+        if (!event.isNotify()) {
             holder.notificationImageButton.setVisibility(View.GONE);
         }
-        if (isAllDay(event.getTitle(), event.getDate(), event.getTime())) {
+        if (event.isAllDay()) {
             holder.eventTimeLinearLayout.setVisibility(View.GONE);
         }
+
 
     }
 
@@ -133,22 +135,31 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
             switch (menuItem.getItemId()) {
                 case R.id.Popup_Item_Edit:
                     intent = new Intent(context, EditEventActivity.class);
-                    intent.putExtra("eventTitle", mEvent.getTitle());
+                    intent.putExtra("eventId", mEvent.getId());
                     intent.putExtra("eventDate", mEvent.getDate());
-                    intent.putExtra("eventTime", mEvent.getTime());
                     calendarFragment.startActivityForResult(intent, EDIT_EVENT_ACTIVITY_REQUEST_CODE);
                     return true;
                 case R.id.Popup_Item_Delete:
-                    deleteEvent(mEvent.getId());
-                    eventList.remove(position);
-                    notifyItemRemoved(position);
-                    notifyItemRangeChanged(position, eventList.size());
-                    notifyDataSetChanged();
-                    calendarFragment.setUpCalendar();
-                    Toast.makeText(context, "Event removed!", Toast.LENGTH_SHORT).show();
-                    if (eventList.isEmpty()) {
-                        alertDialog.dismiss();
-                    }
+                    new AlertDialog.Builder(context)
+                            .setTitle("Deleting a Recurring Event")
+                            .setMessage("Are you sure you want to delete this recurring event? All occurrences of this event will also be deleted.")
+                            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    deleteEvent(mEvent.getId());
+                                    eventList.remove(position);
+                                    notifyItemRemoved(position);
+                                    notifyItemRangeChanged(position, eventList.size());
+                                    notifyDataSetChanged();
+                                    calendarFragment.setUpCalendar();
+                                    Toast.makeText(context, "Event removed!", Toast.LENGTH_SHORT).show();
+                                    if (eventList.isEmpty()) {
+                                        alertDialog.dismiss();
+                                    }
+                                }
+                            })
+                            .setNegativeButton(android.R.string.no, null)
+                            .setIcon(R.drawable.ic_warning)
+                            .show();
                     return true;
                 case R.id.Popup_Item_Share:
                     intent = new Intent();
@@ -181,43 +192,9 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
     private void deleteEvent(int eventId) {
         dbHelper = new DBHelper(context);
         dbHelper.deleteEvent(dbHelper.getWritableDatabase(), eventId);
+        dbHelper.deleteRecurringPattern(dbHelper.getWritableDatabase(), eventId);
+        dbHelper.deleteEventInstanceException(dbHelper.getWritableDatabase(), eventId);
         dbHelper.deleteNotificationByEventId(dbHelper.getWritableDatabase(), eventId);
         dbHelper.close();
-    }
-
-    private boolean isAlarmed(String eventTitle, String date, String time) {
-        boolean alarmed = false;
-        dbHelper = new DBHelper(context);
-        SQLiteDatabase sqLiteDatabase = dbHelper.getReadableDatabase();
-        Cursor cursor = dbHelper.readEvent(sqLiteDatabase, eventTitle, date, time);
-        while (cursor.moveToNext()) {
-            String notify = cursor.getString(cursor.getColumnIndex(DBTables.EVENT_NOTIFY));
-            if (notify.equals("true")) {
-                alarmed = true;
-            } else {
-                alarmed = false;
-            }
-        }
-        cursor.close();
-        sqLiteDatabase.close();
-        return alarmed;
-    }
-
-    private boolean isAllDay(String eventTitle, String date, String time) {
-        boolean isAllDay = false;
-        dbHelper = new DBHelper(context);
-        SQLiteDatabase sqLiteDatabase = dbHelper.getReadableDatabase();
-        Cursor cursor = dbHelper.readEvent(sqLiteDatabase, eventTitle, date, time);
-        while (cursor.moveToNext()) {
-            String notify = cursor.getString(cursor.getColumnIndex(DBTables.EVENT_ALL_DAY));
-            if (notify.equals("true")) {
-                isAllDay = true;
-            } else {
-                isAllDay = false;
-            }
-        }
-        cursor.close();
-        sqLiteDatabase.close();
-        return isAllDay;
     }
 }

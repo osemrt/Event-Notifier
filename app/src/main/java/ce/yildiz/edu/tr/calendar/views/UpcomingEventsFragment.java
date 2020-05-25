@@ -2,7 +2,6 @@ package ce.yildiz.edu.tr.calendar.views;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.icu.util.UniversalTimeScale;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -32,6 +31,7 @@ import ce.yildiz.edu.tr.calendar.adapters.UpcomingEventAdapter;
 import ce.yildiz.edu.tr.calendar.database.DBHelper;
 import ce.yildiz.edu.tr.calendar.database.DBTables;
 import ce.yildiz.edu.tr.calendar.models.Event;
+import ce.yildiz.edu.tr.calendar.models.RecurringPattern;
 
 public class UpcomingEventsFragment extends Fragment {
 
@@ -45,7 +45,7 @@ public class UpcomingEventsFragment extends Fragment {
 
     private DBHelper dbHelper;
 
-    private Utils.Period period;
+    private String period;
     private String todayDate;
 
     @Nullable
@@ -54,7 +54,7 @@ public class UpcomingEventsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_upcoming_events, container, false);
 
         dbHelper = new DBHelper(getActivity());
-        period = Utils.Period.TODAY;
+        period = Utils.TODAY;
 
         defineViews(view);
         initViews();
@@ -94,25 +94,19 @@ public class UpcomingEventsFragment extends Fragment {
                 public boolean onMenuItemClick(MenuItem menuItem) {
                     switch (menuItem.getItemId()) {
                         case R.id.PopupPeriod_Item_Today:
-                            periodTextView.setText("Today");
-                            period = Utils.Period.TODAY;
+                            period = Utils.TODAY;
+                            periodTextView.setText(period);
                             break;
                         case R.id.PopupPeriod_Item_Next7Days:
-                            periodTextView.setText("Next 7 days");
-                            period = Utils.Period.NEXT_7_DAYS;
+                            period = Utils.NEXT_7_DAYS;
+                            periodTextView.setText(period);
                             break;
                         case R.id.PopupPeriod_Item_Next30Days:
-                            periodTextView.setText("Next 30 days");
-                            period = Utils.Period.NEXT_30_DAYS;
-                            break;
-                        case R.id.PopupPeriod_Item_AllEvents:
-                            periodTextView.setText("All events");
-                            period = Utils.Period.ALL_EVENTS;
+                            period = Utils.NEXT_30_DAYS;
+                            periodTextView.setText(period);
                             break;
                     }
-
                     setUpRecyclerView();
-
                     return true;
                 }
             }
@@ -122,32 +116,31 @@ public class UpcomingEventsFragment extends Fragment {
     }
 
 
-    public void setUpRecyclerView(){
-        todayDate = Utils.eventDateFormat.format(Calendar.getInstance().getTime());
+    public void setUpRecyclerView() {
         eventsRecyclerView.setHasFixedSize(true);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
         eventsRecyclerView.setLayoutManager(layoutManager);
-        UpcomingEventAdapter upcomingEventAdapter = new UpcomingEventAdapter(getActivity(), collectEvents(todayDate), this);
+        UpcomingEventAdapter upcomingEventAdapter = new UpcomingEventAdapter(getActivity(), collectEvents(Calendar.getInstance().getTime()), this);
         eventsRecyclerView.setAdapter(upcomingEventAdapter);
         upcomingEventAdapter.notifyDataSetChanged();
 
     }
 
 
-    private List<Event> collectEvents(String today) {
+    private List<Event> collectEvents(Date today) {
         List<Event> events = null;
         try {
             switch (period) {
-                case TODAY:
+                case Utils.TODAY:
                     events = collectTodayEvents(today);
                     break;
-                case NEXT_7_DAYS:
+                case Utils.NEXT_7_DAYS:
                     events = collectNext7DaysEvents(today);
                     break;
-                case NEXT_30_DAYS:
+                case Utils.NEXT_30_DAYS:
                     events = collectNext30DaysEvents(today);
                     break;
-                case ALL_EVENTS:
+                case Utils.THIS_YEAR:
                     events = collectAllEvents(today);
                     break;
             }
@@ -158,141 +151,225 @@ public class UpcomingEventsFragment extends Fragment {
         return events;
     }
 
-    private List<Event> collectTodayEvents(String today) {
-        List<Event> events = new ArrayList<>();
-        SQLiteDatabase sqLiteDatabase = dbHelper.getReadableDatabase();
-        Cursor cursor = dbHelper.readEventsByDate(sqLiteDatabase, today);
-        while (cursor.moveToNext()) {
-            Event event = new Event();
-            event.setId(cursor.getInt(cursor.getColumnIndex(DBTables.EVENT_ID)));
-            event.setTitle(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_TITLE)));
-            event.setAllDay(Boolean.parseBoolean(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_ALL_DAY))));
-            event.setDate(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_DATE)));
-            event.setMonth(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_MONTH)));
-            event.setYear(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_YEAR)));
-            event.setTime(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_TIME)));
-            event.setDuration(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_DURATION)));
-            event.setNotify(Boolean.parseBoolean(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_NOTIFY))));
-            event.setRepetition(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_REPETITION)));
-            event.setNote(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_NOTE)));
-            event.setColor(cursor.getInt(cursor.getColumnIndex(DBTables.EVENT_COLOR)));
-            event.setLocation(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_LOCATION)));
-            event.setPhoneNumber(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_PHONE_NUMBER)));
-            event.setPhoneNumber(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_MAIL)));
-            events.add(event);
-        }
-        cursor.close();
-        sqLiteDatabase.close();
-
-        return events;
-    }
-
-    private List<Event> collectNext7DaysEvents(String today) throws ParseException {
-
-        Date fromDate = Utils.eventDateFormat.parse(today);
-
+    private List<Event> collectTodayEvents(Date today) {
+        List<Event> eventList = new ArrayList<>();
         Calendar calendar = Calendar.getInstance();
-        calendar.setTime(fromDate);
-        calendar.add(Calendar.DAY_OF_MONTH, 8);
-        Date toDate = calendar.getTime();
+        calendar.setTime(today);
 
-        List<Event> events = new ArrayList<>();
+        int month = calendar.get(Calendar.MONTH);
+        int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
+        int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
+
+        // Add recurring events
+        List<RecurringPattern> recurringPatterns = readRecurringPatterns();
         SQLiteDatabase sqLiteDatabase = dbHelper.getReadableDatabase();
-        Cursor cursor = dbHelper.readAllEvents(sqLiteDatabase);
+        Event event = new Event();
+        for (RecurringPattern recurringPattern : recurringPatterns) {
+            switch (recurringPattern.getPattern()) {
+                case Utils.DAILY:
+                    event = dbHelper.readEvent(sqLiteDatabase, recurringPattern.getEventId());
+                    event.setDate(Utils.eventDateFormat.format(today));
+                    eventList.add(event);
+                    break;
+                case Utils.WEEKLY:
+                    if (dayOfWeek == recurringPattern.getDayOfWeek()) {
+                        event = dbHelper.readEvent(sqLiteDatabase, recurringPattern.getEventId());
+                        event.setDate(Utils.eventDateFormat.format(today));
+                        eventList.add(event);
+                    }
+                    break;
+                case Utils.MONTHLY:
+                    if (dayOfMonth == recurringPattern.getDayOfMonth()) {
+                        event = dbHelper.readEvent(sqLiteDatabase, recurringPattern.getEventId());
+                        event.setDate(Utils.eventDateFormat.format(today));
+                        eventList.add(event);
+                    }
+                    break;
+                case Utils.YEARLY:
+                    if (month == recurringPattern.getMonthOfYear() && dayOfMonth == recurringPattern.getDayOfMonth()) {
+                        event = dbHelper.readEvent(sqLiteDatabase, recurringPattern.getEventId());
+                        event.setDate(Utils.eventDateFormat.format(today));
+                        eventList.add(event);
+                    }
+                    break;
+            }
+        }
+
+
+        // Add non-recurring events
+        Cursor cursor = dbHelper.readEventsByDate(sqLiteDatabase, Utils.eventDateFormat.format(today));
         while (cursor.moveToNext()) {
-            Date currentDate = Utils.eventDateFormat.parse(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_DATE)));
-            if (currentDate.after(fromDate) && currentDate.before(toDate)) {
-                Event event = new Event();
-                event.setId(cursor.getInt(cursor.getColumnIndex(DBTables.EVENT_ID)));
-                event.setTitle(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_TITLE)));
-                event.setAllDay(Boolean.parseBoolean(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_ALL_DAY))));
-                event.setDate(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_DATE)));
-                event.setMonth(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_MONTH)));
-                event.setYear(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_YEAR)));
-                event.setTime(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_TIME)));
-                event.setDuration(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_DURATION)));
-                event.setNotify(Boolean.parseBoolean(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_NOTIFY))));
-                event.setRepetition(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_REPETITION)));
-                event.setNote(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_NOTE)));
-                event.setColor(cursor.getInt(cursor.getColumnIndex(DBTables.EVENT_COLOR)));
-                event.setLocation(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_LOCATION)));
-                event.setPhoneNumber(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_PHONE_NUMBER)));
-                event.setPhoneNumber(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_MAIL)));
+            int eventID = cursor.getInt(cursor.getColumnIndex(DBTables.EVENT_ID));
+            if (!isContains(eventList, eventID)) {
+                eventList.add(dbHelper.readEvent(sqLiteDatabase, eventID));
             }
         }
         cursor.close();
         sqLiteDatabase.close();
-
-        return events;
+        return eventList;
     }
 
-    private List<Event> collectNext30DaysEvents(String today) throws ParseException {
+    private List<Event> collectNext7DaysEvents(Date today) throws ParseException {
+        Calendar fromCalendar = Calendar.getInstance();
+        fromCalendar.setTime(today);
 
-        Date fromDate = Utils.eventDateFormat.parse(today);
+        Calendar toCalendar = (Calendar) fromCalendar.clone();
+        toCalendar.add(Calendar.DAY_OF_MONTH, 8);
 
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(fromDate);
-        calendar.add(Calendar.DAY_OF_MONTH, 31);
-        Date toDate = calendar.getTime();
+        Date fromDate = fromCalendar.getTime();
+        Date toDate = toCalendar.getTime();
 
-        List<Event> events = new ArrayList<>();
+        List<Event> eventList = new ArrayList<>();
+        // Add recurring events
+        List<RecurringPattern> recurringPatterns = readRecurringPatterns();
         SQLiteDatabase sqLiteDatabase = dbHelper.getReadableDatabase();
-        Cursor cursor = dbHelper.readAllEvents(sqLiteDatabase);
-        while (cursor.moveToNext()) {
-            Date currentDate = Utils.eventDateFormat.parse(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_DATE)));
-            if (currentDate.after(fromDate) && currentDate.before(toDate)) {
-                Event event = new Event();
-                event.setId(cursor.getInt(cursor.getColumnIndex(DBTables.EVENT_ID)));
-                event.setTitle(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_TITLE)));
-                event.setAllDay(Boolean.parseBoolean(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_ALL_DAY))));
-                event.setDate(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_DATE)));
-                event.setMonth(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_MONTH)));
-                event.setYear(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_YEAR)));
-                event.setTime(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_TIME)));
-                event.setDuration(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_DURATION)));
-                event.setNotify(Boolean.parseBoolean(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_NOTIFY))));
-                event.setRepetition(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_REPETITION)));
-                event.setNote(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_NOTE)));
-                event.setColor(cursor.getInt(cursor.getColumnIndex(DBTables.EVENT_COLOR)));
-                event.setLocation(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_LOCATION)));
-                event.setPhoneNumber(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_PHONE_NUMBER)));
-                event.setPhoneNumber(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_MAIL)));
-                events.add(event);
+        Event event = new Event();
+        for (RecurringPattern recurringPattern : recurringPatterns) {
+            switch (recurringPattern.getPattern()) {
+                case Utils.DAILY:
+                    Calendar mCalendar = (Calendar) fromCalendar.clone();
+                    event = dbHelper.readEvent(sqLiteDatabase, recurringPattern.getEventId());
+                    for (int i = 0; i < 7; i++) {
+                        mCalendar.add(Calendar.DAY_OF_MONTH, 1);
+                        event.setDate(Utils.eventDateFormat.format(mCalendar.getTime()));
+                        eventList.add(event);
+                        event = dbHelper.readEvent(sqLiteDatabase, recurringPattern.getEventId()); // TODO: clone the object
+                    }
+                    break;
+                case Utils.WEEKLY:
+                    mCalendar = (Calendar) fromCalendar.clone();
+                    mCalendar.add(Calendar.DAY_OF_MONTH, 7);
+                    mCalendar.set(Calendar.DAY_OF_WEEK, recurringPattern.getDayOfWeek());
+                    event = dbHelper.readEvent(sqLiteDatabase, recurringPattern.getEventId());
+                    event.setDate(Utils.eventDateFormat.format(mCalendar.getTime()));
+                    eventList.add(event);
+                    break;
+                case Utils.MONTHLY:
+                    mCalendar = (Calendar) fromCalendar.clone();
+                    mCalendar.add(Calendar.DAY_OF_MONTH, 1);
+                    if (recurringPattern.getDayOfMonth() >= mCalendar.get(Calendar.DAY_OF_MONTH)) {
+                        mCalendar.set(Calendar.DAY_OF_MONTH, recurringPattern.getDayOfMonth());
+                        event = dbHelper.readEvent(sqLiteDatabase, recurringPattern.getEventId());
+                        event.setDate(Utils.eventDateFormat.format(mCalendar.getTime()));
+                        eventList.add(event);
+                    }
+                    break;
+                case Utils.THIS_YEAR:
+                    mCalendar = (Calendar) fromCalendar.clone();
+                    mCalendar.set(Calendar.MONTH, recurringPattern.getMonthOfYear());
+                    mCalendar.set(Calendar.DAY_OF_MONTH, recurringPattern.getDayOfMonth());
+                    event = dbHelper.readEvent(sqLiteDatabase, recurringPattern.getEventId());
+                    event.setDate(Utils.eventDateFormat.format(today));
+                    eventList.add(event);
             }
         }
-        cursor.close();
-        sqLiteDatabase.close();
 
-        return events;
+        List<Event> allEvents = dbHelper.readAllEvents(sqLiteDatabase);
+        for (Event mEvent : allEvents) {
+            Date currentDate = Utils.eventDateFormat.parse(mEvent.getDate());
+            if (currentDate.after(fromDate) && currentDate.before(toDate)) {
+                eventList.add(mEvent);
+            }
+        }
+        sqLiteDatabase.close();
+        return eventList;
     }
 
-    private List<Event> collectAllEvents(String today) {
-        List<Event> events = new ArrayList<>();
-        SQLiteDatabase sqLiteDatabase = dbHelper.getReadableDatabase();
-        Cursor cursor = dbHelper.readAllEvents(sqLiteDatabase);
-        while (cursor.moveToNext()) {
-            Event event = new Event();
-            event.setId(cursor.getInt(cursor.getColumnIndex(DBTables.EVENT_ID)));
-            event.setTitle(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_TITLE)));
-            event.setAllDay(Boolean.parseBoolean(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_ALL_DAY))));
-            event.setDate(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_DATE)));
-            event.setMonth(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_MONTH)));
-            event.setYear(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_YEAR)));
-            event.setTime(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_TIME)));
-            event.setDuration(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_DURATION)));
-            event.setNotify(Boolean.parseBoolean(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_NOTIFY))));
-            event.setRepetition(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_REPETITION)));
-            event.setNote(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_NOTE)));
-            event.setColor(cursor.getInt(cursor.getColumnIndex(DBTables.EVENT_COLOR)));
-            event.setLocation(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_LOCATION)));
-            event.setPhoneNumber(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_PHONE_NUMBER)));
-            event.setPhoneNumber(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_MAIL)));
-            events.add(event);
-        }
-        cursor.close();
-        sqLiteDatabase.close();
+    private List<Event> collectNext30DaysEvents(Date today) throws ParseException {
+        Calendar fromCalendar = Calendar.getInstance();
+        fromCalendar.setTime(today);
 
-        return events;
+        Calendar toCalendar = (Calendar) fromCalendar.clone();
+        toCalendar.add(Calendar.DAY_OF_MONTH, 31);
+
+        Date fromDate = fromCalendar.getTime();
+        Date toDate = toCalendar.getTime();
+
+        List<Event> eventList = new ArrayList<>();
+        // Add recurring events
+        List<RecurringPattern> recurringPatterns = readRecurringPatterns();
+        SQLiteDatabase sqLiteDatabase = dbHelper.getReadableDatabase();
+        Event event = new Event();
+        for (RecurringPattern recurringPattern : recurringPatterns) {
+            switch (recurringPattern.getPattern()) {
+                case Utils.DAILY:
+                    Calendar mCalendar = (Calendar) fromCalendar.clone();
+                    for (int i = 0; i < 30; i++) {
+                        event = dbHelper.readEvent(sqLiteDatabase, recurringPattern.getEventId());// TODO: clone the object
+                        mCalendar.add(Calendar.DAY_OF_MONTH, 1);
+                        event.setDate(Utils.eventDateFormat.format(mCalendar.getTime()));
+                        eventList.add(event);
+                    }
+                    break;
+                case Utils.WEEKLY:
+                    mCalendar = (Calendar) fromCalendar.clone();
+                    for (int i = 0; i < 5; i++) {
+                        event = dbHelper.readEvent(sqLiteDatabase, recurringPattern.getEventId()); // TODO: clone the object
+                        mCalendar.add(Calendar.DAY_OF_MONTH, 7);
+                        mCalendar.set(Calendar.DAY_OF_WEEK, recurringPattern.getDayOfWeek());
+                        event.setDate(Utils.eventDateFormat.format(mCalendar.getTime()));
+                        eventList.add(event);
+                    }
+                    break;
+                case Utils.MONTHLY:
+                    mCalendar = (Calendar) fromCalendar.clone();
+                    mCalendar.add(Calendar.DAY_OF_MONTH, 1);
+                    if (Math.abs(recurringPattern.getDayOfMonth() - mCalendar.get(Calendar.DAY_OF_MONTH)) < 30) {
+                        mCalendar.set(Calendar.DAY_OF_MONTH, recurringPattern.getDayOfMonth());
+                        event = dbHelper.readEvent(sqLiteDatabase, recurringPattern.getEventId());
+                        event.setDate(Utils.eventDateFormat.format(mCalendar.getTime()));
+                        eventList.add(event);
+                    }
+                    break;
+                case Utils.THIS_YEAR:
+                    mCalendar = (Calendar) fromCalendar.clone();
+                    mCalendar.set(Calendar.MONTH, recurringPattern.getMonthOfYear());
+                    mCalendar.set(Calendar.DAY_OF_MONTH, recurringPattern.getDayOfMonth());
+                    event = dbHelper.readEvent(sqLiteDatabase, recurringPattern.getEventId());
+                    event.setDate(Utils.eventDateFormat.format(today));
+                    eventList.add(event);
+            }
+        }
+
+        List<Event> allEvents = dbHelper.readAllEvents(sqLiteDatabase);
+        for (Event mEvent : allEvents) {
+            Date currentDate = Utils.eventDateFormat.parse(mEvent.getDate());
+            if (currentDate.after(fromDate) && currentDate.before(toDate)) {
+                eventList.add(mEvent);
+            }
+        }
+        sqLiteDatabase.close();
+        return eventList;
+    }
+
+    private List<Event> collectAllEvents(Date today) {
+        SQLiteDatabase sqLiteDatabase = dbHelper.getReadableDatabase();
+        return dbHelper.readAllEvents(sqLiteDatabase);
+    }
+
+    private List<RecurringPattern> readRecurringPatterns() {
+        List<RecurringPattern> recurringPatterns = new ArrayList<>();
+        SQLiteDatabase sqLiteDatabase = dbHelper.getReadableDatabase();
+        Cursor cursor = dbHelper.readAllRecurringPatterns(sqLiteDatabase);
+        while (cursor.moveToNext()) {
+            RecurringPattern recurringPattern = new RecurringPattern();
+            recurringPattern.setEventId(cursor.getInt(cursor.getColumnIndex(DBTables.RECURRING_PATTERN_EVENT_ID)));
+            recurringPattern.setPattern(cursor.getString(cursor.getColumnIndex(DBTables.RECURRING_PATTERN_TYPE)));
+            recurringPattern.setMonthOfYear(cursor.getInt(cursor.getColumnIndex(DBTables.RECURRING_PATTERN_MONTH_OF_YEAR)));
+            recurringPattern.setDayOfMonth(cursor.getInt(cursor.getColumnIndex(DBTables.RECURRING_PATTERN_DAY_OF_MONTH)));
+            recurringPattern.setDayOfWeek(cursor.getInt(cursor.getColumnIndex(DBTables.RECURRING_PATTERN_DAY_OF_WEEK)));
+            recurringPatterns.add(recurringPattern);
+        }
+        return recurringPatterns;
+    }
+
+    private boolean isContains(List<Event> events, int eventId) {
+        for (Event event : events) {
+            if (event.getId() == eventId) {
+                return true;
+            }
+        }
+        return false;
     }
 
 

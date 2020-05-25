@@ -2,7 +2,6 @@ package ce.yildiz.edu.tr.calendar.adapters;
 
 import android.app.AlertDialog;
 import android.content.Context;
-import android.os.AsyncTask;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -62,7 +61,6 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
                 notifyItemRemoved(position);
                 notifyItemRangeChanged(position, notifications.size());
                 notifyDataSetChanged();
-                // holder.rootLinearLayout.setVisibility(View.GONE);
                 holder.cardView.setVisibility(View.GONE);
 
             }

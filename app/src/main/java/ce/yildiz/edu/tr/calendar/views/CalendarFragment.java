@@ -1,8 +1,6 @@
 package ce.yildiz.edu.tr.calendar.views;
 
-import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
@@ -37,8 +35,9 @@ import ce.yildiz.edu.tr.calendar.adapters.GridAdapter;
 import ce.yildiz.edu.tr.calendar.database.DBHelper;
 import ce.yildiz.edu.tr.calendar.database.DBTables;
 import ce.yildiz.edu.tr.calendar.models.Event;
+import ce.yildiz.edu.tr.calendar.models.RecurringPattern;
 
-public class CalendarFragment extends Fragment implements View.OnClickListener, AdapterView.OnItemClickListener {
+public class CalendarFragment extends Fragment {
 
     private final String TAG = this.getClass().getSimpleName();
 
@@ -50,7 +49,6 @@ public class CalendarFragment extends Fragment implements View.OnClickListener, 
     private List<Date> dates = new ArrayList<>();
     private List<Event> events = new ArrayList<>();
 
-    private Context context;
     private ImageButton previousMonthImageButton, nextMonthImageButton;
     private TextView currentDateTextView;
     private GridView datesGridView;
@@ -71,6 +69,7 @@ public class CalendarFragment extends Fragment implements View.OnClickListener, 
         dbHelper = new DBHelper(getActivity());
 
         defineViews(view);
+        defineListeners();
         setUpCalendar();
 
         return view;
@@ -81,26 +80,87 @@ public class CalendarFragment extends Fragment implements View.OnClickListener, 
         previousMonthImageButton = view.findViewById(R.id.CalenderFragment_Button_Prev);
         currentDateTextView = view.findViewById(R.id.CalenderFragment_TextView_CurrentDate);
         datesGridView = view.findViewById(R.id.CalenderFragment_GridView_Dates);
-
-        nextMonthImageButton.setOnClickListener(this);
-        previousMonthImageButton.setOnClickListener(this);
-        datesGridView.setOnItemClickListener(this);
     }
 
-
-    @Override
-    public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.CalenderFragment_Button_Prev:
-                calendar.add(Calendar.MONTH, -1);
-                setUpCalendar();
-                break;
-            case R.id.CalenderFragment_Button_Next:
+    private void defineListeners() {
+        nextMonthImageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
                 calendar.add(Calendar.MONTH, 1);
                 setUpCalendar();
-                break;
+            }
+        });
 
-        }
+        previousMonthImageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                calendar.add(Calendar.MONTH, -1);
+                setUpCalendar();
+            }
+        });
+
+        datesGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                // Avoid clicking on non-activate dates
+                Date viewDate = dates.get(position);
+                Calendar viewCalendar = calendar.getInstance();
+                viewCalendar.setTime(viewDate);
+                if (viewCalendar.get(Calendar.YEAR) != calendar.get(Calendar.YEAR) || viewCalendar.get(Calendar.MONTH) != calendar.get(Calendar.MONTH)) {
+                    return;
+                }
+
+                // Show events alert dialog
+                final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder.setCancelable(true);
+                View dialogView = LayoutInflater.from(getActivity().getBaseContext()).inflate(R.layout.layout_alert_dialog, parent, false);
+                builder.setView(dialogView);
+                alertDialog = builder.create();
+                alertDialog.show();
+                alertDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                    @Override
+                    public void onCancel(DialogInterface dialog) {
+                        setUpCalendar();
+
+                    }
+                });
+
+                savedEventsRecyclerView = (RecyclerView) dialogView.findViewById(R.id.AlertDialog_RecyclerView_ListEvents);
+                addNewEventButton = (Button) dialogView.findViewById(R.id.AlertDialog_Button_AddEvent);
+                noEventTextView = (TextView) dialogView.findViewById(R.id.AlertDialog_TextView_NoEvent);
+
+
+                final String date = Utils.eventDateFormat.format(dates.get(position));
+                List<Event> eventsByDate = collectEventsByDate(dates.get(position));
+
+                if (eventsByDate.isEmpty()) {
+                    savedEventsRecyclerView.setVisibility(View.INVISIBLE);
+                    noEventTextView.setVisibility(View.VISIBLE);
+                    addNewEventButton.setText("CREATE EVENT");
+                } else {
+                    savedEventsRecyclerView.setVisibility(View.VISIBLE);
+                    noEventTextView.setVisibility(View.GONE);
+                    savedEventsRecyclerView.setHasFixedSize(true);
+                    RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(view.getContext());
+                    savedEventsRecyclerView.setLayoutManager(layoutManager);
+                    EventAdapter eventAdapter = new EventAdapter(getActivity(), eventsByDate, alertDialog, CalendarFragment.this);
+                    savedEventsRecyclerView.setAdapter(eventAdapter);
+                    eventAdapter.notifyDataSetChanged();
+                    addNewEventButton.setText("ADD EVENT");
+                }
+
+
+                addNewEventButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(getContext(), NewEventActivity.class);
+                        intent.putExtra("date", date);
+                        startActivityForResult(intent, ADD_NEW_EVENT_ACTIVITY_REQUEST_CODE);
+                        alertDialog.dismiss();
+                    }
+                });
+            }
+        });
 
     }
 
@@ -111,12 +171,12 @@ public class CalendarFragment extends Fragment implements View.OnClickListener, 
         dates.clear();
 
         Calendar monthCalendar = (Calendar) calendar.clone();
-        monthCalendar.set(Calendar.DAY_OF_MONTH, 1);
+        monthCalendar.set(Calendar.DAY_OF_MONTH, 1); // start from Monday
 
         int firstDayOfMonth = monthCalendar.get(Calendar.DAY_OF_WEEK) - 2;
         monthCalendar.add(Calendar.DAY_OF_MONTH, -firstDayOfMonth);
 
-        collectEventsPerMonth(Utils.monthFormat.format(calendar.getTime()), Utils.yearFormat.format(calendar.getTime()));
+        collectEventsByMonth(Utils.yearFormat.format(calendar.getTime()), Utils.monthFormat.format(calendar.getTime()));
 
         while (dates.size() < Utils.MAX_CALENDAR_DAYS) {
             dates.add(monthCalendar.getTime());
@@ -124,122 +184,103 @@ public class CalendarFragment extends Fragment implements View.OnClickListener, 
         }
 
 
-        GridAdapter gridAdapter = new GridAdapter(getActivity().getBaseContext(), dates, calendar, events);
+        GridAdapter gridAdapter = new GridAdapter(getContext(), dates, calendar, events);
         datesGridView.setAdapter(gridAdapter);
 
     }
 
-    @SuppressLint("SetTextI18n")
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
-        final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setCancelable(true);
-        View dialogView = LayoutInflater.from(getActivity().getBaseContext()).inflate(R.layout.layout_alert_dialog, parent, false);
-        builder.setView(dialogView);
-        alertDialog = builder.create();
-        alertDialog.show();
-        alertDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-            @Override
-            public void onCancel(DialogInterface dialog) {
-                setUpCalendar();
-
-            }
-        });
-
-        savedEventsRecyclerView = (RecyclerView) dialogView.findViewById(R.id.AlertDialog_RecyclerView_ListEvents);
-        addNewEventButton = (Button) dialogView.findViewById(R.id.AlertDialog_Button_AddEvent);
-        noEventTextView = (TextView) dialogView.findViewById(R.id.AlertDialog_TextView_NoEvent);
-
-
-        final String date = Utils.eventDateFormat.format(dates.get(position));
-
-        List<Event> eventsByDate = collectEventsByDate(date);
-
-        if (eventsByDate.isEmpty()) {
-            savedEventsRecyclerView.setVisibility(View.INVISIBLE);
-            noEventTextView.setVisibility(View.VISIBLE);
-            addNewEventButton.setText("CREATE EVENT");
-        } else {
-            savedEventsRecyclerView.setVisibility(View.VISIBLE);
-            noEventTextView.setVisibility(View.GONE);
-            savedEventsRecyclerView.setHasFixedSize(true);
-            RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(view.getContext());
-            savedEventsRecyclerView.setLayoutManager(layoutManager);
-            EventAdapter eventAdapter = new EventAdapter(getActivity(), eventsByDate, alertDialog, this);
-            savedEventsRecyclerView.setAdapter(eventAdapter);
-            eventAdapter.notifyDataSetChanged();
-            addNewEventButton.setText("ADD EVENT");
-        }
-
-
-        addNewEventButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getContext(), NewEventActivity.class);
-                intent.putExtra("date", date);
-                startActivityForResult(intent, ADD_NEW_EVENT_ACTIVITY_REQUEST_CODE);
-                alertDialog.dismiss();
-            }
-        });
-
-
-    }
-
-    private void collectEventsPerMonth(String Month, String Year) {
+    private void collectEventsByMonth(String year, String month) {
         events.clear();
         SQLiteDatabase sqLiteDatabase = dbHelper.getReadableDatabase();
-        Cursor cursor = dbHelper.readEventsByMonth(sqLiteDatabase, Year, Month);
+        Cursor cursor = dbHelper.readEventsByMonth(sqLiteDatabase, year, month);
         while (cursor.moveToNext()) {
-            Event event = new Event();
-            event.setId(cursor.getInt(cursor.getColumnIndex(DBTables.EVENT_ID)));
-            event.setTitle(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_TITLE)));
-            event.setAllDay(Boolean.parseBoolean(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_ALL_DAY))));
-            event.setDate(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_DATE)));
-            event.setMonth(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_MONTH)));
-            event.setYear(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_YEAR)));
-            event.setTime(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_TIME)));
-            event.setDuration(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_DURATION)));
-            event.setNotify(Boolean.parseBoolean(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_NOTIFY))));
-            event.setRepetition(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_REPETITION)));
-            event.setNote(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_NOTE)));
-            event.setColor(cursor.getInt(cursor.getColumnIndex(DBTables.EVENT_COLOR)));
-            event.setLocation(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_LOCATION)));
-            event.setPhoneNumber(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_PHONE_NUMBER)));
-            event.setPhoneNumber(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_MAIL)));
-
-            events.add(event);
-        }
-        cursor.close();
-        dbHelper.close();
-    }
-
-    private List<Event> collectEventsByDate(String date) {
-        List<Event> events = new ArrayList<>();
-        SQLiteDatabase sqLiteDatabase = dbHelper.getReadableDatabase();
-        Cursor cursor = dbHelper.readEventsByDate(sqLiteDatabase, date);
-        while (cursor.moveToNext()) {
-            Event event = new Event();
-            event.setId(cursor.getInt(cursor.getColumnIndex(DBTables.EVENT_ID)));
-            event.setTitle(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_TITLE)));
-            event.setAllDay(Boolean.parseBoolean(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_ALL_DAY))));
-            event.setDate(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_DATE)));
-            event.setMonth(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_MONTH)));
-            event.setYear(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_YEAR)));
-            event.setTime(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_TIME)));
-            event.setDuration(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_DURATION)));
-            event.setNotify(Boolean.parseBoolean(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_NOTIFY))));
-            event.setRepetition(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_REPETITION)));
-            event.setNote(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_NOTE)));
-            event.setColor(cursor.getInt(cursor.getColumnIndex(DBTables.EVENT_COLOR)));
-            event.setLocation(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_LOCATION)));
-            event.setPhoneNumber(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_PHONE_NUMBER)));
-            event.setPhoneNumber(cursor.getString(cursor.getColumnIndex(DBTables.EVENT_MAIL)));
-            events.add(event);
+            events.add(dbHelper.readEvent(sqLiteDatabase, cursor.getInt(cursor.getColumnIndex(DBTables.EVENT_ID))));
         }
         cursor.close();
         sqLiteDatabase.close();
+    }
 
-        return events;
+    private List<Event> collectEventsByDate(Date date) {
+        List<Event> eventList = new ArrayList<>();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+
+        int month = calendar.get(Calendar.MONTH);
+        int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
+        int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
+
+        // Add recurring events
+        Event mEvent = new Event();
+        List<RecurringPattern> recurringPatterns = readRecurringPatterns();
+        SQLiteDatabase sqLiteDatabase = dbHelper.getReadableDatabase();
+        for (RecurringPattern recurringPattern : recurringPatterns) {
+            switch (recurringPattern.getPattern()) {
+                case Utils.DAILY:
+                    mEvent = dbHelper.readEvent(sqLiteDatabase, recurringPattern.getEventId());
+                    mEvent.setDate(Utils.eventDateFormat.format(date));
+                    eventList.add(mEvent);
+                    break;
+                case Utils.WEEKLY:
+                    if (dayOfWeek == recurringPattern.getDayOfWeek()) {
+                        mEvent = dbHelper.readEvent(sqLiteDatabase, recurringPattern.getEventId());
+                        mEvent.setDate(Utils.eventDateFormat.format(date));
+                        eventList.add(mEvent);
+                    }
+                    break;
+                case Utils.MONTHLY:
+                    if (dayOfMonth == recurringPattern.getDayOfMonth()) {
+                        mEvent = dbHelper.readEvent(sqLiteDatabase, recurringPattern.getEventId());
+                        mEvent.setDate(Utils.eventDateFormat.format(date));
+                        eventList.add(mEvent);
+                    }
+                    break;
+                case Utils.YEARLY:
+                    if (month == recurringPattern.getMonthOfYear() && dayOfMonth == recurringPattern.getDayOfMonth()) {
+                        mEvent = dbHelper.readEvent(sqLiteDatabase, recurringPattern.getEventId());
+                        mEvent.setDate(Utils.eventDateFormat.format(date));
+                        eventList.add(mEvent);
+                    }
+                    break;
+            }
+        }
+
+
+        // Add non-recurring events
+        Cursor cursor = dbHelper.readEventsByDate(sqLiteDatabase, Utils.eventDateFormat.format(date));
+        while (cursor.moveToNext()) {
+            int eventID = cursor.getInt(cursor.getColumnIndex(DBTables.EVENT_ID));
+            if (!isContains(eventList, eventID)) {
+                eventList.add(dbHelper.readEvent(sqLiteDatabase, eventID));
+            }
+        }
+        cursor.close();
+        sqLiteDatabase.close();
+        return eventList;
+    }
+
+    private List<RecurringPattern> readRecurringPatterns() {
+        List<RecurringPattern> recurringPatterns = new ArrayList<>();
+        SQLiteDatabase sqLiteDatabase = dbHelper.getReadableDatabase();
+        Cursor cursor = dbHelper.readAllRecurringPatterns(sqLiteDatabase);
+        while (cursor.moveToNext()) {
+            RecurringPattern recurringPattern = new RecurringPattern();
+            recurringPattern.setEventId(cursor.getInt(cursor.getColumnIndex(DBTables.RECURRING_PATTERN_EVENT_ID)));
+            recurringPattern.setPattern(cursor.getString(cursor.getColumnIndex(DBTables.RECURRING_PATTERN_TYPE)));
+            recurringPattern.setMonthOfYear(cursor.getInt(cursor.getColumnIndex(DBTables.RECURRING_PATTERN_MONTH_OF_YEAR)));
+            recurringPattern.setDayOfMonth(cursor.getInt(cursor.getColumnIndex(DBTables.RECURRING_PATTERN_DAY_OF_MONTH)));
+            recurringPattern.setDayOfWeek(cursor.getInt(cursor.getColumnIndex(DBTables.RECURRING_PATTERN_DAY_OF_WEEK)));
+            recurringPatterns.add(recurringPattern);
+        }
+        return recurringPatterns;
+    }
+
+    private boolean isContains(List<Event> events, int eventId) {
+        for (Event event : events) {
+            if (event.getId() == eventId) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -247,13 +288,13 @@ public class CalendarFragment extends Fragment implements View.OnClickListener, 
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == ADD_NEW_EVENT_ACTIVITY_REQUEST_CODE) {
             if (resultCode == getActivity().RESULT_OK) {
-                Toast.makeText(getActivity(), "Event created!", Toast.LENGTH_SHORT).show();
                 setUpCalendar();
+                Toast.makeText(getActivity(), "Event created!", Toast.LENGTH_SHORT).show();
             }
         } else if (requestCode == EDIT_EVENT_ACTIVITY_REQUEST_CODE) {
             if (resultCode == getActivity().RESULT_OK) {
-                Toast.makeText(getActivity(), "Event edited!", Toast.LENGTH_SHORT).show();
                 setUpCalendar();
+                Toast.makeText(getActivity(), "Event edited!", Toast.LENGTH_SHORT).show();
                 alertDialog.dismiss();
             }
         }

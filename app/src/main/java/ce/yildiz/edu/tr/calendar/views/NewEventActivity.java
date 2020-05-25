@@ -11,7 +11,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.GradientDrawable;
 import android.os.AsyncTask;
@@ -33,7 +32,6 @@ import android.widget.RadioGroup;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.TimePicker;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -54,7 +52,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -63,7 +60,6 @@ import ce.yildiz.edu.tr.calendar.R;
 import ce.yildiz.edu.tr.calendar.Utils;
 import ce.yildiz.edu.tr.calendar.adapters.NotificationAdapter;
 import ce.yildiz.edu.tr.calendar.database.DBHelper;
-import ce.yildiz.edu.tr.calendar.database.DBTables;
 import ce.yildiz.edu.tr.calendar.models.Event;
 import ce.yildiz.edu.tr.calendar.models.Notification;
 import ce.yildiz.edu.tr.calendar.other.ServiceAutoLauncher;
@@ -156,7 +152,6 @@ public class NewEventActivity extends AppCompatActivity {
     @SuppressLint("ResourceType")
     private void initViews() {
         Intent intent = getIntent();
-        String asd = intent.getStringExtra("date");
         setDateTextView.setText(intent.getStringExtra("date"));
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeZone(TimeZone.getDefault());
@@ -174,11 +169,19 @@ public class NewEventActivity extends AppCompatActivity {
     private void initVariables() {
         Calendar mCal = Calendar.getInstance();
         mCal.setTimeZone(TimeZone.getDefault());
+        alarmHour = mCal.get(Calendar.HOUR_OF_DAY);
+        alarmMinute = mCal.get(Calendar.MINUTE);
+
+        try {
+            mCal.setTime(Utils.eventDateFormat.parse(getIntent().getStringExtra("date")));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
         alarmYear = mCal.get(Calendar.YEAR);
         alarmMonth = mCal.get(Calendar.MONTH);
         alarmDay = mCal.get(Calendar.DAY_OF_MONTH);
-        alarmHour = mCal.get(Calendar.HOUR_OF_DAY);
-        alarmMinute = mCal.get(Calendar.MINUTE);
+
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             mLocationPermissionGranted = true;
@@ -289,13 +292,11 @@ public class NewEventActivity extends AppCompatActivity {
         locationImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 if (!mLocationPermissionGranted) {
                     getLocationPermission();
                 } else {
                     startActivityForResult(new Intent(getApplicationContext(), MapsActivity.class), MAPS_ACTIVITY_REQUEST);
                 }
-
             }
         });
 
@@ -509,7 +510,8 @@ public class NewEventActivity extends AppCompatActivity {
         event.setTime(setTimeTextView.getText().toString());
         event.setDuration(setDurationButton.getText().toString());
         event.setNotify(!notifications.isEmpty());
-        event.setRepetition(repeatTextView.getText().toString());
+        event.setRecurring(isRecurring(repeatTextView.getText().toString()));
+        event.setRecurringPeriod(repeatTextView.getText().toString());
         event.setNote(eventNoteTextInputLayout.getEditText().getText().toString().trim());
         if (notColor == 0) {
             notColor = getResources().getInteger(R.color.red);
@@ -521,6 +523,10 @@ public class NewEventActivity extends AppCompatActivity {
         event.setPhoneNumber(phoneNumberTextInputLayout.getEditText().getText().toString().trim());
         event.setMail(mailTextInputLayout.getEditText().getText().toString().trim());
 
+    }
+
+    private boolean isRecurring(String toString) {
+        return !toString.equals(getResources().getString(R.string.one_time));
     }
 
     private boolean confirmInputs() {
@@ -606,16 +612,9 @@ public class NewEventActivity extends AppCompatActivity {
 
     private int getEventId(String eventTitle, String eventDate, String eventTime) {
         SQLiteDatabase sqLiteDatabase = dbHelper.getReadableDatabase();
-        Cursor cursor = dbHelper.readEvent(sqLiteDatabase, eventTitle, eventDate, eventTime);
-
-        int eventId = -1;
-        while (cursor.moveToNext()) {
-            eventId = cursor.getInt(cursor.getColumnIndex(DBTables.EVENT_ID));
-        }
-
-        cursor.close();
+        Event event = dbHelper.readEventByTimestamp(sqLiteDatabase, eventTitle, eventDate, eventTime);
         sqLiteDatabase.close();
-        return eventId;
+        return event.getId();
     }
 
     private int getAppTheme() {

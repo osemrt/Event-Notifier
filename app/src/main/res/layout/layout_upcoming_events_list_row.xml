@@ -45,9 +45,7 @@
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-
-                    >
+                    android:orientation="horizontal">
 
                     <LinearLayout
                         android:id="@+id/LayoutCell_LinearLayout_EventDate"
@@ -71,8 +69,8 @@
                             android:id="@+id/UpcomingLayoutCell_TextView_EventDate"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:textColor="?attr/textColor"
-                            android:text="10-May-2020" />
+                            android:text="10-May-2020"
+                            android:textColor="?attr/textColor" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -94,9 +92,26 @@
                         <TextView
                             android:id="@+id/UpcomingLayoutCell_TextView_EventTime"
                             android:layout_width="match_parent"
-                            android:textColor="?attr/textColor"
                             android:layout_height="wrap_content"
-                            android:text="06:00 - 07:00" />
+                            android:text="06:00 - 07:00"
+                            android:textColor="?attr/textColor" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/UpcomingLayoutCell_LinearLayout_Loop"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="7dp"
+                        android:gravity="center"
+                        android:orientation="horizontal">
+
+
+                        <ImageView
+                            android:layout_width="0dp"
+                            android:layout_height="25dp"
+                            android:layout_marginEnd="5dp"
+                            android:layout_weight="1"
+                            app:srcCompat="@drawable/ic_loop" />
                     </LinearLayout>
 
 
@@ -106,9 +121,9 @@
                 <TextView
                     android:id="@+id/UpcomingLayoutCell_TextView_EventNote"
                     android:layout_width="match_parent"
-                    android:textColor="?attr/textColor"
                     android:layout_height="wrap_content"
-                    android:text="Don't forget to buy a gift" />
+                    android:text="Don't forget to buy a gift"
+                    android:textColor="?attr/textColor" />
 
             </LinearLayout>
 
