@@ -40,12 +40,12 @@ public class UpcomingEventsFragment extends Fragment {
     private static final int EDIT_EVENT_ACTIVITY_REQUEST_CODE = 1;
 
     private ImageButton changePeriodImageButton;
-    private TextView periodTextView;
+    public TextView periodTextView;
     private RecyclerView eventsRecyclerView;
 
     private DBHelper dbHelper;
 
-    private String period;
+    //public String period;
     private String todayDate;
 
     @Nullable
@@ -54,7 +54,7 @@ public class UpcomingEventsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_upcoming_events, container, false);
 
         dbHelper = new DBHelper(getActivity());
-        period = Utils.TODAY;
+//        period = Utils.CURRENT_FILTER;
 
         defineViews(view);
         initViews();
@@ -71,7 +71,7 @@ public class UpcomingEventsFragment extends Fragment {
     }
 
     private void initViews() {
-        periodTextView.setText("Today");
+        periodTextView.setText(Utils.CURRENT_FILTER);
         setUpRecyclerView();
     }
 
@@ -94,16 +94,16 @@ public class UpcomingEventsFragment extends Fragment {
                 public boolean onMenuItemClick(MenuItem menuItem) {
                     switch (menuItem.getItemId()) {
                         case R.id.PopupPeriod_Item_Today:
-                            period = Utils.TODAY;
-                            periodTextView.setText(period);
+                            Utils.CURRENT_FILTER = Utils.TODAY;
+                            periodTextView.setText(Utils.CURRENT_FILTER);
                             break;
                         case R.id.PopupPeriod_Item_Next7Days:
-                            period = Utils.NEXT_7_DAYS;
-                            periodTextView.setText(period);
+                            Utils.CURRENT_FILTER = Utils.NEXT_7_DAYS;
+                            periodTextView.setText(Utils.CURRENT_FILTER);
                             break;
                         case R.id.PopupPeriod_Item_Next30Days:
-                            period = Utils.NEXT_30_DAYS;
-                            periodTextView.setText(period);
+                            Utils.CURRENT_FILTER = Utils.NEXT_30_DAYS;
+                            periodTextView.setText(Utils.CURRENT_FILTER);
                             break;
                     }
                     setUpRecyclerView();
@@ -119,18 +119,17 @@ public class UpcomingEventsFragment extends Fragment {
     public void setUpRecyclerView() {
         eventsRecyclerView.setHasFixedSize(true);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
+        layoutManager.setMeasurementCacheEnabled(false);
         eventsRecyclerView.setLayoutManager(layoutManager);
         UpcomingEventAdapter upcomingEventAdapter = new UpcomingEventAdapter(getActivity(), collectEvents(Calendar.getInstance().getTime()), this);
         eventsRecyclerView.setAdapter(upcomingEventAdapter);
-        upcomingEventAdapter.notifyDataSetChanged();
-
     }
 
 
     private List<Event> collectEvents(Date today) {
         List<Event> events = null;
         try {
-            switch (period) {
+            switch (Utils.CURRENT_FILTER) {
                 case Utils.TODAY:
                     events = collectTodayEvents(today);
                     break;
@@ -139,9 +138,6 @@ public class UpcomingEventsFragment extends Fragment {
                     break;
                 case Utils.NEXT_30_DAYS:
                     events = collectNext30DaysEvents(today);
-                    break;
-                case Utils.THIS_YEAR:
-                    events = collectAllEvents(today);
                     break;
             }
         } catch (ParseException e) {
@@ -267,7 +263,7 @@ public class UpcomingEventsFragment extends Fragment {
         List<Event> allEvents = dbHelper.readAllEvents(sqLiteDatabase);
         for (Event mEvent : allEvents) {
             Date currentDate = Utils.eventDateFormat.parse(mEvent.getDate());
-            if (currentDate.after(fromDate) && currentDate.before(toDate)) {
+            if (currentDate.after(fromDate) && currentDate.before(toDate) && !isContains(eventList, mEvent.getId())) {
                 eventList.add(mEvent);
             }
         }
@@ -303,38 +299,34 @@ public class UpcomingEventsFragment extends Fragment {
                     break;
                 case Utils.WEEKLY:
                     mCalendar = (Calendar) fromCalendar.clone();
-                    for (int i = 0; i < 5; i++) {
+                    for (int i = 0; i < 4; i++) {
                         event = dbHelper.readEvent(sqLiteDatabase, recurringPattern.getEventId()); // TODO: clone the object
                         mCalendar.add(Calendar.DAY_OF_MONTH, 7);
                         mCalendar.set(Calendar.DAY_OF_WEEK, recurringPattern.getDayOfWeek());
-                        event.setDate(Utils.eventDateFormat.format(mCalendar.getTime()));
-                        eventList.add(event);
+                        if (mCalendar.getTime().before(toDate)) {
+                            event.setDate(Utils.eventDateFormat.format(mCalendar.getTime()));
+                            eventList.add(event);
+                        }
                     }
                     break;
                 case Utils.MONTHLY:
                     mCalendar = (Calendar) fromCalendar.clone();
+                    mCalendar.set(Calendar.DAY_OF_MONTH, recurringPattern.getDayOfMonth());
                     mCalendar.add(Calendar.DAY_OF_MONTH, 1);
-                    if (Math.abs(recurringPattern.getDayOfMonth() - mCalendar.get(Calendar.DAY_OF_MONTH)) < 30) {
+                    if (mCalendar.getTime().before(toDate) && mCalendar.getTime().after(fromDate)) {
                         mCalendar.set(Calendar.DAY_OF_MONTH, recurringPattern.getDayOfMonth());
                         event = dbHelper.readEvent(sqLiteDatabase, recurringPattern.getEventId());
                         event.setDate(Utils.eventDateFormat.format(mCalendar.getTime()));
                         eventList.add(event);
                     }
                     break;
-                case Utils.THIS_YEAR:
-                    mCalendar = (Calendar) fromCalendar.clone();
-                    mCalendar.set(Calendar.MONTH, recurringPattern.getMonthOfYear());
-                    mCalendar.set(Calendar.DAY_OF_MONTH, recurringPattern.getDayOfMonth());
-                    event = dbHelper.readEvent(sqLiteDatabase, recurringPattern.getEventId());
-                    event.setDate(Utils.eventDateFormat.format(today));
-                    eventList.add(event);
             }
         }
 
         List<Event> allEvents = dbHelper.readAllEvents(sqLiteDatabase);
         for (Event mEvent : allEvents) {
             Date currentDate = Utils.eventDateFormat.parse(mEvent.getDate());
-            if (currentDate.after(fromDate) && currentDate.before(toDate)) {
+            if (currentDate.after(fromDate) && currentDate.before(toDate) && !isContains(eventList, mEvent.getId())) {
                 eventList.add(mEvent);
             }
         }

@@ -19,6 +19,7 @@ public class Utils {
     public static final String MONTHLY = "Repeat Monthly";
     public static final String YEARLY = "Repeat Yearly";
 
+    public static String CURRENT_FILTER = "Today";
     public static final String TODAY = "Today";
     public static final String NEXT_7_DAYS = "Next 7 days";
     public static final String NEXT_30_DAYS = "Next 30 days";
