@@ -399,7 +399,7 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     // Delete functions
-    public void deleteNotificationByEventId(SQLiteDatabase sqLiteDatabase, int eventId) {
+    public void deleteNotificationsByEventId(SQLiteDatabase sqLiteDatabase, int eventId) {
         String where = DBTables.NOTIFICATION_EVENT_ID + "=?";
         String[] whereArgs = {Integer.toString(eventId)};
         sqLiteDatabase.delete(DBTables.NOTIFICATION_TABLE_NAME, where, whereArgs);
