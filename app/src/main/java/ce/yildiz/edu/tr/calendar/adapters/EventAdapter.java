@@ -240,6 +240,10 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
                             alertDialog.dismiss();
                         }
                     }
+
+                    // Refresh the fragment
+                    calendarFragment.getFragmentManager().beginTransaction().detach(calendarFragment).commit();
+                    calendarFragment.getFragmentManager().beginTransaction().attach(calendarFragment).commit();
                     return true;
                 case R.id.Popup_Item_Share:
                     intent = new Intent();

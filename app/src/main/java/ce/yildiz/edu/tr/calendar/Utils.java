@@ -47,8 +47,8 @@ public class Utils {
         Date aDate = null;
         try {
             aDate = simpleDateFormat.parse(date);
-        } catch (ParseException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            //e.printStackTrace();
         }
         return aDate;
     }

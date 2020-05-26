@@ -178,10 +178,8 @@ public class UpcomingEventAdapter extends RecyclerView.Adapter<UpcomingEventAdap
                                         notifyItemRangeChanged(position, events.size());
                                         events.remove(position);
                                         upcomingEventsFragment.setUpRecyclerView();
-
                                         upcomingEventsFragment.getFragmentManager().beginTransaction().detach(upcomingEventsFragment).commit();
                                         upcomingEventsFragment.getFragmentManager().beginTransaction().attach(upcomingEventsFragment).commit();
-
                                         Toast.makeText(context, "Event removed!", Toast.LENGTH_SHORT).show();
                                     }
                                 })
@@ -195,6 +193,8 @@ public class UpcomingEventAdapter extends RecyclerView.Adapter<UpcomingEventAdap
                         notifyItemRemoved(position);
                         notifyItemRangeChanged(position, events.size());
                         notifyDataSetChanged();
+                        upcomingEventsFragment.getFragmentManager().beginTransaction().detach(upcomingEventsFragment).commit();
+                        upcomingEventsFragment.getFragmentManager().beginTransaction().attach(upcomingEventsFragment).commit();
                         Toast.makeText(context, "Event removed!", Toast.LENGTH_SHORT).show();
                         upcomingEventsFragment.setUpRecyclerView();
                     }
@@ -304,5 +304,7 @@ public class UpcomingEventAdapter extends RecyclerView.Adapter<UpcomingEventAdap
         sqLiteDatabase.close();
         return notifications;
     }
+
+
 
 }

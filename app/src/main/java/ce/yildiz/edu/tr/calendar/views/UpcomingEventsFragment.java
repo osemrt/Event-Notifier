@@ -1,5 +1,6 @@
 package ce.yildiz.edu.tr.calendar.views;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -12,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.PopupMenu;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -32,6 +34,8 @@ import ce.yildiz.edu.tr.calendar.database.DBHelper;
 import ce.yildiz.edu.tr.calendar.database.DBTables;
 import ce.yildiz.edu.tr.calendar.models.Event;
 import ce.yildiz.edu.tr.calendar.models.RecurringPattern;
+
+import static android.app.Activity.RESULT_OK;
 
 public class UpcomingEventsFragment extends Fragment {
 
@@ -364,5 +368,12 @@ public class UpcomingEventsFragment extends Fragment {
         return false;
     }
 
-
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == getActivity().RESULT_OK) {
+            setUpRecyclerView();
+            Toast.makeText(getActivity(), "Event edited!", Toast.LENGTH_SHORT).show();
+        }
+    }
 }

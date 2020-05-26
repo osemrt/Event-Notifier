@@ -139,10 +139,13 @@ public class GridAdapter extends ArrayAdapter {
 
         mCalendar = Calendar.getInstance();
         for (Event event : events) {
-            mCalendar.setTime(Utils.convertStringToDate(event.getDate()));
-            if (viewDayOfMonth == mCalendar.get(Calendar.DAY_OF_MONTH) && viewMonth == mCalendar.get(Calendar.MONTH) && viewYear == mCalendar.get(Calendar.YEAR) && !eventIDs.contains(event.getId())) {
-                eventIDs.add(event.getId());
+            if(event.getDate()!=null){
+                mCalendar.setTime(Utils.convertStringToDate(event.getDate()));
+                if (viewDayOfMonth == mCalendar.get(Calendar.DAY_OF_MONTH) && viewMonth == mCalendar.get(Calendar.MONTH) && viewYear == mCalendar.get(Calendar.YEAR) && !eventIDs.contains(event.getId())) {
+                    eventIDs.add(event.getId());
+                }
             }
+
         }
 
         if (eventIDs.size() > 0) {

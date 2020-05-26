@@ -175,9 +175,9 @@ public class EditEventActivity extends AppCompatActivity {
 
         setDurationButton.setText(mEvent.getDuration());
 
-        eventNotifications = readNotifications(mEvent.getId());
-        cancelAlarms(eventNotifications);
-        currentNotifications = new ArrayList<>(eventNotifications);
+//        eventNotifications = readNotifications(mEvent.getId());
+//        cancelAlarms(eventNotifications);
+        currentNotifications = new ArrayList<>(readNotifications(mEvent.getId()));
         setUpRecyclerView();
 
         repeatTextView.setText(mEvent.getRecurringPeriod());
@@ -680,6 +680,8 @@ public class EditEventActivity extends AppCompatActivity {
 
         @Override
         protected Void doInBackground(Void... voids) {
+            cancelAlarms(readNotifications(mEvent.getId()));
+
             dbHelper.updateEvent(dbHelper.getWritableDatabase(), oldEventId, mEvent);
             for (Notification notification : notificationAdapter.getNotifications()) {
                 notification.setEventId(mEvent.getId());
