@@ -226,7 +226,7 @@ public class GridAdapter extends ArrayAdapter {
             case DARK:
                 colors.add(R.color.darkGrey); // disabled date backgroundColor
                 colors.add(R.color.lightGrey2); // disabled date textColor
-                colors.add(R.color.darkGrey2); // active date backgroundColor
+                colors.add(R.color.Grey800); // active date backgroundColor
                 colors.add(R.color.white); // active date textColor
                 colors.add(R.color.black); // current date backgroundColor
                 colors.add(R.color.white); // current date textColor

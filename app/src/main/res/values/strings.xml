@@ -73,4 +73,8 @@
     <string name="piece_of_cake">Piece of cake</string>
     <string name="point_blank">Point blank</string>
     <string name="slow_spring_board">Slow spring board</string>
+    <string name="notifications">Notifications</string>
+    <string name="don_t_forget_to_buy_a_gift">Don\'t forget to buy a gift</string>
+    <string name="location">Location</string>
+    <string name="event_details">Event Details</string>
 </resources>

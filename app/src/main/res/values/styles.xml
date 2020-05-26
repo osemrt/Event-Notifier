@@ -35,7 +35,7 @@
         <item name="iconColor">@color/black</item>
         <item name="unChecked">@color/Grey</item>
         <item name="mainColor">@color/black</item>
-        <item name="Background">@color/darkGrey</item>
+        <item name="Background">#303030</item>
         <item name="headViewColor">@color/lBlack</item>
     </style>
 

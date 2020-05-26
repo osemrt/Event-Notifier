@@ -15,7 +15,7 @@
         android:minHeight="?attr/actionBarSize"
         android:theme="?attr/colorPrimaryDark"
         app:navigationIcon="@drawable/ic_arrow_back_white"
-        app:title="New Event"
+        app:title="Event Details"
         app:titleTextColor="@color/white" />
 
     <LinearLayout
@@ -31,7 +31,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="20dp"
-            app:srcCompat="@drawable/ic_event" />
+            app:srcCompat="@drawable/ic_event_white" />
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/AddNewEventActivity_TextInputLayout_EventTitle"
@@ -85,7 +85,8 @@
                             android:layout_height="match_parent"
                             android:layout_margin="20dp"
                             android:gravity="center"
-                            android:orientation="horizontal">
+                            android:orientation="horizontal"
+                            android:visibility="gone">
 
                             <ImageView
                                 android:id="@+id/AddNewEventActivity_ImageView_AllDay"
@@ -129,6 +130,7 @@
                             <LinearLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:layout_marginTop="25dp"
                                 android:layout_marginBottom="20dp"
                                 android:gravity="center"
                                 android:orientation="horizontal">

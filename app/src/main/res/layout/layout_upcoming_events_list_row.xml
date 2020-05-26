@@ -27,6 +27,7 @@
                 android:background="@color/darkIndigo" />
 
             <LinearLayout
+                android:id="@+id/UpcomingEventsFragment_LinearLayout"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_margin="3dp"
