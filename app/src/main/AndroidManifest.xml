@@ -62,7 +62,8 @@
 
         <activity android:name=".views.NewEventActivity" />
         <activity android:name=".views.EditEventActivity" />
-        <activity android:name=".views.MainActivity">
+        <activity android:name=".views.MainActivity" />
+        <activity android:name=".views.LoadingActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
