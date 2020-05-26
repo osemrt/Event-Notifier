@@ -368,7 +368,7 @@ public class EditEventActivity extends AppCompatActivity {
             notification.setChannelId(cursor.getInt(cursor.getColumnIndex(DBTables.NOTIFICATION_CHANNEL_ID)));
             notifications.add(notification);
         }
-
+        sqLiteDatabase.close();
         return notifications;
     }
 
@@ -493,14 +493,14 @@ public class EditEventActivity extends AppCompatActivity {
                                     public void onClick(DialogInterface dialog, int which) {
                                         getViewValues();
                                         new UpdateAsyncTask().execute();
-                                        if (mEvent.isNotify()) {
-                                            setAlarms();
-                                        }
                                     }
                                 })
                                 .setNegativeButton(android.R.string.no, null)
                                 .setIcon(R.drawable.ic_warning)
                                 .show();
+                    } else {
+                        getViewValues();
+                        new UpdateAsyncTask().execute();
                     }
                 }
                 break;
@@ -512,17 +512,19 @@ public class EditEventActivity extends AppCompatActivity {
     private void cancelAlarms(List<Notification> notifications) {
         for (Notification notification : notifications) {
             cancelAlarm(notification.getId());
+            dbHelper.deleteNotificationById(dbHelper.getWritableDatabase(), notification.getId());
         }
     }
 
     private void cancelAlarm(int requestCode) {
-        Intent intent = new Intent(this, ServiceAutoLauncher.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, requestCode, intent, PendingIntent.FLAG_ONE_SHOT);
-        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        alarmManager.cancel(pendingIntent);
+        Log.d(TAG, "cancelAlarm: " + requestCode);
+        Intent intent = new Intent(getApplicationContext(), ServiceAutoLauncher.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), requestCode, intent, 0);
+        AlarmManager alarmManager = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
+        pendingIntent.cancel();
     }
 
-    private void setAlarms() {
+    private void setAlarms(ArrayList<Notification> notifications) {
         Calendar calendar = Calendar.getInstance();
         calendar.set(alarmYear, alarmMonth, alarmDay);
 
@@ -530,7 +532,7 @@ public class EditEventActivity extends AppCompatActivity {
         calendar.set(Calendar.MINUTE, alarmMinute);
         calendar.set(Calendar.SECOND, 0);
 
-        for (Notification notification : notificationAdapter.getNotifications()) {
+        for (Notification notification : notifications) {
             Calendar aCal = (Calendar) calendar.clone();
             String notificationPreference = notification.getTime();
 
@@ -541,7 +543,7 @@ public class EditEventActivity extends AppCompatActivity {
             } else if (notificationPreference.equals(getString(R.string._1_day_before))) {
                 aCal.add(Calendar.DAY_OF_MONTH, -1);
             } else {
-                Log.i(TAG, "setAlarms: ");
+                // At the time of the event
             }
 
             setAlarm(notification, aCal.getTimeInMillis());
@@ -549,6 +551,7 @@ public class EditEventActivity extends AppCompatActivity {
     }
 
     private void setAlarm(Notification notification, long triggerAtMillis) {
+        Log.d(TAG, "setAlarm: " + notification.getId());
         Intent intent = new Intent(this, ServiceAutoLauncher.class);
         intent.putExtra("eventTitle", mEvent.getTitle());
         intent.putExtra("eventNote", mEvent.getNote());
@@ -557,11 +560,10 @@ public class EditEventActivity extends AppCompatActivity {
         intent.putExtra("interval", getInterval());
         intent.putExtra("soundName", getString("ringtone"));
         String asd = getInterval();
-        Log.d(TAG, "setAlarm: " + asd);
         intent.putExtra("notificationId", notification.getChannelId());
 
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, notification.getId(), intent, PendingIntent.FLAG_CANCEL_CURRENT);
-        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        AlarmManager alarmManager = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), notification.getId(), intent, 0);
         alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent);
     }
 
@@ -658,7 +660,7 @@ public class EditEventActivity extends AppCompatActivity {
             } else if (notificationPreference.equals(getString(R.string._1_day_before))) {
                 aCal.add(Calendar.DAY_OF_MONTH, -1);
             } else {
-                Log.i(TAG, "setAlarms: ");
+                // At the time of the event
             }
 
             if (aCal.before(Calendar.getInstance())) {
@@ -679,14 +681,14 @@ public class EditEventActivity extends AppCompatActivity {
         @Override
         protected Void doInBackground(Void... voids) {
             dbHelper.updateEvent(dbHelper.getWritableDatabase(), oldEventId, mEvent);
-            for (Notification notification : eventNotifications) {
-                dbHelper.deleteNotificationById(dbHelper.getWritableDatabase(), notification.getId());
-            }
-
             for (Notification notification : notificationAdapter.getNotifications()) {
                 notification.setEventId(mEvent.getId());
                 dbHelper.saveNotification(dbHelper.getWritableDatabase(), notification);
             }
+            if (mEvent.isNotify()) {
+                setAlarms(readNotifications(mEvent.getId()));
+            }
+
             return null;
         }
 
@@ -698,17 +700,6 @@ public class EditEventActivity extends AppCompatActivity {
             setResult(RESULT_OK);
             finish();
         }
-    }
-
-    private int getEventId(String eventTitle, String eventDate, String eventTime) {
-        SQLiteDatabase sqLiteDatabase = dbHelper.getReadableDatabase();
-        Event event = dbHelper.readEventByTimestamp(sqLiteDatabase, eventTitle, eventDate, eventTime);
-        return event.getId();
-    }
-
-    private boolean getFlag(String key) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        return sharedPreferences.getBoolean(key, false);
     }
 
     private int getAppTheme() {
@@ -753,13 +744,10 @@ public class EditEventActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == MAPS_ACTIVITY_REQUEST) {
             if (resultCode == RESULT_OK) {
                 eventLocationTextInputLayout.getEditText().setText(data.getStringExtra("address"));
-
-            } else {
-                startActivityForResult(new Intent(getApplicationContext(), MapsActivity.class), MAPS_ACTIVITY_REQUEST);
-                super.onActivityResult(requestCode, resultCode, data);
             }
         }
 

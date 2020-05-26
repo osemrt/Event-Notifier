@@ -43,18 +43,21 @@ public class AlarmService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(TAG, "onStartCommand: ");
-        bundle = intent.getExtras();
-        eventTitle = bundle.getString("eventTitle");
-        eventNote = bundle.getString("eventNote");
-        eventColor = bundle.getInt("eventColor");
-        eventTimeStamp = bundle.getString("eventTimeStamp");
-        interval = bundle.getString("interval");
-        notificationId = bundle.getInt("notificationId");
-        soundName = bundle.getString("soundName");
 
-        showNotification();
-        setNewAlarm();
+        if (intent != null) {
+            bundle = intent.getExtras();
+            eventTitle = bundle.getString("eventTitle", "No title");
+            eventNote = bundle.getString("eventNote", "No note");
+            eventColor = bundle.getInt("eventColor", -49920);
+            eventTimeStamp = bundle.getString("eventTimeStamp", "No Timestamp");
+            interval = bundle.getString("interval", "");
+            notificationId = bundle.getInt("notificationId", 0);
+            soundName = bundle.getString("soundName", "Consequence");
 
+
+            showNotification();
+            setNewAlarm();
+        }
         return super.onStartCommand(intent, flags, startId);
     }
 

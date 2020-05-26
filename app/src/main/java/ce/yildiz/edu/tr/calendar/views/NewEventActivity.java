@@ -11,6 +11,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.GradientDrawable;
 import android.os.AsyncTask;
@@ -60,6 +61,7 @@ import ce.yildiz.edu.tr.calendar.R;
 import ce.yildiz.edu.tr.calendar.Utils;
 import ce.yildiz.edu.tr.calendar.adapters.NotificationAdapter;
 import ce.yildiz.edu.tr.calendar.database.DBHelper;
+import ce.yildiz.edu.tr.calendar.database.DBTables;
 import ce.yildiz.edu.tr.calendar.models.Event;
 import ce.yildiz.edu.tr.calendar.models.Notification;
 import ce.yildiz.edu.tr.calendar.other.ServiceAutoLauncher;
@@ -161,8 +163,8 @@ public class NewEventActivity extends AppCompatActivity {
         bgShape.setColor(getResources().getInteger(R.color.red));
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        repeatTextView.setText(sharedPreferences.getString("frequency", "One-Time"));
-        notifications.add(new Notification(sharedPreferences.getString("reminder", "10 minutes before")));
+        repeatTextView.setText(sharedPreferences.getString("frequency", "Repeat One-Time"));
+        notifications.add(new Notification(sharedPreferences.getString("reminder", getResources().getString(R.string.at_the_time_of_event))));
         setUpRecyclerView();
     }
 
@@ -428,9 +430,6 @@ public class NewEventActivity extends AppCompatActivity {
                 if (confirmInputs()) {
                     getViewValues();
                     new SaveAsyncTask().execute();
-                    if (event.isNotify()) {
-                        setAlarms();
-                    }
                 }
                 break;
         }
@@ -464,7 +463,7 @@ public class NewEventActivity extends AppCompatActivity {
     }
 
     private void setAlarm(Notification notification, long triggerAtMillis) {
-        Intent intent = new Intent(this, ServiceAutoLauncher.class);
+        Intent intent = new Intent(getApplicationContext(), ServiceAutoLauncher.class);
         intent.putExtra("eventTitle", event.getTitle());
         intent.putExtra("eventNote", event.getNote());
         intent.putExtra("eventColor", event.getColor());
@@ -473,8 +472,10 @@ public class NewEventActivity extends AppCompatActivity {
         intent.putExtra("notificationId", notification.getChannelId());
         intent.putExtra("soundName", getString("ringtone"));
 
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, notification.getId(), intent, PendingIntent.FLAG_ONE_SHOT);
-        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        Log.d(TAG, "setAlarm: " + notification.getId());
+
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), notification.getId(), intent, 0);
+        AlarmManager alarmManager = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
         alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent);
     }
 
@@ -526,7 +527,7 @@ public class NewEventActivity extends AppCompatActivity {
     }
 
     private boolean isRecurring(String toString) {
-        return !toString.equals(getResources().getString(R.string.one_time));
+        return !toString.equals("Repeat One-Time");
     }
 
     private boolean confirmInputs() {
@@ -597,6 +598,10 @@ public class NewEventActivity extends AppCompatActivity {
                 notification.setEventId(event_id);
                 dbHelper.saveNotification(dbHelper.getWritableDatabase(), notification);
             }
+            notifications = readNotifications(event_id);
+            if (event.isNotify()) {
+                setAlarms();
+            }
             return null;
         }
 
@@ -608,6 +613,22 @@ public class NewEventActivity extends AppCompatActivity {
             setResult(RESULT_OK);
             finish();
         }
+    }
+
+    private ArrayList<Notification> readNotifications(int eventId) {
+        ArrayList<Notification> notifications = new ArrayList<>();
+        SQLiteDatabase sqLiteDatabase = dbHelper.getReadableDatabase();
+        Cursor cursor = dbHelper.readEventNotifications(sqLiteDatabase, eventId);
+        while (cursor.moveToNext()) {
+            Notification notification = new Notification();
+            notification.setId(cursor.getInt(cursor.getColumnIndex(DBTables.NOTIFICATION_ID)));
+            notification.setEventId(cursor.getInt(cursor.getColumnIndex(DBTables.NOTIFICATION_EVENT_ID)));
+            notification.setTime(cursor.getString(cursor.getColumnIndex(DBTables.NOTIFICATION_TIME)));
+            notification.setChannelId(cursor.getInt(cursor.getColumnIndex(DBTables.NOTIFICATION_CHANNEL_ID)));
+            notifications.add(notification);
+        }
+
+        return notifications;
     }
 
     private int getEventId(String eventTitle, String eventDate, String eventTime) {
@@ -659,13 +680,10 @@ public class NewEventActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == MAPS_ACTIVITY_REQUEST) {
             if (resultCode == RESULT_OK) {
                 eventLocationTextInputLayout.getEditText().setText(data.getStringExtra("address"));
-
-            } else {
-                startActivityForResult(new Intent(getApplicationContext(), MapsActivity.class), MAPS_ACTIVITY_REQUEST);
-                super.onActivityResult(requestCode, resultCode, data);
             }
         }
 
