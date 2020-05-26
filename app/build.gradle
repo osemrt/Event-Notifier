@@ -11,6 +11,7 @@ android {
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
+        multiDexEnabled true
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -33,7 +34,8 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
-    implementation group: 'com.google.android.material', name: 'material', version: '1.2.0-alpha06'
+    implementation 'com.google.android.material:material:1.1.0'
+//    implementation group: 'com.google.android.material', name: 'material', version: '1.2.0-alpha06'
     implementation 'petrov.kristiyan:colorpicker-library:1.1.10'
     implementation 'com.google.android.gms:play-services-location:17.0.0'
     implementation 'com.google.android.libraries.places:places:2.2.0'

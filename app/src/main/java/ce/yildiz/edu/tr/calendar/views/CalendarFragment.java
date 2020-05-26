@@ -19,6 +19,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -54,7 +55,7 @@ public class CalendarFragment extends Fragment {
     private GridView datesGridView;
 
     // AlertDialog components
-    private RecyclerView savedEventsRecyclerView;
+    public RecyclerView savedEventsRecyclerView;
     private Button addNewEventButton;
     private TextView noEventTextView;
 
@@ -131,7 +132,7 @@ public class CalendarFragment extends Fragment {
 
 
                 final String date = Utils.eventDateFormat.format(dates.get(position));
-                List<Event> eventsByDate = collectEventsByDate(dates.get(position));
+                final List<Event> eventsByDate = collectEventsByDate(dates.get(position));
 
                 if (eventsByDate.isEmpty()) {
                     savedEventsRecyclerView.setVisibility(View.INVISIBLE);
@@ -143,7 +144,7 @@ public class CalendarFragment extends Fragment {
                     savedEventsRecyclerView.setHasFixedSize(true);
                     RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(view.getContext());
                     savedEventsRecyclerView.setLayoutManager(layoutManager);
-                    EventAdapter eventAdapter = new EventAdapter(getActivity(), eventsByDate, alertDialog, CalendarFragment.this);
+                    final EventAdapter eventAdapter = new EventAdapter(getActivity(), eventsByDate, alertDialog, CalendarFragment.this);
                     savedEventsRecyclerView.setAdapter(eventAdapter);
                     eventAdapter.notifyDataSetChanged();
                     addNewEventButton.setText("ADD EVENT");

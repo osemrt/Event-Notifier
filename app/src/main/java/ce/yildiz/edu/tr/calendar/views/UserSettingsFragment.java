@@ -71,7 +71,7 @@ public class UserSettingsFragment extends Fragment {
     private void initViews() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         ringtoneTextView.setText(sharedPreferences.getString("ringtone", "Consequence"));
-        reminderTimeTextView.setText(sharedPreferences.getString("reminder", "10 minutes before"));
+        reminderTimeTextView.setText(sharedPreferences.getString("reminder", getResources().getString(R.string.at_the_time_of_event)));
         reminderFrequencyTextView.setText(sharedPreferences.getString("frequency", "One-Time"));
         appThemeTextView.setText(sharedPreferences.getString("theme", "Indigo"));
     }
